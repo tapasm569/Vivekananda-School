@@ -1,4 +1,4 @@
-package in.vidyamandir.schoolmanager.data
+package com.vidyamandir.schoolmanager.data
 
 import android.content.Context
 import androidx.room.Database

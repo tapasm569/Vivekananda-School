@@ -1,4 +1,4 @@
-package in.vidyamandir.schoolmanager.ui
+package com.vidyamandir.schoolmanager.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -9,11 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import in.vidyamandir.schoolmanager.data.AppDatabase
-import in.vidyamandir.schoolmanager.data.ExamResult
-import in.vidyamandir.schoolmanager.data.Student
-import in.vidyamandir.schoolmanager.databinding.ActivityResultPublishBinding
-import in.vidyamandir.schoolmanager.util.ResultPdfGenerator
+import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.data.ExamResult
+import com.vidyamandir.schoolmanager.data.Student
+import com.vidyamandir.schoolmanager.databinding.ActivityResultPublishBinding
+import com.vidyamandir.schoolmanager.util.ResultPdfGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

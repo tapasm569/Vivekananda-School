@@ -1,4 +1,4 @@
-package in.vidyamandir.schoolmanager.data
+package com.vidyamandir.schoolmanager.data
 
 import androidx.room.Entity
 import androidx.room.ForeignKey

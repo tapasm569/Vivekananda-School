@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "in.vidyamandir.schoolmanager"
+    namespace = "com.vidyamandir.schoolmanager"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "in.vidyamandir.schoolmanager"
+        applicationId = "com.vidyamandir.schoolmanager"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

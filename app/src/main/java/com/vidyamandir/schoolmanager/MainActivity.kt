@@ -1,11 +1,11 @@
-package in.vidyamandir.schoolmanager
+package com.vidyamandir.schoolmanager
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import in.vidyamandir.schoolmanager.databinding.ActivityMainBinding
-import in.vidyamandir.schoolmanager.ui.FeeCollectionActivity
-import in.vidyamandir.schoolmanager.ui.ResultPublishActivity
+import com.vidyamandir.schoolmanager.databinding.ActivityMainBinding
+import com.vidyamandir.schoolmanager.ui.FeeCollectionActivity
+import com.vidyamandir.schoolmanager.ui.ResultPublishActivity
 
 class MainActivity : AppCompatActivity() {
 

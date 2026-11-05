@@ -1,7 +1,7 @@
-package in.vidyamandir.schoolmanager.domain
+package com.vidyamandir.schoolmanager.domain
 
-import in.vidyamandir.schoolmanager.data.LateFeeRule
-import in.vidyamandir.schoolmanager.data.Student
+import com.vidyamandir.schoolmanager.data.LateFeeRule
+import com.vidyamandir.schoolmanager.data.Student
 import java.util.Calendar
 
 data class MonthDueStatus(

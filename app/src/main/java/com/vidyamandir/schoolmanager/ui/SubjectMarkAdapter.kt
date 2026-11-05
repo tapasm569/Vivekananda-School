@@ -1,11 +1,11 @@
-package in.vidyamandir.schoolmanager.ui
+package com.vidyamandir.schoolmanager.ui
 
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import in.vidyamandir.schoolmanager.databinding.ItemSubjectMarkInputBinding
+import com.vidyamandir.schoolmanager.databinding.ItemSubjectMarkInputBinding
 
 data class SubjectScoreItem(
     val subjectName: String,

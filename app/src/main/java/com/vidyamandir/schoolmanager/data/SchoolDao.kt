@@ -1,4 +1,4 @@
-package in.vidyamandir.schoolmanager.data
+package com.vidyamandir.schoolmanager.data
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow

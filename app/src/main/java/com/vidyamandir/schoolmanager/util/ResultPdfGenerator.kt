@@ -1,10 +1,10 @@
-package in.vidyamandir.schoolmanager.util
+package com.vidyamandir.schoolmanager.util
 
 import android.content.Context
 import android.graphics.*
 import android.graphics.pdf.PdfDocument
-import in.vidyamandir.schoolmanager.data.ExamResult
-import in.vidyamandir.schoolmanager.data.Student
+import com.vidyamandir.schoolmanager.data.ExamResult
+import com.vidyamandir.schoolmanager.data.Student
 import java.io.File
 import java.io.FileOutputStream
 

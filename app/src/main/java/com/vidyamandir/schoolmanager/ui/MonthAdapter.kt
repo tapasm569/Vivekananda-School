@@ -1,11 +1,11 @@
-package in.vidyamandir.schoolmanager.ui
+package com.vidyamandir.schoolmanager.ui
 
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import in.vidyamandir.schoolmanager.databinding.ItemMonthFeeBinding
-import in.vidyamandir.schoolmanager.domain.MonthDueStatus
+import com.vidyamandir.schoolmanager.databinding.ItemMonthFeeBinding
+import com.vidyamandir.schoolmanager.domain.MonthDueStatus
 
 class MonthAdapter(
     private val onSelectionChanged: (selectedMonths: List<MonthDueStatus>) -> Unit

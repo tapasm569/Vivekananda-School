@@ -1,4 +1,4 @@
-package in.vidyamandir.schoolmanager.ui
+package com.vidyamandir.schoolmanager.ui
 
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -6,13 +6,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import in.vidyamandir.schoolmanager.data.AppDatabase
-import in.vidyamandir.schoolmanager.data.FeePayment
-import in.vidyamandir.schoolmanager.data.LateFeeRule
-import in.vidyamandir.schoolmanager.data.Student
-import in.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
-import in.vidyamandir.schoolmanager.domain.FeeCalculator
-import in.vidyamandir.schoolmanager.domain.MonthDueStatus
+import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.data.FeePayment
+import com.vidyamandir.schoolmanager.data.LateFeeRule
+import com.vidyamandir.schoolmanager.data.Student
+import com.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
+import com.vidyamandir.schoolmanager.domain.FeeCalculator
+import com.vidyamandir.schoolmanager.domain.MonthDueStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
