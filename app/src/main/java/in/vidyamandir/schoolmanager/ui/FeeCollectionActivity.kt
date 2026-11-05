@@ -1,0 +1,189 @@
+package in.vidyamandir.schoolmanager.ui
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import in.vidyamandir.schoolmanager.data.AppDatabase
+import in.vidyamandir.schoolmanager.data.FeePayment
+import in.vidyamandir.schoolmanager.data.LateFeeRule
+import in.vidyamandir.schoolmanager.data.Student
+import in.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
+import in.vidyamandir.schoolmanager.domain.FeeCalculator
+import in.vidyamandir.schoolmanager.domain.MonthDueStatus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Calendar
+
+class FeeCollectionActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityFeeCounterBinding
+    private lateinit var adapter: MonthAdapter
+    private lateinit var db: AppDatabase
+
+    private var studentsList: List<Student> = emptyList()
+    private var selectedStudent: Student? = null
+    private var activeRules: List<LateFeeRule> = emptyList()
+    private var currentlySelectedMonths: List<MonthDueStatus> = emptyList()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityFeeCounterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        db = AppDatabase.getDatabase(this, lifecycleScope)
+
+        setupToolbar()
+        setupRecyclerView()
+        loadInitialData()
+        setupListeners()
+    }
+
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener { finish() }
+    }
+
+    private fun setupRecyclerView() {
+        adapter = MonthAdapter { selectedMonths ->
+            currentlySelectedMonths = selectedMonths
+            calculateTotals(selectedMonths)
+        }
+        binding.rvMonths.layoutManager = LinearLayoutManager(this)
+        binding.rvMonths.adapter = adapter
+    }
+
+    private fun loadInitialData() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            activeRules = db.schoolDao().getAllLateFeeRules()
+            // Sample demo students if empty
+            val existing = db.schoolDao().getAllActiveStudents().first()
+            if (existing.isEmpty()) {
+                db.schoolDao().insertStudent(
+                    Student(
+                        admissionNo = "VV-2026-001",
+                        fullName = "Rahul Barman",
+                        className = "Class V",
+                        section = "A",
+                        rollNo = 1,
+                        admissionMonth = 1,
+                        monthlyFee = 450.0,
+                        parentPhone = "9876543210"
+                    )
+                )
+                db.schoolDao().insertStudent(
+                    Student(
+                        admissionNo = "VV-2026-002",
+                        fullName = "Priya Roy",
+                        className = "Class V",
+                        section = "A",
+                        rollNo = 2,
+                        admissionMonth = 2,
+                        monthlyFee = 450.0,
+                        parentPhone = "9876543211"
+                    )
+                )
+            }
+
+            studentsList = db.schoolDao().getAllActiveStudents().first()
+
+            withContext(Dispatchers.Main) {
+                val studentNames = studentsList.map { "${it.fullName} (${it.admissionNo}) - ${it.className}" }
+                val arrayAdapter = ArrayAdapter(this@FeeCollectionActivity, android.R.layout.simple_dropdown_item_1line, studentNames)
+                binding.actvStudentSelect.setAdapter(arrayAdapter)
+            }
+        }
+    }
+
+    private fun setupListeners() {
+        binding.actvStudentSelect.setOnItemClickListener { _, _, position, _ ->
+            selectedStudent = studentsList[position]
+            displayStudentInfo(selectedStudent!!)
+            loadStudentFeeMonths(selectedStudent!!)
+        }
+
+        binding.btnSubmitPayment.setOnClickListener {
+            submitPayment()
+        }
+    }
+
+    private fun displayStudentInfo(student: Student) {
+        binding.tvSelectedStudentName.text = "${student.fullName} (Roll: ${student.rollNo})"
+        binding.tvSelectedStudentMeta.text = "Class: ${student.className} | Monthly Fee: ₹${student.monthlyFee}"
+    }
+
+    private fun loadStudentFeeMonths(student: Student) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
+            val paidMonthsSet = mutableSetOf<Int>()
+
+            payments.forEach { p ->
+                p.paidMonths.split(",").filter { it.isNotBlank() }.forEach { m ->
+                    paidMonthsSet.add(m.trim().toInt())
+                }
+            }
+
+            val statusList = FeeCalculator.calculateDueMonths(student, paidMonthsSet, activeRules)
+
+            withContext(Dispatchers.Main) {
+                adapter.submitList(statusList)
+            }
+        }
+    }
+
+    private fun calculateTotals(selectedMonths: List<MonthDueStatus>) {
+        val baseSum = selectedMonths.sumOf { it.baseFee }
+        val lateSum = selectedMonths.sumOf { it.lateFee }
+        val payableTotal = baseSum + lateSum
+
+        binding.tvTotalBaseFee.text = "₹${String.format("%.2f", baseSum)}"
+        binding.tvTotalLateFee.text = "₹${String.format("%.2f", lateSum)}"
+        binding.tvTotalPayable.text = "₹${String.format("%.2f", payableTotal)}"
+    }
+
+    private fun submitPayment() {
+        val student = selectedStudent
+        if (student == null) {
+            Toast.makeText(this, "Please select a student first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (currentlySelectedMonths.isEmpty()) {
+            Toast.makeText(this, "Please select at least one month to pay", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val baseSum = currentlySelectedMonths.sumOf { it.baseFee }
+        val lateSum = currentlySelectedMonths.sumOf { it.lateFee }
+        val total = baseSum + lateSum
+        val monthsString = currentlySelectedMonths.joinToString(",") { it.monthIndex.toString() }
+        val receipt = "REC-${System.currentTimeMillis().toString().takeLast(6)}"
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val payment = FeePayment(
+                studentId = student.id,
+                receiptNo = receipt,
+                academicYear = 2026,
+                paidMonths = monthsString,
+                baseAmount = baseSum,
+                lateFeeAmount = lateSum,
+                totalAmount = total,
+                paymentDate = System.currentTimeMillis()
+            )
+            db.schoolDao().recordPayment(payment)
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    this@FeeCollectionActivity,
+                    "Payment Recorded Successfully! Receipt: $receipt",
+                    Toast.LENGTH_LONG
+                ).show()
+                // Refresh list
+                loadStudentFeeMonths(student)
+            }
+        }
+    }
+}
