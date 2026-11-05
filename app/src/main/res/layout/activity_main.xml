@@ -4,8 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC">
+    android:background="#F1F5F9">
 
+    <!-- Top AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -16,146 +17,439 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#0F3D6E"
             app:title="Vivekananda Vidyamandir"
+            app:subtitle="Dhupguri, Jalpaiguri • Admin Panel"
             app:titleTextColor="@android:color/white"
+            app:subtitleTextColor="#93C5FD"
             app:menu="@menu/main_menu" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="20dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#0F3D6E">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Vivekananda Vidyamandir"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Dhupguri, Jalpaiguri, West Bengal"
-                    android:textColor="#E2E8F0"
-                    android:textSize="12sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <!-- ROW 1: STUDENTS (33%), CLASS (33%), TEACHER (33%) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Students Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardStudents"
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#CBD5E1"
+                    app:cardBackgroundColor="@android:color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="STUDENTS"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.05"
+                            android:textStyle="bold"
+                            android:textColor="#0F3D6E" />
+
+                        <TextView
+                            android:id="@+id/tvStudentCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="#0F3D6E" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Enrolled"
+                            android:textSize="10sp"
+                            android:textColor="#64748B" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Class Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardClasses"
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#CBD5E1"
+                    app:cardBackgroundColor="@android:color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CLASS"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.05"
+                            android:textStyle="bold"
+                            android:textColor="#0F3D6E" />
+
+                        <TextView
+                            android:id="@+id/tvClassCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="#0F3D6E" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Classes"
+                            android:textSize="10sp"
+                            android:textColor="#64748B" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Teacher Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardTeachers"
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#CBD5E1"
+                    app:cardBackgroundColor="@android:color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TEACHER"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.05"
+                            android:textStyle="bold"
+                            android:textColor="#0F3D6E" />
+
+                        <TextView
+                            android:id="@+id/tvTeacherCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="#0F3D6E" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Staff"
+                            android:textSize="10sp"
+                            android:textColor="#64748B" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ROW 2: DUE BALANCE (50%), PAID BALANCE (50%) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <!-- Due Balance Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardDueBalance"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FEF2F2"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#FECACA">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DUE BALANCE"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="#991B1B" />
+
+                        <TextView
+                            android:id="@+id/tvDueBalanceAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="₹0.00"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#DC2626" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Tap to view due list →"
+                            android:textSize="11sp"
+                            android:textColor="#B91C1C" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Paid Balance Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardPaidBalance"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#F0FDF4"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#BBF7D0">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PAID BALANCE"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="#166534" />
+
+                        <TextView
+                            android:id="@+id/tvPaidBalanceAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="₹0.00"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#16A34A" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="This month collected →"
+                            android:textSize="11sp"
+                            android:textColor="#15803D" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ROW 3: TRACK PAYMENT (50%), APPROVED MARKSHEET (50%) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <!-- Track Payment Card (Daily Collection) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardTrackPayment"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#EFF6FF"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#BFDBFE">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TRACK PAYMENT"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="#1E40AF" />
+
+                        <TextView
+                            android:id="@+id/tvDailyCollection"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="₹0.00"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#2563EB" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Today's receipts →"
+                            android:textSize="11sp"
+                            android:textColor="#1D4ED8" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Approved Marksheet Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardApprovedMarksheet"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FFFBEB"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#FDE68A">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="APPROVED MARKSHEET"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="#92400E" />
+
+                        <TextView
+                            android:id="@+id/tvPendingMarksheetCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="0 Pending"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#D97706" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Review &amp; Approve →"
+                            android:textSize="11sp"
+                            android:textColor="#B45309" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ROW 4: LONG FULL-WIDTH CARD FOR WHATSAPP MESSAGING -->
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardCornerRadius="14dp"
-                app:cardBackgroundColor="@android:color/white"
-                app:strokeWidth="1dp"
-                app:strokeColor="#E2E8F0">
+                android:id="@+id/cardMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#0F3D6E">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Due List"
-                        android:textColor="#64748B"
-                        android:textSize="13sp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvDueCount"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MESSAGE"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.04"
+                            android:textColor="@android:color/white" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Direct WhatsApp messaging to students &amp; parents"
+                            android:textSize="12sp"
+                            android:textColor="#93C5FD" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOpenMessage"
+                        style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="0 Students"
-                        android:textColor="#DC2626"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_height="44dp"
+                        android:text="Send WhatsApp"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="#0F3D6E"
+                        app:backgroundTint="#FEF3C7"
+                        app:cornerRadius="10dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="14dp"
-                app:cardBackgroundColor="@android:color/white"
-                app:strokeWidth="1dp"
-                app:strokeColor="#E2E8F0">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Paid List"
-                        android:textColor="#64748B"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/tvPaidCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="0 Students"
-                        android:textColor="#16A34A"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFeeCounter"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="24dp"
-            android:text="Open Fee Collection Counter"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:backgroundTint="#0F3D6E" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnResults"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="12dp"
-            android:text="Publish &amp; Print Exam Results"
-            android:textColor="#0F3D6E"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            app:strokeColor="#0F3D6E"
-            app:strokeWidth="1.5dp"
-            app:cornerRadius="12dp" />
-
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -4,6 +4,23 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
+@Entity(tableName = "classes")
+data class SchoolClass(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val className: String,         // e.g. "Class V", "Class VI"
+    val monthlyFee: Double,        // e.g. 500.0
+    val sections: String = "A,B"   // Comma separated sections
+)
+
+@Entity(tableName = "teachers")
+data class Teacher(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val phone: String,
+    val password: String,
+    val photoUri: String? = null
+)
+
 @Entity(tableName = "students")
 data class Student(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -12,9 +29,13 @@ data class Student(
     val className: String,
     val section: String,
     val rollNo: Int,
-    val admissionMonth: Int,   // 1 for Jan .. 12 for Dec
-    val monthlyFee: Double,
+    val fatherName: String = "",
+    val motherName: String = "",
     val parentPhone: String,
+    val address: String = "",
+    val photoUri: String? = null,
+    val admissionMonth: Int = 1,   // 1 for Jan .. 12 for Dec
+    val monthlyFee: Double,
     val isActive: Boolean = true
 )
 
@@ -32,13 +53,14 @@ data class Student(
 data class FeePayment(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val studentId: Long,
+    val studentName: String = "",
     val receiptNo: String,
     val academicYear: Int,
-    val paidMonths: String,    // e.g. "1,2,3"
+    val paidMonths: String,        // e.g. "1,2,3"
     val baseAmount: Double,
     val lateFeeAmount: Double,
     val totalAmount: Double,
-    val paymentDate: Long
+    val paymentDate: Long          // System.currentTimeMillis()
 )
 
 @Entity(tableName = "late_fee_rules")
@@ -69,7 +91,9 @@ data class ExamResult(
     val fullMarks: Int,
     val writtenMarks: Int,
     val practicalMarks: Int,
-    val grade: String
+    val grade: String,
+    val submittedByTeacher: String = "Admin",
+    val approvalStatus: String = "APPROVED" // "PENDING", "APPROVED", "REJECTED"
 ) {
     val obtainedMarks: Int get() = writtenMarks + practicalMarks
 }

@@ -9,7 +9,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SchoolManager">
 
-        <!-- Initial Entry Screen -->
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true">
@@ -19,19 +18,17 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Dashboard -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-
-        <!-- Feature Activities -->
-        <activity
-            android:name=".ui.FeeCollectionActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.ResultPublishActivity"
-            android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".ui.FeeCollectionActivity" android:exported="false" />
+        <activity android:name=".ui.ResultPublishActivity" android:exported="false" />
+        <activity android:name=".ui.StudentManagementActivity" android:exported="false" />
+        <activity android:name=".ui.AddStudentActivity" android:exported="false" />
+        <activity android:name=".ui.ClassManagementActivity" android:exported="false" />
+        <activity android:name=".ui.TeacherManagementActivity" android:exported="false" />
+        <activity android:name=".ui.StudentDuesListActivity" android:exported="false" />
+        <activity android:name=".ui.TrackPaymentActivity" android:exported="false" />
+        <activity android:name=".ui.MarksheetApprovalActivity" android:exported="false" />
+        <activity android:name=".ui.WhatsAppMessageActivity" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
