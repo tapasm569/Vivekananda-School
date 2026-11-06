@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.data.SchoolClass
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityAddStudentBinding
 import com.vidyamandir.schoolmanager.util.ImageHelper
@@ -17,11 +18,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
+data class ClassUnitOption(
+    val className: String,
+    val section: String,
+    val fee: Double
+) {
+    val displayText: String
+        get() = if (section.isNotBlank()) "$className (Sec $section)" else className
+}
+
 class AddStudentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddStudentBinding
     private lateinit var db: AppDatabase
     private var internalPhotoPath: String? = null
+    private val classUnitOptions = mutableListOf<ClassUnitOption>()
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -57,22 +68,38 @@ class AddStudentActivity : AppCompatActivity() {
     private fun loadClasses() {
         lifecycleScope.launch(Dispatchers.IO) {
             val classes = db.schoolDao().getAllClasses().first()
-            val classNames = classes.map { it.className }
+            classUnitOptions.clear()
+
+            for (cls in classes) {
+                for (unit in cls.getDisplayUnits()) {
+                    classUnitOptions.add(ClassUnitOption(unit.first, unit.second, cls.monthlyFee))
+                }
+            }
+
             withContext(Dispatchers.Main) {
-                if (classNames.isNotEmpty()) {
-                    val adapter = ArrayAdapter(this@AddStudentActivity, android.R.layout.simple_dropdown_item_1line, classNames)
+                if (classUnitOptions.isNotEmpty()) {
+                    val names = classUnitOptions.map { it.displayText }
+                    val adapter = ArrayAdapter(this@AddStudentActivity, android.R.layout.simple_dropdown_item_1line, names)
                     binding.actvClass.setAdapter(adapter)
-                    val targetClass = intent.getStringExtra("PRESET_CLASS") ?: classNames[0]
-                    binding.actvClass.setText(targetClass, false)
+                    binding.actvClass.setText(names[0], false)
+                } else {
+                    Toast.makeText(this@AddStudentActivity, "No classes registered yet. Please add a class first in 'CLASS' menu.", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
     private fun saveStudent() {
+        val selectedText = binding.actvClass.text?.toString()?.trim() ?: ""
+        val matchedUnit = classUnitOptions.firstOrNull { it.displayText.equals(selectedText, ignoreCase = true) }
+
+        if (matchedUnit == null) {
+            Toast.makeText(this, "Please select a valid Class", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val name = binding.etStudentName.text?.toString()?.trim() ?: ""
         val rollStr = binding.etRollNo.text?.toString()?.trim() ?: "1"
-        val className = binding.actvClass.text?.toString()?.trim() ?: "Class V"
         val father = binding.etFatherName.text?.toString()?.trim() ?: ""
         val mother = binding.etMotherName.text?.toString()?.trim() ?: ""
         val phone = binding.etContactPhone.text?.toString()?.trim() ?: ""
@@ -84,16 +111,14 @@ class AddStudentActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val cls = db.schoolDao().getClassByName(className)
-            val fee = cls?.monthlyFee ?: 450.0
             val admissionNo = "VV-${System.currentTimeMillis().toString().takeLast(5)}"
             val admissionMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
 
             val student = Student(
                 admissionNo = admissionNo,
                 fullName = name,
-                className = className,
-                section = "A",
+                className = matchedUnit.className,
+                section = matchedUnit.section,
                 rollNo = rollStr.toIntOrNull() ?: 1,
                 fatherName = father,
                 motherName = mother,
@@ -101,13 +126,13 @@ class AddStudentActivity : AppCompatActivity() {
                 address = address,
                 photoUri = internalPhotoPath,
                 admissionMonth = admissionMonth,
-                monthlyFee = fee
+                monthlyFee = matchedUnit.fee
             )
 
             db.schoolDao().insertStudent(student)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@AddStudentActivity, "Student Enrolled Successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@AddStudentActivity, "Student enrolled in ${matchedUnit.displayText}!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

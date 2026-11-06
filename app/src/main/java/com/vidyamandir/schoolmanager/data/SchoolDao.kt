@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SchoolDao {
 
-    // --- COUNTS FOR DASHBOARD ---
+    // --- DASHBOARD COUNTS ---
     @Query("SELECT COUNT(*) FROM students WHERE isActive = 1")
     fun getStudentCount(): Flow<Int>
 
@@ -23,7 +23,10 @@ interface SchoolDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClass(schoolClass: SchoolClass): Long
 
-    @Query("SELECT * FROM classes ORDER BY className ASC")
+    @Delete
+    suspend fun deleteClass(schoolClass: SchoolClass)
+
+    @Query("SELECT * FROM classes ORDER BY id ASC")
     fun getAllClasses(): Flow<List<SchoolClass>>
 
     @Query("SELECT * FROM classes WHERE className = :name LIMIT 1")
@@ -33,8 +36,14 @@ interface SchoolDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTeacher(teacher: Teacher): Long
 
+    @Delete
+    suspend fun deleteTeacher(teacher: Teacher)
+
     @Query("SELECT * FROM teachers ORDER BY name ASC")
     fun getAllTeachers(): Flow<List<Teacher>>
+
+    @Query("SELECT * FROM teachers WHERE password = :pass LIMIT 1")
+    suspend fun getTeacherByPassword(pass: String): Teacher?
 
     // --- STUDENTS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -46,7 +55,7 @@ interface SchoolDao {
     @Query("SELECT * FROM students WHERE className = :className AND isActive = 1 ORDER BY rollNo ASC")
     fun getStudentsByClass(className: String): Flow<List<Student>>
 
-    // --- FEE PAYMENTS & REVENUE ---
+    // --- FEE PAYMENTS ---
     @Insert
     suspend fun recordPayment(payment: FeePayment): Long
 
@@ -66,7 +75,7 @@ interface SchoolDao {
     @Query("SELECT * FROM late_fee_rules ORDER BY dayFrom ASC")
     suspend fun getAllLateFeeRules(): List<LateFeeRule>
 
-    // --- MARKSHEET & APPROVALS ---
+    // --- EXAM RESULTS & APPROVALS ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertResults(results: List<ExamResult>)
 

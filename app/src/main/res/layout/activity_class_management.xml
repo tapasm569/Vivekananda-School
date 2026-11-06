@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="#0F3D6E"
-            app:title="Manage Classes &amp; Monthly Fee"
+            app:title="Manage School Classes"
             app:titleTextColor="@android:color/white"
             app:navigationIcon="@android:drawable/ic_menu_revert" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -27,7 +27,7 @@
         android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Add Class Card -->
+        <!-- Add Class Form Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,8 +45,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add New Class"
-                    android:textSize="15sp"
+                    android:text="Create New Class"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="#0F3D6E" />
 
@@ -54,8 +54,8 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="Class Name (e.g. Class IX)">
+                    android:layout_marginTop="10dp"
+                    android:hint="Class Name (e.g. Class 5, Nursery)">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etClassName"
                         android:layout_width="match_parent"
@@ -75,14 +75,41 @@
                         android:inputType="numberDecimal" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Checkbox to divide class into sections -->
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/cbDivideSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Divide this class into sections (A, B...)"
+                    android:textColor="#334155" />
+
+                <!-- Sections Input (Visible only if checked) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilSections"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:hint="Sections (comma separated, e.g. A, B)"
+                    android:visibility="gone">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etSections"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="A, B" />
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAddClass"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Save Class"
+                    android:layout_marginTop="14dp"
+                    android:text="Save &amp; Register Class"
+                    android:textStyle="bold"
                     app:cornerRadius="10dp"
                     app:backgroundTint="#0F3D6E" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -91,7 +118,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
-            android:text="Registered Classes"
+            android:text="Registered Classes &amp; Units"
             android:textStyle="bold"
             android:textColor="#1E293B" />
 

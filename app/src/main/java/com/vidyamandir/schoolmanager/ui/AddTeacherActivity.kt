@@ -55,7 +55,7 @@ class AddTeacherActivity : AppCompatActivity() {
         val password = binding.etTeacherPassword.text?.toString()?.trim() ?: ""
 
         if (name.isEmpty() || phone.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields (Name, Phone, Password)", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter Name, Contact Number, and Password", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -67,6 +67,7 @@ class AddTeacherActivity : AppCompatActivity() {
                 photoUri = internalPhotoPath
             )
             db.schoolDao().insertTeacher(teacher)
+
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@AddTeacherActivity, "Teacher registered successfully!", Toast.LENGTH_SHORT).show()
                 finish()

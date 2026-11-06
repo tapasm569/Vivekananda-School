@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
         LateFeeRule::class,
         ExamResult::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -52,13 +52,8 @@ abstract class AppDatabase : RoomDatabase() {
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
                         val dao = database.schoolDao()
-                        // Initial Default Classes
-                        dao.insertClass(SchoolClass(className = "Class V", monthlyFee = 450.0, sections = "A,B"))
-                        dao.insertClass(SchoolClass(className = "Class VI", monthlyFee = 480.0, sections = "A,B"))
-                        dao.insertClass(SchoolClass(className = "Class VII", monthlyFee = 500.0, sections = "A,B"))
-                        dao.insertClass(SchoolClass(className = "Class VIII", monthlyFee = 550.0, sections = "A,B"))
-
-                        // Initial Default Late Rules
+                        // ZERO demo classes inserted here. Database starts completely clean.
+                        // Default late fine rules
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 1, dayTo = 10, fineAmount = 0.0))
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 11, dayTo = 20, fineAmount = 50.0))
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 21, dayTo = 30, fineAmount = 100.0))

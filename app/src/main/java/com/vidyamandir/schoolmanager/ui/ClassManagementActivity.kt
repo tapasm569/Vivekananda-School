@@ -2,6 +2,7 @@ package com.vidyamandir.schoolmanager.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,25 +32,52 @@ class ClassManagementActivity : AppCompatActivity() {
 
         binding.rvClasses.layoutManager = LinearLayoutManager(this)
 
-        binding.btnAddClass.setOnClickListener {
+        binding.cbDivideSection.setOnCheckedChangeListener { _, isChecked ->
+            binding.tilSections.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        binding.btnAddClass = setSaveClickListener()
+        observeClasses()
+    }
+
+    private fun setSaveClickListener(): View.OnClickListener {
+        val listener = View.OnClickListener {
             val name = binding.etClassName.text?.toString()?.trim() ?: ""
             val feeStr = binding.etMonthlyFee.text?.toString()?.trim() ?: ""
+            val hasSections = binding.cbDivideSection.isChecked
+            val sections = if (hasSections) {
+                binding.etSections.text?.toString()?.trim() ?: "A, B"
+            } else {
+                ""
+            }
 
             if (name.isEmpty() || feeStr.isEmpty()) {
-                Toast.makeText(this, "Please enter Class name and Fee", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                Toast.makeText(this, "Please enter Class Name and Monthly Fee", Toast.LENGTH_SHORT).show()
+                return@OnClickListener
             }
 
             lifecycleScope.launch(Dispatchers.IO) {
-                db.schoolDao().insertClass(SchoolClass(className = name, monthlyFee = feeStr.toDoubleOrNull() ?: 500.0))
+                val newClass = SchoolClass(
+                    className = name,
+                    monthlyFee = feeStr.toDoubleOrNull() ?: 500.0,
+                    hasSections = hasSections,
+                    sections = sections
+                )
+                db.schoolDao().insertClass(newClass)
+
                 withContext(Dispatchers.Main) {
                     binding.etClassName.text?.clear()
                     binding.etMonthlyFee.text?.clear()
-                    Toast.makeText(this@ClassManagementActivity, "Class Added!", Toast.LENGTH_SHORT).show()
+                    binding.cbDivideSection.isChecked = false
+                    Toast.makeText(this@ClassManagementActivity, "Class registered successfully!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+        binding.btnAddClass.setOnClickListener(listener)
+        return listener
+    }
 
+    private fun observeClasses() {
         lifecycleScope.launch {
             db.schoolDao().getAllClasses().collect { list ->
                 binding.rvClasses.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -57,15 +85,24 @@ class ClassManagementActivity : AppCompatActivity() {
                         val v = ItemMonthFeeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                         return object : RecyclerView.ViewHolder(v.root) {}
                     }
+
                     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, pos: Int) {
                         val cls = list[pos]
                         val b = ItemMonthFeeBinding.bind(holder.itemView)
                         b.tvMonthName.text = cls.className
-                        b.tvFeeBreakdown.text = "Monthly Fee: ₹${cls.monthlyFee} • Sections: ${cls.sections}"
-                        b.tvStatusBadge.text = "ACTIVE"
-                        b.cbSelectMonth.isEnabled = false
-                        b.cbSelectMonth.isChecked = true
+
+                        if (cls.hasSections && cls.sections.isNotBlank()) {
+                            val units = cls.getDisplayUnits().joinToString(", ") { "${cls.className} (${it.second})" }
+                            b.tvFeeBreakdown.text = "Fee: ₹${cls.monthlyFee}/m • Units: $units"
+                            b.tvStatusBadge.text = "SECTIONS: ${cls.sections}"
+                        } else {
+                            b.tvFeeBreakdown.text = "Fee: ₹${cls.monthlyFee}/m • Single Unit (No Sections)"
+                            b.tvStatusBadge.text = "SINGLE CLASS"
+                        }
+
+                        b.cbSelectMonth.visibility = View.GONE
                     }
+
                     override fun getItemCount() = list.size
                 }
             }
