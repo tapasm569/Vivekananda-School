@@ -3,11 +3,10 @@
         <item name="colorPrimary">#0F3D6E</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorSecondary">#D97706</item>
+        <!-- Material 3 BottomNavigationView uses colorSecondaryContainer for active pill indicator -->
+        <item name="colorSecondaryContainer">#FEF3C7</item>
+        <item name="colorOnSecondaryContainer">#0F3D6E</item>
         <item name="android:statusBarColor">#0F3D6E</item>
         <item name="android:windowLightStatusBar">false</item>
-    </style>
-
-    <style name="CustomNavIndicator">
-        <item name="android:color">#FEF3C7</item>
     </style>
 </resources>
