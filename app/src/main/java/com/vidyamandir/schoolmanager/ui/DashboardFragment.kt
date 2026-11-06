@@ -108,7 +108,7 @@ class DashboardFragment : Fragment() {
         }
 
         binding.cardSetExams.setOnClickListener {
-            startActivity(Intent(requireContext(), ResultPublishActivity::class.java))
+            startActivity(Intent(requireContext(), SetExamsActivity::class.java))
         }
         binding.cardPublishResult.setOnClickListener {
             startActivity(Intent(requireContext(), ResultPublishActivity::class.java))

@@ -14,11 +14,13 @@ import kotlinx.coroutines.launch
         SchoolClass::class,
         Teacher::class,
         Student::class,
+        ExamDefinition::class,
+        ExamSubject::class,
+        ExamResult::class,
         FeePayment::class,
-        LateFeeRule::class,
-        ExamResult::class
+        LateFeeRule::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -52,7 +54,6 @@ abstract class AppDatabase : RoomDatabase() {
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
                         val dao = database.schoolDao()
-                        // Zero demo classes inserted. Starts completely fresh.
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 1, dayTo = 10, fineAmount = 0.0))
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 11, dayTo = 20, fineAmount = 50.0))
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 21, dayTo = 30, fineAmount = 100.0))

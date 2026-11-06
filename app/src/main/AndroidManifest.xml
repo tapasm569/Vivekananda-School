@@ -21,6 +21,7 @@
         <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".ui.TeacherPortalActivity" android:exported="false" />
         <activity android:name=".ui.FeeCollectionActivity" android:exported="false" />
+        <activity android:name=".ui.SetExamsActivity" android:exported="false" />
         <activity android:name=".ui.ResultPublishActivity" android:exported="false" />
         <activity android:name=".ui.StudentManagementActivity" android:exported="false" />
         <activity android:name=".ui.AddStudentActivity" android:exported="false" />

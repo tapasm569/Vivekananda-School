@@ -165,11 +165,12 @@ class ResultPdfGenerator(private val context: Context) {
         paint.isFakeBoldText = true
         paint.textSize = 10f
         canvas.drawText("Subject Name", 50f, y - 4f, paint)
-        canvas.drawText("Full", 230f, y - 4f, paint)
-        canvas.drawText("Written", 290f, y - 4f, paint)
-        canvas.drawText("Practical", 360f, y - 4f, paint)
-        canvas.drawText("Obtained", 440f, y - 4f, paint)
-        canvas.drawText("Grade", 510f, y - 4f, paint)
+        canvas.drawText("Full", 220f, y - 4f, paint)
+        canvas.drawText("Written", 270f, y - 4f, paint)
+        canvas.drawText("Oral", 330f, y - 4f, paint)
+        canvas.drawText("Practical", 380f, y - 4f, paint)
+        canvas.drawText("Obtained", 450f, y - 4f, paint)
+        canvas.drawText("Grade", 520f, y - 4f, paint)
 
         paint.color = Color.BLACK
         paint.isFakeBoldText = false
@@ -184,11 +185,12 @@ class ResultPdfGenerator(private val context: Context) {
             if (res.obtainedMarks < (res.fullMarks * 0.35)) isPassed = false
 
             canvas.drawText(res.subjectName, 50f, y, paint)
-            canvas.drawText(res.fullMarks.toString(), 230f, y, paint)
-            canvas.drawText(res.writtenMarks.toString(), 290f, y, paint)
-            canvas.drawText(res.practicalMarks.toString(), 360f, y, paint)
-            canvas.drawText(res.obtainedMarks.toString(), 440f, y, paint)
-            canvas.drawText(res.grade, 510f, y, paint)
+            canvas.drawText(res.fullMarks.toString(), 220f, y, paint)
+            canvas.drawText(res.writtenMarks.toString(), 270f, y, paint)
+            canvas.drawText(res.oralMarks.toString(), 330f, y, paint)
+            canvas.drawText(res.practicalMarks.toString(), 380f, y, paint)
+            canvas.drawText(res.obtainedMarks.toString(), 450f, y, paint)
+            canvas.drawText(res.grade, 520f, y, paint)
 
             paint.color = Color.parseColor("#E2E8F0")
             canvas.drawLine(40f, y + 5f, (a4Width - 40).toFloat(), y + 5f, paint)
