@@ -4,36 +4,27 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.vidyamandir.schoolmanager.data.AppDatabase
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.vidyamandir.schoolmanager.databinding.ActivityMainBinding
-import com.vidyamandir.schoolmanager.ui.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Calendar
+import com.vidyamandir.schoolmanager.ui.DashboardFragment
+import com.vidyamandir.schoolmanager.ui.DueListFragment
+import com.vidyamandir.schoolmanager.ui.LoginActivity
+import com.vidyamandir.schoolmanager.ui.PaidListFragment
+import com.vidyamandir.schoolmanager.ui.SearchFragment
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var db: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        db = AppDatabase.getDatabase(this, lifecycleScope)
-
         setupToolbar()
-        observeDashboardStats()
-        setupCardClicks()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refreshBalances()
+        setupViewPagerWithBottomNav()
     }
 
     private fun setupToolbar() {
@@ -53,136 +44,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeDashboardStats() {
-        lifecycleScope.launch {
-            db.schoolDao().getStudentCount().collect { count ->
-                binding.tvStudentCount.text = count.toString()
-            }
-        }
-
-        lifecycleScope.launch {
-            db.schoolDao().getClassCount().collect { count ->
-                binding.tvClassCount.text = count.toString()
-            }
-        }
-
-        lifecycleScope.launch {
-            db.schoolDao().getTeacherCount().collect { count ->
-                binding.tvTeacherCount.text = count.toString()
-            }
-        }
-
-        lifecycleScope.launch {
-            db.schoolDao().getPendingMarksheetCount().collect { count ->
-                binding.tvPendingMarksheetCount.text = "$count Pending"
-            }
-        }
-
-        lifecycleScope.launch {
-            val cal = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            db.schoolDao().getTodayPayments(cal.timeInMillis).collect { todayPayments ->
-                val todaySum = todayPayments.sumOf { it.totalAmount }
-                binding.tvDailyCollection.text = "₹${String.format("%.2f", todaySum)}"
-            }
-        }
-
-        lifecycleScope.launch {
-            db.schoolDao().getAllPayments().collect { allPayments ->
-                val paidSum = allPayments.sumOf { it.totalAmount }
-                binding.tvPaidBalanceAmount.text = "₹${String.format("%.2f", paidSum)}"
-            }
-        }
-    }
-
-    private fun refreshBalances() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val students = db.schoolDao().getAllActiveStudents().first()
-                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
-                var totalDues = 0.0
-
-                for (student in students) {
-                    val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
-                    val paidMonths = payments.flatMap { p ->
-                        p.paidMonths.split(",").filter { it.isNotBlank() }.map { it.trim().toInt() }
-                    }.toSet()
-
-                    val startMonth = student.admissionMonth.coerceAtMost(12)
-                    var dueMonthsCount = 0
-                    for (m in startMonth..currentMonth) {
-                        if (!paidMonths.contains(m)) dueMonthsCount++
-                    }
-                    totalDues += (dueMonthsCount * student.monthlyFee)
+    private fun setupViewPagerWithBottomNav() {
+        // Tab 0: Due List, Tab 1: Paid List, Tab 2: Search, Tab 3: Dashboard
+        val pagerAdapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = 4
+            override fun createFragment(position: Int): Fragment {
+                return when (position) {
+                    0 -> DueListFragment()
+                    1 -> PaidListFragment()
+                    2 -> SearchFragment()
+                    3 -> DashboardFragment()
+                    else -> DashboardFragment()
                 }
-
-                withContext(Dispatchers.Main) {
-                    binding.tvDueBalanceAmount.text = "₹${String.format("%.2f", totalDues)}"
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
-    }
 
-    private fun setupCardClicks() {
-        // Collect Fee Action
-        binding.cardCollectFee.setOnClickListener {
-            startActivity(Intent(this, FeeCollectionActivity::class.java))
-        }
-        binding.btnQuickCollect.setOnClickListener {
-            startActivity(Intent(this, FeeCollectionActivity::class.java))
-        }
+        binding.viewPager.adapter = pagerAdapter
+        binding.viewPager.offscreenPageLimit = 3
 
-        // Row 1
-        binding.cardStudents.setOnClickListener {
-            startActivity(Intent(this, StudentManagementActivity::class.java))
-        }
-        binding.cardClasses.setOnClickListener {
-            startActivity(Intent(this, ClassManagementActivity::class.java))
-        }
-        binding.cardTeachers.setOnClickListener {
-            startActivity(Intent(this, TeacherManagementActivity::class.java))
-        }
+        // Swiping Left/Right updates Footer Icon
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                when (position) {
+                    0 -> binding.bottomNav.selectedItemId = R.id.nav_due
+                    1 -> binding.bottomNav.selectedItemId = R.id.nav_paid
+                    2 -> binding.bottomNav.selectedItemId = R.id.nav_search
+                    3 -> binding.bottomNav.selectedItemId = R.id.nav_dashboard
+                }
+            }
+        })
 
-        // Row 2
-        binding.cardDueBalance.setOnClickListener {
-            val intent = Intent(this, StudentDuesListActivity::class.java)
-            intent.putExtra("VIEW_MODE", "DUE")
-            startActivity(intent)
-        }
-        binding.cardPaidBalance.setOnClickListener {
-            val intent = Intent(this, StudentDuesListActivity::class.java)
-            intent.putExtra("VIEW_MODE", "PAID")
-            startActivity(intent)
-        }
-
-        // Row 3
-        binding.cardTrackPayment.setOnClickListener {
-            startActivity(Intent(this, TrackPaymentActivity::class.java))
-        }
-        binding.cardApprovedMarksheet.setOnClickListener {
-            startActivity(Intent(this, MarksheetApprovalActivity::class.java))
-        }
-
-        // Row 4
-        binding.cardSetExams.setOnClickListener {
-            startActivity(Intent(this, ResultPublishActivity::class.java))
-        }
-        binding.cardPublishResult.setOnClickListener {
-            startActivity(Intent(this, ResultPublishActivity::class.java))
-        }
-
-        // Row 5
-        binding.cardMessage.setOnClickListener {
-            startActivity(Intent(this, WhatsAppMessageActivity::class.java))
-        }
-        binding.btnOpenMessage.setOnClickListener {
-            startActivity(Intent(this, WhatsAppMessageActivity::class.java))
+        // Tapping Footer Icon scrolls ViewPager2
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_due -> {
+                    if (binding.viewPager.currentItem != 0) binding.viewPager.setCurrentItem(0, true)
+                    true
+                }
+                R.id.nav_paid -> {
+                    if (binding.viewPager.currentItem != 1) binding.viewPager.setCurrentItem(1, true)
+                    true
+                }
+                R.id.nav_search -> {
+                    if (binding.viewPager.currentItem != 2) binding.viewPager.setCurrentItem(2, true)
+                    true
+                }
+                R.id.nav_dashboard -> {
+                    if (binding.viewPager.currentItem != 3) binding.viewPager.setCurrentItem(3, true)
+                    true
+                }
+                else -> false
+            }
         }
     }
 }

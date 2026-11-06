@@ -2,6 +2,7 @@ package com.vidyamandir.schoolmanager.data
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "classes")
@@ -62,7 +63,8 @@ data class Student(
             childColumns = ["studentId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["studentId"])]
 )
 data class FeePayment(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -94,7 +96,8 @@ data class LateFeeRule(
             childColumns = ["studentId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["studentId"])]
 )
 data class ExamResult(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
