@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:padding="14dp">
 
-        <!-- COLLECT FEE (PRIMARY FULL-WIDTH ACTION CARD) -->
+        <!-- COLLECT FEE (SINGLE CARD ROW) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCollectFee"
             android:layout_width="match_parent"
