@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_due"
+        android:icon="@drawable/ic_nav_due"
+        android:title="Due" />
+    <item
+        android:id="@+id/nav_paid"
+        android:icon="@drawable/ic_nav_paid"
+        android:title="Paid" />
+    <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/ic_nav_search"
+        android:title="Search" />
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@drawable/ic_nav_dashboard"
+        android:title="Dashboard" />
+</menu>
