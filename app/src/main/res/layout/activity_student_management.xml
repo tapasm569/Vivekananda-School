@@ -27,7 +27,6 @@
         android:padding="12dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Class Filter Dropdown -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilClassFilter"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -57,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:text="Enroll New Student"
+        android:text="Enroll Student"
         android:textColor="@android:color/white"
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="@android:color/white"

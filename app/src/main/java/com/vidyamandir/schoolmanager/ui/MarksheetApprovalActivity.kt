@@ -28,6 +28,7 @@ class MarksheetApprovalActivity : AppCompatActivity() {
 
         binding.toolbar.title = "Approve Marksheets"
         binding.fabAddStudent.hide()
+        binding.tilClassFilter.visibility = android.view.View.GONE
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         db = AppDatabase.getDatabase(this, lifecycleScope)
@@ -65,7 +66,7 @@ class MarksheetApprovalActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ApprovalViewHolder, position: Int) {
             val item = list[position]
             holder.binding.tvSubjectName.text = "${item.subjectName} (${item.examName})"
-            holder.binding.tvSubjectGradeBadge.text = "Obtained: ${item.obtainedMarks}/${item.fullMarks}"
+            holder.binding.tvSubjectGradeBadge.text = "Tap to Approve (${item.obtainedMarks}/${item.fullMarks})"
             holder.binding.etFullMarks.setText(item.fullMarks.toString())
             holder.binding.etWrittenMarks.setText(item.writtenMarks.toString())
             holder.binding.etPracticalMarks.setText(item.practicalMarks.toString())

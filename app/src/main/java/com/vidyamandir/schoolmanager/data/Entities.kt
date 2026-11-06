@@ -7,13 +7,12 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "classes")
 data class SchoolClass(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val className: String,             // e.g. "Class 5" or "Nursery"
-    val monthlyFee: Double,            // e.g. 500.0
-    val hasSections: Boolean = false,  // true only when divided
-    val sections: String = ""          // comma-separated: "A,B"
+    val className: String,
+    val monthlyFee: Double,
+    val hasSections: Boolean = false,
+    val sections: String = ""
 ) {
     fun getDisplayUnits(): List<Pair<String, String>> {
-        // Returns list of Pair(ClassName, Section)
         if (!hasSections || sections.isBlank()) {
             return listOf(Pair(className, ""))
         }
@@ -28,8 +27,8 @@ data class SchoolClass(
 data class Teacher(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val phone: String,                 // Used as contact & ID
-    val password: String,              // Teacher login password
+    val phone: String,
+    val password: String,
     val photoUri: String? = null
 )
 
@@ -39,14 +38,14 @@ data class Student(
     val admissionNo: String,
     val fullName: String,
     val className: String,
-    val section: String = "",          // Empty if class has no section
+    val section: String = "",
     val rollNo: Int,
     val fatherName: String = "",
     val motherName: String = "",
     val parentPhone: String,
     val address: String = "",
     val photoUri: String? = null,
-    val admissionMonth: Int = 1,       // 1 for Jan .. 12 for Dec
+    val admissionMonth: Int = 1,
     val monthlyFee: Double,
     val isActive: Boolean = true
 ) {
@@ -108,7 +107,7 @@ data class ExamResult(
     val practicalMarks: Int,
     val grade: String,
     val submittedByTeacher: String = "Admin",
-    val approvalStatus: String = "APPROVED" // "PENDING", "APPROVED", "REJECTED"
+    val approvalStatus: String = "APPROVED"
 ) {
     val obtainedMarks: Int get() = writtenMarks + practicalMarks
 }

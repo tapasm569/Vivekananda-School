@@ -29,6 +29,7 @@ class WhatsAppMessageActivity : AppCompatActivity() {
 
         binding.toolbar.title = "WhatsApp Parent Broadcast"
         binding.fabAddStudent.hide()
+        binding.tilClassFilter.visibility = android.view.View.GONE
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         db = AppDatabase.getDatabase(this, lifecycleScope)
@@ -46,7 +47,7 @@ class WhatsAppMessageActivity : AppCompatActivity() {
     private fun sendWhatsApp(student: Student) {
         try {
             val phone = if (student.parentPhone.startsWith("+91")) student.parentPhone else "+91${student.parentPhone}"
-            val text = "Namaskar, this is Vivekananda Vidyamandir (Dhupguri). Notice regarding student: ${student.fullName} (Class: ${student.className}, Roll: ${student.rollNo})."
+            val text = "Namaskar, this is Vivekananda Vidyamandir (Dhupguri). Notice regarding student: ${student.fullName} (Class: ${student.displayClass}, Roll: ${student.rollNo})."
             val uri = Uri.parse("https://api.whatsapp.com/send?phone=$phone&text=${URLEncoder.encode(text, "UTF-8")}")
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
@@ -73,7 +74,7 @@ class WhatsAppMessageActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: WhatsAppViewHolder, position: Int) {
             val s = list[position]
             holder.binding.tvStudentName.text = s.fullName
-            holder.binding.tvStudentMeta.text = "${s.className} • 📞 ${s.parentPhone}"
+            holder.binding.tvStudentMeta.text = "${s.displayClass} • 📞 ${s.parentPhone}"
             holder.binding.tvParentsName.text = "Tap to send WhatsApp alert"
             holder.binding.tvMonthlyFeeBadge.text = "CHAT"
             holder.binding.root.setOnClickListener { onClick(s) }

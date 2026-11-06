@@ -47,7 +47,6 @@ class MonthAdapter(
                 binding.tvStatusBadge.text = "PAID"
                 binding.tvStatusBadge.setTextColor(Color.parseColor("#16A34A"))
                 binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#DCFCE7"))
-                binding.cardMonth.strokeColor = Color.parseColor("#E2E8F0")
                 binding.root.setOnClickListener(null)
             } else {
                 binding.cbSelectMonth.isEnabled = true

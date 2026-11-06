@@ -8,7 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vidyamandir.schoolmanager.data.AppDatabase
-import com.vidyamandir.schoolmanager.data.FeePayment
 import com.vidyamandir.schoolmanager.databinding.ActivityStudentManagementBinding
 import com.vidyamandir.schoolmanager.databinding.ItemMonthFeeBinding
 import kotlinx.coroutines.launch
@@ -29,6 +28,7 @@ class TrackPaymentActivity : AppCompatActivity() {
 
         binding.toolbar.title = "Today's Tracked Payments"
         binding.fabAddStudent.hide()
+        binding.tilClassFilter.visibility = android.view.View.GONE
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         db = AppDatabase.getDatabase(this, lifecycleScope)
@@ -53,8 +53,8 @@ class TrackPaymentActivity : AppCompatActivity() {
                         val p = list[pos]
                         val b = ItemMonthFeeBinding.bind(holder.itemView)
                         val timeStr = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(p.paymentDate))
-                        b.tvMonthName.text = "Receipt: ${p.receiptNo}"
-                        b.tvFeeBreakdown.text = "Base: ₹${p.baseAmount} | Fine: ₹${p.lateFeeAmount} | Time: $timeStr"
+                        b.tvMonthName.text = "${p.studentName} (${p.receiptNo})"
+                        b.tvFeeBreakdown.text = "Base: ₹${p.baseAmount} | Fine: ₹${p.lateFeeAmount} | $timeStr"
                         b.tvStatusBadge.text = "₹${p.totalAmount}"
                         b.cbSelectMonth.isEnabled = false
                         b.cbSelectMonth.isChecked = true

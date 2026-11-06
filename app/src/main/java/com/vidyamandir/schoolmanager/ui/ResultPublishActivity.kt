@@ -45,43 +45,14 @@ class ResultPublishActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         db = AppDatabase.getDatabase(this, lifecycleScope)
-
-        setupToolbar()
-        setupRecyclerView()
-        loadStudents()
-        setupListeners()
-    }
-
-    private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener { finish() }
-    }
 
-    private fun setupRecyclerView() {
         adapter = SubjectMarkAdapter(subjectScoreItems)
         binding.rvSubjects.layoutManager = LinearLayoutManager(this)
         binding.rvSubjects.adapter = adapter
-    }
 
-    private fun loadStudents() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            studentsList = db.schoolDao().getAllActiveStudents().first()
-            withContext(Dispatchers.Main) {
-                if (studentsList.isNotEmpty()) {
-                    val names = studentsList.map { "${it.fullName} (${it.admissionNo}) - ${it.className}" }
-                    val arrayAdapter = ArrayAdapter(
-                        this@ResultPublishActivity,
-                        android.R.layout.simple_dropdown_item_1line,
-                        names
-                    )
-                    binding.actvStudentSelect.setAdapter(arrayAdapter)
-                    binding.actvStudentSelect.setText(names[0], false)
-                    selectedStudent = studentsList[0]
-                }
-            }
-        }
-    }
+        loadStudents()
 
-    private fun setupListeners() {
         binding.actvStudentSelect.setOnItemClickListener { _, _, position, _ ->
             selectedStudent = studentsList[position]
         }
@@ -95,6 +66,21 @@ class ResultPublishActivity : AppCompatActivity() {
         binding.btnGeneratePdf.setOnClickListener {
             saveMarksToDatabase {
                 generateAndOpenPdf()
+            }
+        }
+    }
+
+    private fun loadStudents() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            studentsList = db.schoolDao().getAllActiveStudents().first()
+            withContext(Dispatchers.Main) {
+                if (studentsList.isNotEmpty()) {
+                    val names = studentsList.map { "${it.fullName} (${it.displayClass}) - Roll ${it.rollNo}" }
+                    val arrayAdapter = ArrayAdapter(this@ResultPublishActivity, android.R.layout.simple_dropdown_item_1line, names)
+                    binding.actvStudentSelect.setAdapter(arrayAdapter)
+                    binding.actvStudentSelect.setText(names[0], false)
+                    selectedStudent = studentsList[0]
+                }
             }
         }
     }
@@ -117,7 +103,8 @@ class ResultPublishActivity : AppCompatActivity() {
                 fullMarks = it.fullMarks,
                 writtenMarks = it.writtenMarks,
                 practicalMarks = it.practicalMarks,
-                grade = it.grade
+                grade = it.grade,
+                approvalStatus = "APPROVED"
             )
         }
 
@@ -142,7 +129,8 @@ class ResultPublishActivity : AppCompatActivity() {
                 fullMarks = it.fullMarks,
                 writtenMarks = it.writtenMarks,
                 practicalMarks = it.practicalMarks,
-                grade = it.grade
+                grade = it.grade,
+                approvalStatus = "APPROVED"
             )
         }
 
@@ -165,9 +153,7 @@ class ResultPublishActivity : AppCompatActivity() {
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NO_HISTORY
             }
 
-            val chooser = Intent.createChooser(intent, "Open 2-Page Vivekananda Report Card")
-            startActivity(chooser)
-
+            startActivity(Intent.createChooser(intent, "Open 2-Page Vivekananda Report Card"))
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to create PDF: ${e.message}", Toast.LENGTH_LONG).show()
         }

@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         binding.topAppBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_logout -> {
-                    val prefs = getSharedPreferences("vv_admin_auth", Context.MODE_PRIVATE)
+                    val prefs = getSharedPreferences("vv_auth_session", Context.MODE_PRIVATE)
                     prefs.edit().clear().apply()
                     val intent = Intent(this, LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -130,38 +130,54 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupCardClicks() {
+        // Collect Fee Action
+        binding.cardCollectFee.setOnClickListener {
+            startActivity(Intent(this, FeeCollectionActivity::class.java))
+        }
+        binding.btnQuickCollect.setOnClickListener {
+            startActivity(Intent(this, FeeCollectionActivity::class.java))
+        }
+
+        // Row 1
         binding.cardStudents.setOnClickListener {
             startActivity(Intent(this, StudentManagementActivity::class.java))
         }
-
         binding.cardClasses.setOnClickListener {
             startActivity(Intent(this, ClassManagementActivity::class.java))
         }
-
         binding.cardTeachers.setOnClickListener {
             startActivity(Intent(this, TeacherManagementActivity::class.java))
         }
 
+        // Row 2
         binding.cardDueBalance.setOnClickListener {
             val intent = Intent(this, StudentDuesListActivity::class.java)
             intent.putExtra("VIEW_MODE", "DUE")
             startActivity(intent)
         }
-
         binding.cardPaidBalance.setOnClickListener {
             val intent = Intent(this, StudentDuesListActivity::class.java)
             intent.putExtra("VIEW_MODE", "PAID")
             startActivity(intent)
         }
 
+        // Row 3
         binding.cardTrackPayment.setOnClickListener {
             startActivity(Intent(this, TrackPaymentActivity::class.java))
         }
-
         binding.cardApprovedMarksheet.setOnClickListener {
             startActivity(Intent(this, MarksheetApprovalActivity::class.java))
         }
 
+        // Row 4
+        binding.cardSetExams.setOnClickListener {
+            startActivity(Intent(this, ResultPublishActivity::class.java))
+        }
+        binding.cardPublishResult.setOnClickListener {
+            startActivity(Intent(this, ResultPublishActivity::class.java))
+        }
+
+        // Row 5
         binding.cardMessage.setOnClickListener {
             startActivity(Intent(this, WhatsAppMessageActivity::class.java))
         }

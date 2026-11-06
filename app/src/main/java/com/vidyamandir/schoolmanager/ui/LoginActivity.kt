@@ -20,7 +20,7 @@ class LoginActivity : AppCompatActivity() {
 
     companion object {
         private const val PREFS_NAME = "vv_auth_session"
-        private const val KEY_ROLE = "session_role" // "ADMIN" or "TEACHER"
+        private const val KEY_ROLE = "session_role"
         private const val KEY_TEACHER_NAME = "teacher_name"
         private const val SCHOOL_CODE = "VV001"
         private const val ADMIN_PASSWORD = "India360@"
@@ -66,7 +66,6 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // 1. Check Admin Credentials
         if (inputPassword == ADMIN_PASSWORD) {
             getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
                 .putString(KEY_ROLE, "ADMIN")
@@ -77,7 +76,6 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // 2. Check Teacher Credentials
         lifecycleScope.launch(Dispatchers.IO) {
             val teacher = db.schoolDao().getTeacherByPassword(inputPassword)
             withContext(Dispatchers.Main) {

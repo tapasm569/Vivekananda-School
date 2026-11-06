@@ -21,16 +21,14 @@ class ResultPdfGenerator(private val context: Context) {
     ) {
         val document = PdfDocument()
 
-        // Page 1: Formal Cover Page
         val pageInfo1 = PdfDocument.PageInfo.Builder(a4Width, a4Height, 1).create()
         val page1 = document.startPage(pageInfo1)
         drawPageOne(page1.canvas, student, examName)
         document.finishPage(page1)
 
-        // Page 2: Tabular Marksheet
         val pageInfo2 = PdfDocument.PageInfo.Builder(a4Width, a4Height, 2).create()
         val page2 = document.startPage(pageInfo2)
-        drawPageTwo(page2.canvas, student, examName, results)
+        drawPageTwo(page2.canvas, student, results)
         document.finishPage(page2)
 
         FileOutputStream(outputFile).use { out ->
@@ -42,7 +40,6 @@ class ResultPdfGenerator(private val context: Context) {
     private fun drawPageOne(canvas: Canvas, student: Student, examName: String) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-        // Double Border
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 3f
         paint.color = Color.parseColor("#0F3D6E")
@@ -51,7 +48,6 @@ class ResultPdfGenerator(private val context: Context) {
         paint.strokeWidth = 1f
         canvas.drawRect(28f, 28f, (a4Width - 28).toFloat(), (a4Height - 28).toFloat(), paint)
 
-        // School Title
         paint.style = Paint.Style.FILL
         paint.color = Color.parseColor("#0F3D6E")
         paint.textSize = 24f
@@ -59,19 +55,16 @@ class ResultPdfGenerator(private val context: Context) {
         paint.textAlign = Paint.Align.CENTER
         canvas.drawText("VIVEKANANDA VIDYAMANDIR", (a4Width / 2).toFloat(), 95f, paint)
 
-        // Address
         paint.textSize = 12f
         paint.isFakeBoldText = false
         paint.color = Color.DKGRAY
         canvas.drawText("Dhupguri, Jalpaiguri, West Bengal - 735210", (a4Width / 2).toFloat(), 120f, paint)
 
-        // Exam Title Badge
         paint.textSize = 14f
         paint.isFakeBoldText = true
         paint.color = Color.parseColor("#D97706")
         canvas.drawText(examName.uppercase(), (a4Width / 2).toFloat(), 160f, paint)
 
-        // Central Emblem Medallion
         val centerX = (a4Width / 2).toFloat()
         val centerY = 310f
 
@@ -93,7 +86,6 @@ class ResultPdfGenerator(private val context: Context) {
         paint.color = Color.parseColor("#B45309")
         canvas.drawText("★ MOTTO OF EDUCATION ★", centerX, centerY + 10f, paint)
 
-        // Quotation Card
         val quoteTop = 460f
         paint.style = Paint.Style.FILL
         paint.color = Color.parseColor("#F8FAFC")
@@ -119,7 +111,6 @@ class ResultPdfGenerator(private val context: Context) {
         paint.color = Color.DKGRAY
         canvas.drawText("— Swami Vivekananda", centerX, quoteTop + 68f, paint)
 
-        // Candidate Profile Card
         val profileTop = 590f
         paint.color = Color.parseColor("#FFFFFF")
         canvas.drawRoundRect(45f, profileTop, (a4Width - 45).toFloat(), profileTop + 140f, 10f, 10f, paint)
@@ -139,26 +130,19 @@ class ResultPdfGenerator(private val context: Context) {
         paint.textAlign = Paint.Align.LEFT
         canvas.drawText("Student Name: ${student.fullName}", 70f, profileTop + 65f, paint)
         canvas.drawText("Admission ID: ${student.admissionNo}", 70f, profileTop + 95f, paint)
-        canvas.drawText("Class & Section: ${student.className} (${student.section})", 320f, profileTop + 65f, paint)
+        canvas.drawText("Class: ${student.displayClass}", 320f, profileTop + 65f, paint)
         canvas.drawText("Roll Number: ${student.rollNo}", 320f, profileTop + 95f, paint)
     }
 
-    private fun drawPageTwo(
-        canvas: Canvas,
-        student: Student,
-        examName: String,
-        results: List<ExamResult>
-    ) {
+    private fun drawPageTwo(canvas: Canvas, student: Student, results: List<ExamResult>) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-        // Header Title
         paint.color = Color.parseColor("#0F3D6E")
         paint.textSize = 18f
         paint.isFakeBoldText = true
         paint.textAlign = Paint.Align.CENTER
         canvas.drawText("ACADEMIC PROGRESS STATEMENT", (a4Width / 2).toFloat(), 55f, paint)
 
-        // Meta Bar
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 1f
         paint.color = Color.LTGRAY
@@ -170,10 +154,9 @@ class ResultPdfGenerator(private val context: Context) {
         paint.color = Color.BLACK
         paint.isFakeBoldText = false
         canvas.drawText("Student: ${student.fullName}", 50f, 98f, paint)
-        canvas.drawText("Class: ${student.className} (${student.section})", 260f, 98f, paint)
+        canvas.drawText("Class: ${student.displayClass}", 260f, 98f, paint)
         canvas.drawText("Roll: ${student.rollNo}", 440f, 98f, paint)
 
-        // Table Header
         var y = 145f
         paint.color = Color.parseColor("#0F3D6E")
         canvas.drawRect(40f, y - 18f, (a4Width - 40).toFloat(), y + 8f, paint)
@@ -198,9 +181,7 @@ class ResultPdfGenerator(private val context: Context) {
         for (res in results) {
             grandFull += res.fullMarks
             grandObtained += res.obtainedMarks
-            if (res.obtainedMarks < (res.fullMarks * 0.35)) {
-                isPassed = false
-            }
+            if (res.obtainedMarks < (res.fullMarks * 0.35)) isPassed = false
 
             canvas.drawText(res.subjectName, 50f, y, paint)
             canvas.drawText(res.fullMarks.toString(), 230f, y, paint)
@@ -215,7 +196,6 @@ class ResultPdfGenerator(private val context: Context) {
             y += 24f
         }
 
-        // Summary Statistics Box
         y += 20f
         val percentage = if (grandFull > 0) (grandObtained.toDouble() / grandFull * 100) else 0.0
         val finalStatus = if (isPassed) "PASSED" else "FAILED"
@@ -244,7 +224,6 @@ class ResultPdfGenerator(private val context: Context) {
         paint.textSize = 14f
         canvas.drawText("Result: $finalStatus", 420f, y + 36f, paint)
 
-        // Signatures
         val signY = a4Height - 90f
         paint.color = Color.GRAY
         canvas.drawLine(50f, signY, 180f, signY, paint)

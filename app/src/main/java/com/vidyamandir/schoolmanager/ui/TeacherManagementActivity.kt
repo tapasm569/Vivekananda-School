@@ -55,7 +55,7 @@ class TeacherManagementActivity : AppCompatActivity() {
             val t = list[position]
             holder.binding.tvTeacherName.text = t.name
             holder.binding.tvTeacherPhone.text = "📞 ${t.phone}"
-            holder.binding.tvTeacherPassword.text = "Login Pass: ${t.password}"
+            holder.binding.tvTeacherPassword.text = "Password: ${t.password}"
 
             ImageHelper.loadProfilePhoto(
                 t.photoUri,

@@ -99,7 +99,7 @@ class StudentDuesListActivity : AppCompatActivity() {
             val entry = list[position]
             val s = entry.student
             holder.binding.tvStudentName.text = s.fullName
-            holder.binding.tvStudentMeta.text = "${s.className} (${s.section}) • Roll: ${s.rollNo}"
+            holder.binding.tvStudentMeta.text = "${s.displayClass} • Roll: ${s.rollNo}"
             holder.binding.tvParentsName.text = "${entry.detailsText} • 📞 ${s.parentPhone}"
 
             if (mode == "DUE") {

@@ -110,7 +110,7 @@ class TeacherPortalActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 Toast.makeText(
                     this@TeacherPortalActivity,
-                    "Marks for ${student.fullName} submitted to Admin Panel for approval!",
+                    "Marks submitted for Admin Approval!",
                     Toast.LENGTH_LONG
                 ).show()
             }

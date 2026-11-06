@@ -95,8 +95,8 @@ class ClassManagementActivity : AppCompatActivity() {
                             b.tvFeeBreakdown.text = "Fee: ₹${cls.monthlyFee}/m • Units: $units"
                             b.tvStatusBadge.text = "SECTIONS: ${cls.sections}"
                         } else {
-                            b.tvFeeBreakdown.text = "Fee: ₹${cls.monthlyFee}/m • Single Unit (No Sections)"
-                            b.tvStatusBadge.text = "SINGLE CLASS"
+                            b.tvFeeBreakdown.text = "Fee: ₹${cls.monthlyFee}/m • Single Unit"
+                            b.tvStatusBadge.text = "CLASS"
                         }
 
                         b.cbSelectMonth.visibility = View.GONE

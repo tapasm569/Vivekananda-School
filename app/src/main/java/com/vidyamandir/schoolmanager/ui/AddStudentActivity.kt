@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
-import com.vidyamandir.schoolmanager.data.SchoolClass
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityAddStudentBinding
 import com.vidyamandir.schoolmanager.util.ImageHelper
@@ -83,7 +82,7 @@ class AddStudentActivity : AppCompatActivity() {
                     binding.actvClass.setAdapter(adapter)
                     binding.actvClass.setText(names[0], false)
                 } else {
-                    Toast.makeText(this@AddStudentActivity, "No classes registered yet. Please add a class first in 'CLASS' menu.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@AddStudentActivity, "Please add a class first in 'CLASS' menu.", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -132,7 +131,7 @@ class AddStudentActivity : AppCompatActivity() {
             db.schoolDao().insertStudent(student)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@AddStudentActivity, "Student enrolled in ${matchedUnit.displayText}!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@AddStudentActivity, "Student enrolled successfully!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

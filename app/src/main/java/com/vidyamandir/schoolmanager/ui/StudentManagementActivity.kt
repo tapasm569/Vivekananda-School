@@ -36,11 +36,7 @@ class StudentManagementActivity : AppCompatActivity() {
         binding.rvStudents.layoutManager = LinearLayoutManager(this)
 
         binding.fabAddStudent.setOnClickListener {
-            val intent = Intent(this, AddStudentActivity::class.java)
-            if (selectedClassFilter != "All Classes") {
-                intent.putExtra("PRESET_CLASS", selectedClassFilter)
-            }
-            startActivity(intent)
+            startActivity(Intent(this, AddStudentActivity::class.java))
         }
 
         loadClassFilters()
@@ -51,7 +47,12 @@ class StudentManagementActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             val classes = db.schoolDao().getAllClasses().first()
             val filterOptions = mutableListOf("All Classes")
-            filterOptions.addAll(classes.map { it.className })
+            classes.forEach { cls ->
+                cls.getDisplayUnits().forEach { unit ->
+                    val text = if (unit.second.isNotBlank()) "${unit.first} (Sec ${unit.second})" else unit.first
+                    filterOptions.add(text)
+                }
+            }
 
             withContext(Dispatchers.Main) {
                 val adapter = ArrayAdapter(this@StudentManagementActivity, android.R.layout.simple_dropdown_item_1line, filterOptions)
@@ -79,7 +80,7 @@ class StudentManagementActivity : AppCompatActivity() {
         val filtered = if (selectedClassFilter == "All Classes") {
             allStudents
         } else {
-            allStudents.filter { it.className.equals(selectedClassFilter, ignoreCase = true) }
+            allStudents.filter { it.displayClass.equals(selectedClassFilter, ignoreCase = true) }
         }
         binding.rvStudents.adapter = StudentAdapter(filtered)
     }
@@ -97,7 +98,7 @@ class StudentManagementActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val s = list[position]
             holder.binding.tvStudentName.text = s.fullName
-            holder.binding.tvStudentMeta.text = "${s.className} (${s.section}) • Roll: ${s.rollNo}"
+            holder.binding.tvStudentMeta.text = "${s.displayClass} • Roll: ${s.rollNo}"
             holder.binding.tvParentsName.text = "Father: ${s.fatherName} • 📞 ${s.parentPhone}"
             holder.binding.tvMonthlyFeeBadge.text = "₹${s.monthlyFee}/m"
 

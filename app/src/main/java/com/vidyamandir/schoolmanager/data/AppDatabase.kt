@@ -52,8 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
                         val dao = database.schoolDao()
-                        // ZERO demo classes inserted here. Database starts completely clean.
-                        // Default late fine rules
+                        // Zero demo classes inserted. Starts completely fresh.
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 1, dayTo = 10, fineAmount = 0.0))
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 11, dayTo = 20, fineAmount = 50.0))
                         dao.insertLateFeeRule(LateFeeRule(dayFrom = 21, dayTo = 30, fineAmount = 100.0))

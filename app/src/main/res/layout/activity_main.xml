@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="#F1F5F9">
 
-    <!-- Top AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -34,17 +33,70 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- ROW 1: STUDENTS (33%), CLASS (33%), TEACHER (33%) -->
+            <!-- COLLECT FEE (SINGLE CARD ROW) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCollectFee"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#0F3D6E">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="18dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="COLLECT FEE"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp"
+                            android:letterSpacing="0.04"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="12-month fee counter, advances &amp; late fines"
+                            android:textColor="#93C5FD"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnQuickCollect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="44dp"
+                        android:text="Open Counter →"
+                        android:textColor="#0F3D6E"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="#FEF3C7"
+                        app:cornerRadius="10dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ROW 1: STUDENTS, CLASS, TEACHER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
                 android:orientation="horizontal">
 
-                <!-- Students Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardStudents"
                     android:layout_width="0dp"
-                    android:layout_height="115dp"
+                    android:layout_height="110dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
                     app:cardCornerRadius="16dp"
@@ -64,10 +116,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="STUDENTS"
+                            android:textColor="#0F3D6E"
                             android:textSize="11sp"
-                            android:letterSpacing="0.05"
-                            android:textStyle="bold"
-                            android:textColor="#0F3D6E" />
+                            android:letterSpacing="0.04"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvStudentCount"
@@ -75,24 +127,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
+                            android:textColor="#0F3D6E"
                             android:textSize="22sp"
-                            android:textStyle="bold"
-                            android:textColor="#0F3D6E" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Enrolled"
-                            android:textSize="10sp"
-                            android:textColor="#64748B" />
+                            android:textColor="#64748B"
+                            android:textSize="10sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Class Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardClasses"
                     android:layout_width="0dp"
-                    android:layout_height="115dp"
+                    android:layout_height="110dp"
                     android:layout_weight="1"
                     android:layout_marginHorizontal="4dp"
                     app:cardCornerRadius="16dp"
@@ -112,10 +163,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="CLASS"
+                            android:textColor="#0F3D6E"
                             android:textSize="11sp"
-                            android:letterSpacing="0.05"
-                            android:textStyle="bold"
-                            android:textColor="#0F3D6E" />
+                            android:letterSpacing="0.04"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvClassCount"
@@ -123,24 +174,23 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
+                            android:textColor="#0F3D6E"
                             android:textSize="22sp"
-                            android:textStyle="bold"
-                            android:textColor="#0F3D6E" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Classes"
-                            android:textSize="10sp"
-                            android:textColor="#64748B" />
+                            android:textColor="#64748B"
+                            android:textSize="10sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Teacher Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardTeachers"
                     android:layout_width="0dp"
-                    android:layout_height="115dp"
+                    android:layout_height="110dp"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     app:cardCornerRadius="16dp"
@@ -160,10 +210,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="TEACHER"
+                            android:textColor="#0F3D6E"
                             android:textSize="11sp"
-                            android:letterSpacing="0.05"
-                            android:textStyle="bold"
-                            android:textColor="#0F3D6E" />
+                            android:letterSpacing="0.04"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvTeacherCount"
@@ -171,32 +221,31 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
+                            android:textColor="#0F3D6E"
                             android:textSize="22sp"
-                            android:textStyle="bold"
-                            android:textColor="#0F3D6E" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Staff"
-                            android:textSize="10sp"
-                            android:textColor="#64748B" />
+                            android:textColor="#64748B"
+                            android:textSize="10sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- ROW 2: DUE BALANCE (50%), PAID BALANCE (50%) -->
+            <!-- ROW 2: DUE BALANCE, PAID BALANCE -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:orientation="horizontal">
 
-                <!-- Due Balance Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardDueBalance"
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="115dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp"
                     app:cardCornerRadius="18dp"
@@ -216,35 +265,34 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="DUE BALANCE"
+                            android:textColor="#991B1B"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:textColor="#991B1B" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvDueBalanceAmount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="4dp"
                             android:text="₹0.00"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#DC2626" />
+                            android:textColor="#DC2626"
+                            android:textSize="19sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Tap to view due list →"
-                            android:textSize="11sp"
-                            android:textColor="#B91C1C" />
+                            android:textColor="#B91C1C"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Paid Balance Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardPaidBalance"
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="115dp"
                     android:layout_weight="1"
                     android:layout_marginStart="6dp"
                     app:cardCornerRadius="18dp"
@@ -264,43 +312,42 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="PAID BALANCE"
+                            android:textColor="#166534"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:textColor="#166534" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvPaidBalanceAmount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="4dp"
                             android:text="₹0.00"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#16A34A" />
+                            android:textColor="#16A34A"
+                            android:textSize="19sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="This month collected →"
-                            android:textSize="11sp"
-                            android:textColor="#15803D" />
+                            android:text="Total collected →"
+                            android:textColor="#15803D"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- ROW 3: TRACK PAYMENT (50%), APPROVED MARKSHEET (50%) -->
+            <!-- ROW 3: TRACK PAYMENT, APPROVED MARKSHEET -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:orientation="horizontal">
 
-                <!-- Track Payment Card (Daily Collection) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardTrackPayment"
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="115dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp"
                     app:cardCornerRadius="18dp"
@@ -320,35 +367,34 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="TRACK PAYMENT"
+                            android:textColor="#1E40AF"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:textColor="#1E40AF" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvDailyCollection"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="4dp"
                             android:text="₹0.00"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#2563EB" />
+                            android:textColor="#2563EB"
+                            android:textSize="19sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Today's receipts →"
-                            android:textSize="11sp"
-                            android:textColor="#1D4ED8" />
+                            android:textColor="#1D4ED8"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Approved Marksheet Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardApprovedMarksheet"
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="115dp"
                     android:layout_weight="1"
                     android:layout_marginStart="6dp"
                     app:cardCornerRadius="18dp"
@@ -368,37 +414,137 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="APPROVED MARKSHEET"
+                            android:textColor="#92400E"
                             android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:textColor="#92400E" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvPendingMarksheetCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="4dp"
                             android:text="0 Pending"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#D97706" />
+                            android:textColor="#D97706"
+                            android:textSize="19sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Review &amp; Approve →"
-                            android:textSize="11sp"
-                            android:textColor="#B45309" />
+                            android:textColor="#B45309"
+                            android:textSize="11sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- ROW 4: LONG FULL-WIDTH CARD FOR WHATSAPP MESSAGING -->
+            <!-- ROW 4: SET EXAMS, PUBLISH RESULT -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSetExams"
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#FAF5FF"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#E9D5FF">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SET EXAMS"
+                            android:textColor="#6B21A8"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Schedule"
+                            android:textColor="#9333EA"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Input &amp; configure tests →"
+                            android:textColor="#7E22CE"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardPublishResult"
+                    android:layout_width="0dp"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="#F0FDFA"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#99F6E4">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PUBLISH RESULT"
+                            android:textColor="#115E59"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Print 2-Page"
+                            android:textColor="#0D9488"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Generate PDF marksheets →"
+                            android:textColor="#0F766E"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- ROW 5: MESSAGE (FULL-WIDTH WHATSAPP BROADCAST) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:layout_marginBottom="24dp"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
@@ -407,9 +553,9 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="20dp">
+                    android:orientation="horizontal"
+                    android:padding="18dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -421,18 +567,18 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="MESSAGE"
+                            android:textColor="@android:color/white"
                             android:textSize="16sp"
-                            android:textStyle="bold"
                             android:letterSpacing="0.04"
-                            android:textColor="@android:color/white" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="2dp"
                             android:text="Direct WhatsApp messaging to students &amp; parents"
-                            android:textSize="12sp"
-                            android:textColor="#93C5FD" />
+                            android:textColor="#93C5FD"
+                            android:textSize="12sp" />
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
@@ -441,9 +587,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="44dp"
                         android:text="Send WhatsApp"
+                        android:textColor="#0F3D6E"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="#0F3D6E"
                         app:backgroundTint="#FEF3C7"
                         app:cornerRadius="10dp" />
 
