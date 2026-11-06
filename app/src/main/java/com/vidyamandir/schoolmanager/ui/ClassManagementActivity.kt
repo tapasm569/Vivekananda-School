@@ -36,45 +36,44 @@ class ClassManagementActivity : AppCompatActivity() {
             binding.tilSections.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
-        binding.btnAddClass = setSaveClickListener()
+        binding.btnAddClass.setOnClickListener {
+            saveClass()
+        }
+
         observeClasses()
     }
 
-    private fun setSaveClickListener(): View.OnClickListener {
-        val listener = View.OnClickListener {
-            val name = binding.etClassName.text?.toString()?.trim() ?: ""
-            val feeStr = binding.etMonthlyFee.text?.toString()?.trim() ?: ""
-            val hasSections = binding.cbDivideSection.isChecked
-            val sections = if (hasSections) {
-                binding.etSections.text?.toString()?.trim() ?: "A, B"
-            } else {
-                ""
-            }
+    private fun saveClass() {
+        val name = binding.etClassName.text?.toString()?.trim() ?: ""
+        val feeStr = binding.etMonthlyFee.text?.toString()?.trim() ?: ""
+        val hasSections = binding.cbDivideSection.isChecked
+        val sections = if (hasSections) {
+            binding.etSections.text?.toString()?.trim() ?: "A, B"
+        } else {
+            ""
+        }
 
-            if (name.isEmpty() || feeStr.isEmpty()) {
-                Toast.makeText(this, "Please enter Class Name and Monthly Fee", Toast.LENGTH_SHORT).show()
-                return@OnClickListener
-            }
+        if (name.isEmpty() || feeStr.isEmpty()) {
+            Toast.makeText(this, "Please enter Class Name and Monthly Fee", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-            lifecycleScope.launch(Dispatchers.IO) {
-                val newClass = SchoolClass(
-                    className = name,
-                    monthlyFee = feeStr.toDoubleOrNull() ?: 500.0,
-                    hasSections = hasSections,
-                    sections = sections
-                )
-                db.schoolDao().insertClass(newClass)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val newClass = SchoolClass(
+                className = name,
+                monthlyFee = feeStr.toDoubleOrNull() ?: 500.0,
+                hasSections = hasSections,
+                sections = sections
+            )
+            db.schoolDao().insertClass(newClass)
 
-                withContext(Dispatchers.Main) {
-                    binding.etClassName.text?.clear()
-                    binding.etMonthlyFee.text?.clear()
-                    binding.cbDivideSection.isChecked = false
-                    Toast.makeText(this@ClassManagementActivity, "Class registered successfully!", Toast.LENGTH_SHORT).show()
-                }
+            withContext(Dispatchers.Main) {
+                binding.etClassName.text?.clear()
+                binding.etMonthlyFee.text?.clear()
+                binding.cbDivideSection.isChecked = false
+                Toast.makeText(this@ClassManagementActivity, "Class registered successfully!", Toast.LENGTH_SHORT).show()
             }
         }
-        binding.btnAddClass.setOnClickListener(listener)
-        return listener
     }
 
     private fun observeClasses() {
