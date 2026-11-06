@@ -28,14 +28,12 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- WhatsApp-Style Horizontal Swiper -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- Icon-Only Bottom Navigation Footer -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
@@ -45,7 +43,7 @@
             app:labelVisibilityMode="unlabeled"
             app:menu="@menu/bottom_nav_menu"
             app:itemIconTint="@color/nav_icon_color"
-            app:itemActiveIndicatorStyle="@style/CustomNavIndicator" />
+            app:itemActiveIndicatorColor="#FEF3C7" />
 
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
