@@ -8,8 +8,10 @@ import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.databinding.ActivityMainBinding
 import com.vidyamandir.schoolmanager.ui.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +29,11 @@ class MainActivity : AppCompatActivity() {
         setupToolbar()
         observeDashboardStats()
         setupCardClicks()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshBalances()
     }
 
     private fun setupToolbar() {
@@ -48,7 +55,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeDashboardStats() {
         lifecycleScope.launch {
-            // 1. Counts
             db.schoolDao().getStudentCount().collect { count ->
                 binding.tvStudentCount.text = count.toString()
             }
@@ -73,7 +79,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            // 2. Track Payment (Today's Collection)
             val cal = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
@@ -87,35 +92,44 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            // 3. Paid Balance (All / Current Month Collection)
             db.schoolDao().getAllPayments().collect { allPayments ->
                 val paidSum = allPayments.sumOf { it.totalAmount }
                 binding.tvPaidBalanceAmount.text = "₹${String.format("%.2f", paidSum)}"
             }
         }
+    }
 
-        lifecycleScope.launch {
-            // 4. Due Balance Calculation
-            val students = db.schoolDao().getAllActiveStudents().first()
-            val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
-            var totalDues = 0.0
+    private fun refreshBalances() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val students = db.schoolDao().getAllActiveStudents().first()
+                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+                var totalDues = 0.0
 
-            for (student in students) {
-                val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
-                val paidMonths = payments.flatMap { p ->
-                    p.paidMonths.split(",").filter { it.isNotBlank() }.map { it.trim().toInt() }
-                }.toSet()
+                for (student in students) {
+                    val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
+                    val paidMonths = payments.flatMap { p ->
+                        p.paidMonths.split(",").filter { it.isNotBlank() }.map { it.trim().toInt() }
+                    }.toSet()
 
-                val dueMonthsCount = (student.admissionMonth..currentMonth).count { !paidMonths.contains(it) }
-                totalDues += (dueMonthsCount * student.monthlyFee)
+                    val startMonth = student.admissionMonth.coerceAtMost(12)
+                    var dueMonthsCount = 0
+                    for (m in startMonth..currentMonth) {
+                        if (!paidMonths.contains(m)) dueMonthsCount++
+                    }
+                    totalDues += (dueMonthsCount * student.monthlyFee)
+                }
+
+                withContext(Dispatchers.Main) {
+                    binding.tvDueBalanceAmount.text = "₹${String.format("%.2f", totalDues)}"
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-
-            binding.tvDueBalanceAmount.text = "₹${String.format("%.2f", totalDues)}"
         }
     }
 
     private fun setupCardClicks() {
-        // Row 1
         binding.cardStudents.setOnClickListener {
             startActivity(Intent(this, StudentManagementActivity::class.java))
         }
@@ -128,7 +142,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TeacherManagementActivity::class.java))
         }
 
-        // Row 2
         binding.cardDueBalance.setOnClickListener {
             val intent = Intent(this, StudentDuesListActivity::class.java)
             intent.putExtra("VIEW_MODE", "DUE")
@@ -141,7 +154,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Row 3
         binding.cardTrackPayment.setOnClickListener {
             startActivity(Intent(this, TrackPaymentActivity::class.java))
         }
@@ -150,7 +162,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, MarksheetApprovalActivity::class.java))
         }
 
-        // Row 4
         binding.cardMessage.setOnClickListener {
             startActivity(Intent(this, WhatsAppMessageActivity::class.java))
         }

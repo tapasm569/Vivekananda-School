@@ -25,6 +25,7 @@
         <activity android:name=".ui.AddStudentActivity" android:exported="false" />
         <activity android:name=".ui.ClassManagementActivity" android:exported="false" />
         <activity android:name=".ui.TeacherManagementActivity" android:exported="false" />
+        <activity android:name=".ui.AddTeacherActivity" android:exported="false" />
         <activity android:name=".ui.StudentDuesListActivity" android:exported="false" />
         <activity android:name=".ui.TrackPaymentActivity" android:exported="false" />
         <activity android:name=".ui.MarksheetApprovalActivity" android:exported="false" />

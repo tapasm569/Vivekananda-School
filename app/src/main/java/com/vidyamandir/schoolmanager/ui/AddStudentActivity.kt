@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityAddStudentBinding
+import com.vidyamandir.schoolmanager.util.ImageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -20,14 +21,17 @@ class AddStudentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddStudentBinding
     private lateinit var db: AppDatabase
-    private var selectedPhotoUri: Uri? = null
+    private var internalPhotoPath: String? = null
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            selectedPhotoUri = it
-            binding.ivStudentPhoto.setImageURI(it)
+            val savedPath = ImageHelper.saveImageToInternalStorage(this, it, "student")
+            if (savedPath != null) {
+                internalPhotoPath = savedPath
+                ImageHelper.loadProfilePhoto(savedPath, binding.ivStudentPhoto, android.R.drawable.ic_menu_camera)
+            }
         }
     }
 
@@ -55,10 +59,11 @@ class AddStudentActivity : AppCompatActivity() {
             val classes = db.schoolDao().getAllClasses().first()
             val classNames = classes.map { it.className }
             withContext(Dispatchers.Main) {
-                val adapter = ArrayAdapter(this@AddStudentActivity, android.R.layout.simple_dropdown_item_1line, classNames)
-                binding.actvClass.setAdapter(adapter)
                 if (classNames.isNotEmpty()) {
-                    binding.actvClass.setText(classNames[0], false)
+                    val adapter = ArrayAdapter(this@AddStudentActivity, android.R.layout.simple_dropdown_item_1line, classNames)
+                    binding.actvClass.setAdapter(adapter)
+                    val targetClass = intent.getStringExtra("PRESET_CLASS") ?: classNames[0]
+                    binding.actvClass.setText(targetClass, false)
                 }
             }
         }
@@ -80,7 +85,7 @@ class AddStudentActivity : AppCompatActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             val cls = db.schoolDao().getClassByName(className)
-            val fee = cls?.monthlyFee ?: 500.0
+            val fee = cls?.monthlyFee ?: 450.0
             val admissionNo = "VV-${System.currentTimeMillis().toString().takeLast(5)}"
             val admissionMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
 
@@ -94,7 +99,7 @@ class AddStudentActivity : AppCompatActivity() {
                 motherName = mother,
                 parentPhone = phone,
                 address = address,
-                photoUri = selectedPhotoUri?.toString(),
+                photoUri = internalPhotoPath,
                 admissionMonth = admissionMonth,
                 monthlyFee = fee
             )
