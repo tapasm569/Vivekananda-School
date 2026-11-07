@@ -11,7 +11,9 @@ data class SchoolClass(
     val className: String,
     val monthlyFee: Double,
     val hasSections: Boolean = false,
-    val sections: String = ""
+    val sections: String = "",
+    @androidx.room.ColumnInfo(defaultValue = "''")
+    val subjects: String = ""
 ) {
     fun getDisplayUnits(): List<Pair<String, String>> {
         if (!hasSections || sections.isBlank()) {
@@ -116,6 +118,47 @@ data class ExamResult(
 ) {
     val obtainedMarks: Int get() = writtenMarks + oralMarks + practicalMarks
 }
+
+@Entity(
+    tableName = "exam_subject_components",
+    foreignKeys = [
+        ForeignKey(
+            entity = ExamSubject::class,
+            parentColumns = ["id"],
+            childColumns = ["examSubjectId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["examSubjectId"])]
+)
+data class ExamSubjectComponent(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val examSubjectId: Long,
+    val componentName: String,
+    val maxMarks: Int,
+    val position: Int = 0
+)
+
+@Entity(
+    tableName = "exam_result_components",
+    foreignKeys = [
+        ForeignKey(
+            entity = ExamResult::class,
+            parentColumns = ["id"],
+            childColumns = ["examResultId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["examResultId"])]
+)
+data class ExamResultComponent(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val examResultId: Long,
+    val componentName: String,
+    val maxMarks: Int,
+    val obtainedMarks: Int,
+    val position: Int = 0
+)
 
 @Entity(
     tableName = "fee_payments",

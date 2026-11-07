@@ -22,6 +22,9 @@ interface SchoolDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClass(schoolClass: SchoolClass): Long
 
+    @Update
+    suspend fun updateClass(schoolClass: SchoolClass)
+
     @Query("SELECT * FROM classes ORDER BY id ASC")
     fun getAllClasses(): Flow<List<SchoolClass>>
 
@@ -56,10 +59,26 @@ interface SchoolDao {
     suspend fun insertExam(exam: ExamDefinition): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExamSubjects(subjects: List<ExamSubject>)
+    suspend fun insertExamSubjects(subjects: List<ExamSubject>): List<Long>
 
     @Query("SELECT * FROM exams ORDER BY id DESC")
     fun getAllExams(): Flow<List<ExamDefinition>>
+
+    @Query("""
+        SELECT * FROM exams
+        WHERE examName = :examName
+        AND targetClass = :targetClass
+        AND academicYear = :academicYear
+        LIMIT 1
+    """)
+    suspend fun findExistingExam(
+        examName: String,
+        targetClass: String,
+        academicYear: Int
+    ): ExamDefinition?
+
+    @Query("SELECT * FROM exams WHERE targetClass = :targetClass ORDER BY id DESC")
+    suspend fun getExamsForClass(targetClass: String): List<ExamDefinition>
 
     @Query("SELECT * FROM exam_subjects WHERE examId = :examId ORDER BY id ASC")
     suspend fun getSubjectsForExam(examId: Long): List<ExamSubject>
@@ -74,11 +93,71 @@ interface SchoolDao {
     @Query("SELECT * FROM exam_results WHERE studentId = :studentId AND examName = :examName")
     suspend fun getStudentExamResults(studentId: Long, examName: String): List<ExamResult>
 
+    @Query("""
+        SELECT * FROM exam_results
+        WHERE studentId = :studentId
+        AND examName = :examName
+        AND academicYear = :academicYear
+        ORDER BY id ASC
+    """)
+    suspend fun getStudentExamResultsForYear(
+        studentId: Long,
+        examName: String,
+        academicYear: Int
+    ): List<ExamResult>
+
+    @Query("""
+        SELECT * FROM exam_results
+        WHERE studentId = :studentId
+        AND examName = :examName
+        AND academicYear = :academicYear
+        AND subjectName = :subjectName
+        LIMIT 1
+    """)
+    suspend fun getExistingExamResult(
+        studentId: Long,
+        examName: String,
+        academicYear: Int,
+        subjectName: String
+    ): ExamResult?
+
+    @Query("""
+        SELECT * FROM exam_results
+        WHERE examName = :examName
+        AND academicYear = :academicYear
+        ORDER BY studentId ASC, id ASC
+    """)
+    suspend fun getResultsForExam(
+        examName: String,
+        academicYear: Int
+    ): List<ExamResult>
+
     @Query("SELECT * FROM exam_results WHERE approvalStatus = 'PENDING'")
     fun getPendingMarksheets(): Flow<List<ExamResult>>
 
     @Query("UPDATE exam_results SET approvalStatus = :status WHERE id = :id")
     suspend fun updateMarksheetStatus(id: Long, status: String)
+
+    // Exam component configuration
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExamSubjectComponents(
+        components: List<ExamSubjectComponent>
+    )
+
+    @Query("SELECT * FROM exam_subject_components WHERE examSubjectId = :subjectId ORDER BY position ASC")
+    suspend fun getExamSubjectComponents(subjectId: Long): List<ExamSubjectComponent>
+
+    // Student component marks
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExamResult(result: ExamResult): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExamResultComponents(
+        components: List<ExamResultComponent>
+    )
+
+    @Query("SELECT * FROM exam_result_components WHERE examResultId = :resultId ORDER BY position ASC")
+    suspend fun getExamResultComponents(resultId: Long): List<ExamResultComponent>
 
     // Payments
     @Insert

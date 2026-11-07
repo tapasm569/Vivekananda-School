@@ -31,6 +31,13 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         db = AppDatabase.getDatabase(requireContext(), viewLifecycleOwner.lifecycleScope)
 
+        val userRole = requireContext()
+            .getSharedPreferences("vv_auth_session", android.content.Context.MODE_PRIVATE)
+            .getString("session_role", null)
+
+        binding.cardApprovedMarksheet.visibility =
+            if (userRole == "TEACHER") View.GONE else View.VISIBLE
+
         observeStats()
         observeFeeLists()
         setupListeners()

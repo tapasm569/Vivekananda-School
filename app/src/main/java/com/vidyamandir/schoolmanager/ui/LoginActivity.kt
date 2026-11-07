@@ -36,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
             finish()
             return
         } else if (role == "TEACHER") {
-            startActivity(Intent(this, TeacherPortalActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
@@ -85,7 +85,7 @@ class LoginActivity : AppCompatActivity() {
                         .putString(KEY_TEACHER_NAME, teacher.name)
                         .apply()
                     Toast.makeText(this@LoginActivity, "Welcome Teacher ${teacher.name}!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@LoginActivity, TeacherPortalActivity::class.java))
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 } else {
                     binding.tilPassword.error = "Incorrect Password"

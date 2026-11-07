@@ -97,6 +97,23 @@
                         android:text="A, B" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Subjects (comma separated, e.g. English, Mathematics, Science)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etClassSubjects"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences"
+                        android:minLines="2"
+                        android:gravity="top"
+                        android:hint="English, Mathematics, Science" />
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAddClass"
                     android:layout_width="match_parent"

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,10 +18,12 @@ import kotlinx.coroutines.launch
         ExamDefinition::class,
         ExamSubject::class,
         ExamResult::class,
+        ExamSubjectComponent::class,
+        ExamResultComponent::class,
         FeePayment::class,
         LateFeeRule::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,6 +31,47 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun schoolDao(): SchoolDao
 
     companion object {
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "ALTER TABLE classes ADD COLUMN subjects TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `exam_subject_components` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `examSubjectId` INTEGER NOT NULL,
+                    `componentName` TEXT NOT NULL,
+                    `maxMarks` INTEGER NOT NULL,
+                    `position` INTEGER NOT NULL,
+                    FOREIGN KEY(`examSubjectId`) REFERENCES `exam_subjects`(`id`)
+                    ON UPDATE NO ACTION ON DELETE CASCADE)"""
+                )
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_exam_subject_components_examSubjectId` ON `exam_subject_components` (`examSubjectId`)"
+                )
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `exam_result_components` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `examResultId` INTEGER NOT NULL,
+                    `componentName` TEXT NOT NULL,
+                    `maxMarks` INTEGER NOT NULL,
+                    `obtainedMarks` INTEGER NOT NULL,
+                    `position` INTEGER NOT NULL,
+                    FOREIGN KEY(`examResultId`) REFERENCES `exam_results`(`id`)
+                    ON UPDATE NO ACTION ON DELETE CASCADE)"""
+                )
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_exam_result_components_examResultId` ON `exam_result_components` (`examResultId`)"
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -38,7 +82,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "vivekananda_vidyamandir.db"
                 )
-                // Keep existing school records safe. Add explicit Room migrations before any schema upgrade.
+                .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
                 .addCallback(DatabaseCallback(scope))
                 .build()
                 INSTANCE = instance

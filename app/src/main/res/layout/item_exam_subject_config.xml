@@ -117,5 +117,31 @@
                 android:text="20" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Custom Components"
+            android:textColor="#0F3D6E"
+            android:textStyle="bold"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/llCustomComponents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddCustomComponent"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_marginTop="4dp"
+            android:text="+ Add Component"
+            android:textSize="11sp"
+            app:cornerRadius="8dp" />
+
     </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>
