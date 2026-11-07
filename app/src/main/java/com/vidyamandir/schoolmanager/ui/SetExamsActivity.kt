@@ -433,7 +433,7 @@ class SetExamsActivity : AppCompatActivity() {
                 })
 
                 deleteButton.setOnClickListener {
-                    val currentPosition = holder.bindingAdapterPosition
+                    val currentPosition = holder.adapterPosition
                     if (currentPosition != RecyclerView.NO_POSITION) {
                         val currentItem = list[currentPosition]
                         currentItem.customComponents.remove(component)
@@ -448,7 +448,7 @@ class SetExamsActivity : AppCompatActivity() {
             }
 
             b.btnAddCustomComponent.setOnClickListener {
-                val currentPosition = holder.bindingAdapterPosition
+                val currentPosition = holder.adapterPosition
                 if (currentPosition != RecyclerView.NO_POSITION) {
                     list[currentPosition].customComponents.add(
                         CustomComponentConfig("New Component", 10)
@@ -460,7 +460,7 @@ class SetExamsActivity : AppCompatActivity() {
             recalculateFullMarks()
 
             b.btnDeleteSubject.setOnClickListener {
-                val currentPosition = holder.bindingAdapterPosition
+                val currentPosition = holder.adapterPosition
                 if (currentPosition != RecyclerView.NO_POSITION) {
                     list.removeAt(currentPosition)
                     notifyItemRemoved(currentPosition)
