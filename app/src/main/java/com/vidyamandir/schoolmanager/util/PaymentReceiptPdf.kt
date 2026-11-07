@@ -1,4 +1,5 @@
 package com.vidyamandir.schoolmanager.util
+import android.print.PrintAttributes
 
 import android.content.Context
 import android.content.Intent
