@@ -77,7 +77,7 @@ class MonthAdapter(
                     selectedPeriodKeys.add(item.periodKey)
                 }
 
-                notifyItemChanged(bindingAdapterPosition)
+                binding.cbSelectMonth.isChecked = selectedPeriodKeys.contains(item.periodKey)
 
                 val selectedItems = items.filter {
                     selectedPeriodKeys.contains(it.periodKey)
