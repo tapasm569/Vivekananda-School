@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.ViewGroup
+import android.view.View
 import android.text.InputType
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -115,57 +116,269 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMainMenu() {
-        val schoolName = profilePrefs().getString(
-            "school_name",
-            DEFAULT_SCHOOL_NAME
-        ) ?: DEFAULT_SCHOOL_NAME
+        val dialog = android.app.Dialog(this)
+        val navy = android.graphics.Color.parseColor("#0F3D6E")
+        val amber = android.graphics.Color.parseColor("#D97706")
+        val dark = android.graphics.Color.parseColor("#172B4D")
+        val muted = android.graphics.Color.parseColor("#718096")
 
-        val popup = PopupMenu(this, binding.topAppBar, Gravity.END)
-
-        popup.menu.add(0, MENU_PROFILE, 0, schoolName)
-        popup.menu.add(0, MENU_PENALTY, 1, "Set Penalty")
-        popup.menu.add(0, MENU_BACKUP, 2, "BackUp Data")
-        popup.menu.add(0, MENU_RESTORE, 3, "Restore Data")
-        popup.menu.add(0, MENU_MARKSHEET, 4, "Export Marksheet")
-        popup.menu.add(0, MENU_LOGOUT, 5, "Logout")
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                MENU_PROFILE -> {
-                    showSchoolProfileDialog()
-                    true
-                }
-
-                MENU_PENALTY -> {
-                    showPenaltyDialog()
-                    true
-                }
-
-                MENU_BACKUP -> {
-                    startBackup()
-                    true
-                }
-
-                MENU_RESTORE -> {
-                    startRestore()
-                    true
-                }
-
-                MENU_MARKSHEET -> {
-                    startMarksheetExport()
-                    true
-                }
-
-                MENU_LOGOUT -> {
-                    logout()
-                    true
-                }
-
-                else -> false
+        fun rounded(color: Int, radius: Int): android.graphics.drawable.GradientDrawable {
+            return android.graphics.drawable.GradientDrawable().apply {
+                setColor(color)
+                cornerRadius = dp(radius).toFloat()
             }
         }
 
-        popup.show()
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(12), dp(20), dp(24))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(android.graphics.Color.parseColor("#F5F7FB"))
+                cornerRadii = floatArrayOf(
+                    dp(26).toFloat(), dp(26).toFloat(),
+                    dp(26).toFloat(), dp(26).toFloat(),
+                    0f, 0f, 0f, 0f
+                )
+            }
+        }
+
+        val handle = View(this).apply {
+            background = rounded(android.graphics.Color.parseColor("#CBD5E1"), 10)
+        }
+        root.addView(handle, LinearLayout.LayoutParams(dp(42), dp(5)).apply {
+            gravity = Gravity.CENTER
+            bottomMargin = dp(18)
+        })
+
+        val schoolName = profilePrefs().getString(
+            "school_name", DEFAULT_SCHOOL_NAME
+        ) ?: DEFAULT_SCHOOL_NAME
+
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(18), dp(12), dp(18))
+            background = rounded(navy, 20)
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                dialog.dismiss()
+                showSchoolProfileDialog()
+            }
+        }
+
+        val schoolIcon = TextView(this).apply {
+            text = "🏫"
+            textSize = 27f
+            gravity = Gravity.CENTER
+            background = rounded(android.graphics.Color.parseColor("#FFFFFF"), 14)
+        }
+        header.addView(schoolIcon, LinearLayout.LayoutParams(dp(54), dp(54)))
+
+        val heading = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(12), 0, dp(6), 0)
+        }
+
+        heading.addView(TextView(this).apply {
+            text = schoolName
+            textSize = 17f
+            maxLines = 2
+            setTextColor(android.graphics.Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+
+        heading.addView(TextView(this).apply {
+            text = "SCHOOL ADMINISTRATION  •  EDIT PROFILE"
+            textSize = 9f
+            setTextColor(android.graphics.Color.parseColor("#D7E7F8"))
+            setPadding(0, dp(5), 0, 0)
+        })
+
+        header.addView(heading, LinearLayout.LayoutParams(0, -2, 1f))
+
+        header.addView(TextView(this).apply {
+            text = "✎"
+            textSize = 23f
+            setTextColor(android.graphics.Color.WHITE)
+            gravity = Gravity.CENTER
+        }, LinearLayout.LayoutParams(dp(35), dp(45)))
+
+        root.addView(header, LinearLayout.LayoutParams(-1, -2).apply {
+            bottomMargin = dp(20)
+        })
+
+        root.addView(TextView(this).apply {
+            text = "QUICK SETTINGS"
+            textSize = 11f
+            letterSpacing = 1.2f
+            setTextColor(muted)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }, LinearLayout.LayoutParams(-1, -2).apply {
+            bottomMargin = dp(12)
+        })
+
+        val grid = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        val penalty = createMenuCard(
+            "⚙", "Set Penalty", "Late fee settings",
+            amber
+        ) {
+            dialog.dismiss()
+            showPenaltyDialog()
+        }
+
+        val backup = createMenuCard(
+            "☁", "BackUp Data", "Save school records",
+            navy
+        ) {
+            dialog.dismiss()
+            startBackup()
+        }
+
+        val restore = createMenuCard(
+            "↻", "Restore Data", "Recover saved records",
+            android.graphics.Color.parseColor("#0D9488")
+        ) {
+            dialog.dismiss()
+            startRestore()
+        }
+
+        val marksheet = createMenuCard(
+            "▤", "Export Marksheet", "Create class PDF",
+            android.graphics.Color.parseColor("#7C3AED")
+        ) {
+            dialog.dismiss()
+            startMarksheetExport()
+        }
+
+        addMenuCardRow(grid, penalty, backup)
+        addMenuCardRow(grid, restore, marksheet)
+        root.addView(grid)
+
+        val logout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            background = rounded(android.graphics.Color.parseColor("#FEECEC"), 15)
+            setPadding(dp(12), dp(14), dp(12), dp(14))
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                dialog.dismiss()
+                logout()
+            }
+        }
+
+        logout.addView(TextView(this).apply {
+            text = "⇥"
+            textSize = 22f
+            setTextColor(android.graphics.Color.parseColor("#DC2626"))
+        })
+
+        logout.addView(TextView(this).apply {
+            text = "Logout"
+            textSize = 15f
+            setTextColor(android.graphics.Color.parseColor("#DC2626"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(dp(10), 0, 0, 0)
+        })
+
+        root.addView(logout, LinearLayout.LayoutParams(-1, -2).apply {
+            topMargin = dp(18)
+        })
+
+        dialog.setContentView(root)
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setDimAmount(0.48f)
+            addFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            attributes = attributes.apply {
+                gravity = Gravity.BOTTOM
+            }
+        }
+
+        dialog.show()
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog.window?.setGravity(Gravity.BOTTOM)
+    }
+
+    private fun createMenuCard(
+        icon: String,
+        title: String,
+        subtitle: String,
+        accent: Int,
+        action: () -> Unit
+    ): LinearLayout {
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(13), dp(15), dp(10), dp(14))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(android.graphics.Color.WHITE)
+                cornerRadius = dp(17).toFloat()
+                setStroke(dp(1), android.graphics.Color.parseColor("#E7ECF3"))
+            }
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { action() }
+        }
+
+        card.addView(TextView(this).apply {
+            text = icon
+            textSize = 23f
+            gravity = Gravity.CENTER
+            setTextColor(accent)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(accent and 0x20FFFFFF)
+                cornerRadius = dp(12).toFloat()
+            }
+        }, LinearLayout.LayoutParams(dp(43), dp(43)).apply {
+            bottomMargin = dp(11)
+        })
+
+        card.addView(TextView(this).apply {
+            text = title
+            textSize = 14f
+            maxLines = 2
+            setTextColor(android.graphics.Color.parseColor("#172B4D"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+
+        card.addView(TextView(this).apply {
+            text = subtitle
+            textSize = 10f
+            setTextColor(android.graphics.Color.parseColor("#718096"))
+            setPadding(0, dp(5), 0, 0)
+        })
+
+        return card
+    }
+
+    private fun addMenuCardRow(
+        parent: LinearLayout,
+        first: View,
+        second: View
+    ) {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        row.addView(first, LinearLayout.LayoutParams(0, dp(142), 1f).apply {
+            rightMargin = dp(6)
+            bottomMargin = dp(12)
+        })
+
+        row.addView(second, LinearLayout.LayoutParams(0, dp(142), 1f).apply {
+            leftMargin = dp(6)
+            bottomMargin = dp(12)
+        })
+
+        parent.addView(row)
     }
 
     private fun showSchoolProfileDialog() {
