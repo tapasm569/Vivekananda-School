@@ -13,6 +13,7 @@ import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
 import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.domain.MonthDueStatus
+import com.vidyamandir.schoolmanager.util.PaymentReceiptPdf
 import com.vidyamandir.schoolmanager.util.ThermalReceiptPrinter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -29,6 +30,7 @@ class FeeCollectionActivity : AppCompatActivity() {
     private var selectedStudent: Student? = null
     private var activeRules: List<LateFeeRule> = emptyList()
     private var currentlySelectedMonths: List<MonthDueStatus> = emptyList()
+    private var lastSavedPayment: FeePayment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,7 +136,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         val lateSum = currentlySelectedMonths.sumOf { it.lateFee }
         val total = baseSum + lateSum
         val monthsString = currentlySelectedMonths.joinToString(",") { it.monthIndex.toString() }
-        val receipt = "REC-${System.currentTimeMillis().toString().takeLast(6)}"
+        val receipt = "REC-${System.currentTimeMillis()}"
 
         lifecycleScope.launch(Dispatchers.IO) {
             val payment = FeePayment(
@@ -149,63 +151,40 @@ class FeeCollectionActivity : AppCompatActivity() {
                 paymentDate = System.currentTimeMillis()
             )
             db.schoolDao().recordPayment(payment)
+            lastSavedPayment = payment
+            val pdfFile = withContext(Dispatchers.IO) {
+                PaymentReceiptPdf.create(this@FeeCollectionActivity, student, payment)
+            }
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@FeeCollectionActivity, "Payment recorded. Receipt: $receipt", Toast.LENGTH_LONG).show()
-                shareReceipt(student, receipt, monthsString, baseSum, lateSum, total)
+                Toast.makeText(this@FeeCollectionActivity, "Payment saved. PDF receipt: $receipt", Toast.LENGTH_LONG).show()
+                showReceiptActions(pdfFile, receipt)
                 loadStudentFeeMonths(student)
             }
         }
     }
 
-    private fun shareReceipt(student: Student, receipt: String, months: String, base: Double, late: Double, total: Double) {
-        val monthNames = months.split(",").mapNotNull { it.toIntOrNull() }.mapNotNull { index ->
-            java.text.DateFormatSymbols().months.getOrNull(index - 1)
-        }.joinToString(", ")
-        val date = java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date())
-        val message = """VIVEKANANDA VIDYAMANDIR
-Dhupguri, Jalpaiguri
-FEE PAYMENT RECEIPT
-================================
-Receipt No: $receipt
-Date: $date
-Student: ${student.fullName}
-Admission No: ${student.admissionNo}
-Class: ${student.displayClass} | Roll: ${student.rollNo}
-Academic Year: 2026
-Paid For: $monthNames
---------------------------------
-Base Fee: Rs. ${String.format("%.2f", base)}
-Late Fee: Rs. ${String.format("%.2f", late)}
-TOTAL PAID: Rs. ${String.format("%.2f", total)}
-================================
-Payment Status: PAID
-Thank you for your payment.
-""".trimIndent()
-        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(android.content.Intent.EXTRA_TEXT, message)
-        }
+    private fun showReceiptActions(file: java.io.File, receipt: String) {
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Payment receipt generated")
-            .setMessage("Receipt $receipt is saved in payment history. Choose how to deliver it.")
-            .setPositiveButton("WhatsApp") { _, _ ->
-                try {
-                    send.setPackage("com.whatsapp")
-                    startActivity(send)
-                } catch (_: Exception) {
-                    send.setPackage(null)
-                    startActivity(android.content.Intent.createChooser(send, "Share payment receipt"))
-                }
+            .setTitle("Receipt saved successfully")
+            .setMessage("Receipt $receipt is stored on this phone. You can reopen it anytime from the Paid List.")
+            .setItems(arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")) { _, choice ->
+                runCatching {
+                    when (choice) {
+                        0 -> PaymentReceiptPdf.view(this, file)
+                        1 -> PaymentReceiptPdf.print(this, file)
+                        2 -> {
+                            val payment = lastSavedPayment
+                            val student = selectedStudent
+                            if (payment != null && student != null) {
+                                ThermalReceiptPrinter.choosePrinterAndPrint(this, PaymentReceiptPdf.thermalText(student, payment))
+                            }
+                        }
+                        3 -> PaymentReceiptPdf.share(this, file)
+                    }
+                }.onFailure { Toast.makeText(this, "Receipt action failed: ${it.message}", Toast.LENGTH_LONG).show() }
             }
-            .setNegativeButton("Print receipt") { _, _ ->
-                ThermalReceiptPrinter.choosePrinterAndPrint(this, message)
-            }
-            .setNeutralButton("Other apps") { _, _ ->
-                send.setPackage(null)
-                startActivity(android.content.Intent.createChooser(send, "Share payment receipt"))
-            }
+            .setNegativeButton("Close", null)
             .show()
     }
-
 }
