@@ -78,14 +78,21 @@ class StudentDuesListActivity : AppCompatActivity() {
             }
 
             withContext(Dispatchers.Main) {
-                binding.rvStudents.adapter = DuesAdapter(displayList, mode)
+                binding.rvStudents.adapter = DuesAdapter(displayList, mode) { student ->
+                    StudentReceiptActions.show(
+                        this@StudentDuesListActivity,
+                        this@StudentDuesListActivity,
+                        lifecycleScope, db, student
+                    )
+                }
             }
         }
     }
 
     class DuesAdapter(
         private val list: List<StudentDueEntry>,
-        private val mode: String
+        private val mode: String,
+        private val onReceiptsClick: (Student) -> Unit
     ) : RecyclerView.Adapter<DuesAdapter.ViewHolder>() {
 
         class ViewHolder(val binding: ItemStudentCardBinding) : RecyclerView.ViewHolder(binding.root)
@@ -118,6 +125,8 @@ class StudentDuesListActivity : AppCompatActivity() {
             holder.binding.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
             holder.binding.btnCollectDue.visibility = if (mode == "DUE") android.view.View.VISIBLE else android.view.View.GONE
             holder.binding.btnCollectDue.setOnClickListener { StudentCardActions.collect(holder.itemView.context, s) }
+            holder.binding.btnStudentReceipts.visibility = android.view.View.VISIBLE
+            holder.binding.btnStudentReceipts.setOnClickListener { onReceiptsClick(s) }
         }
 
         override fun getItemCount() = list.size

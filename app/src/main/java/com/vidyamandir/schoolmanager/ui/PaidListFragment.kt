@@ -162,10 +162,9 @@ class PaidListFragment : Fragment() {
             holder.b.root.setOnClickListener { StudentCardActions.openProfile(holder.itemView.context, s) }
             holder.b.btnStudentWhatsApp.setOnClickListener { StudentCardActions.whatsapp(holder.itemView.context, s) }
             holder.b.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
-            holder.b.btnCollectDue.visibility = View.VISIBLE
-            holder.b.btnCollectDue.text = "Receipt"
-            holder.b.btnCollectDue.setBackgroundColor(android.graphics.Color.parseColor("#0F766E"))
-            holder.b.btnCollectDue.setOnClickListener { onReceiptsClick(s) }
+            holder.b.btnCollectDue.visibility = View.GONE
+            holder.b.btnStudentReceipts.visibility = View.VISIBLE
+            holder.b.btnStudentReceipts.setOnClickListener { onReceiptsClick(s) }
         }
 
         override fun getItemCount() = list.size

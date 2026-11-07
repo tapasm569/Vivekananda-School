@@ -77,7 +77,12 @@ class DueListFragment : Fragment() {
                 if (_binding != null) {
                     binding.tvTotalDueHeader.text = "₹${String.format("%.2f", grandTotalDue)}"
                     binding.tvDueStudentCount.text = "${dueList.size} Students"
-                    binding.rvDueList.adapter = DueAdapter(dueList)
+                    binding.rvDueList.adapter = DueAdapter(dueList) { student ->
+                        StudentReceiptActions.show(
+                            requireContext(), requireActivity(),
+                            viewLifecycleOwner.lifecycleScope, db, student
+                        )
+                    }
                 }
             }
         }
@@ -99,7 +104,10 @@ class DueListFragment : Fragment() {
         _binding = null
     }
 
-    class DueAdapter(private val list: List<DueStudentCardItem>) : RecyclerView.Adapter<DueAdapter.ViewHolder>() {
+    class DueAdapter(
+        private val list: List<DueStudentCardItem>,
+        private val onReceiptsClick: (Student) -> Unit
+    ) : RecyclerView.Adapter<DueAdapter.ViewHolder>() {
 
         class ViewHolder(val b: ItemStudentCardBinding) : RecyclerView.ViewHolder(b.root)
 
@@ -126,6 +134,8 @@ class DueListFragment : Fragment() {
             holder.b.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
             holder.b.btnCollectDue.visibility = View.VISIBLE
             holder.b.btnCollectDue.setOnClickListener { StudentCardActions.collect(holder.itemView.context, s) }
+            holder.b.btnStudentReceipts.visibility = View.VISIBLE
+            holder.b.btnStudentReceipts.setOnClickListener { onReceiptsClick(s) }
         }
 
         override fun getItemCount() = list.size
