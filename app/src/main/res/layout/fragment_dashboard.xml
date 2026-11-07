@@ -35,8 +35,8 @@
                     android:orientation="vertical">
 
                     <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_collect" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="COLLECT FEE"
                         android:textColor="@android:color/white"
@@ -44,8 +44,8 @@
                         android:letterSpacing="0.04"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="12-month advance &amp; due payment counter"
@@ -77,10 +77,10 @@
                 android:minHeight="104dp"
                 android:layout_weight="1" android:layout_marginEnd="6dp"
                 app:cardCornerRadius="14dp" app:cardBackgroundColor="#FFF1F2">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
                     <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_due" android:contentDescription="" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DUE LIST" android:textColor="#991B1B" android:textStyle="bold" android:textSize="12sp" />
-                    <TextView android:id="@+id/tvDashboardDueCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 Students" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold" />
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="DUE LIST" android:textColor="#991B1B" android:textStyle="bold" android:textSize="12sp" />
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:id="@+id/tvDashboardDueCount" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0 Students" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
             <com.google.android.material.card.MaterialCardView
@@ -89,10 +89,10 @@
                 android:minHeight="104dp"
                 android:layout_weight="1" android:layout_marginStart="6dp"
                 app:cardCornerRadius="14dp" app:cardBackgroundColor="#ECFDF5">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
                     <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_paid" android:contentDescription="" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="PAID LIST" android:textColor="#166534" android:textStyle="bold" android:textSize="12sp" />
-                    <TextView android:id="@+id/tvDashboardPaidCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 Students" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold" />
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="PAID LIST" android:textColor="#166534" android:textStyle="bold" android:textSize="12sp" />
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:id="@+id/tvDashboardPaidCount" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0 Students" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
@@ -125,8 +125,8 @@
                     android:padding="8dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_students" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="STUDENTS"
                         android:textColor="#0F3D6E"
@@ -138,9 +138,9 @@
                         android:letterSpacing="0.035"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
                         android:id="@+id/tvStudentCount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="0"
@@ -148,8 +148,8 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Enrolled"
                         android:textColor="#64748B"
@@ -178,8 +178,8 @@
                     android:padding="8dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_class" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="CLASS"
                         android:textColor="#0F3D6E"
@@ -191,9 +191,9 @@
                         android:letterSpacing="0.035"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
                         android:id="@+id/tvClassCount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="0"
@@ -201,8 +201,8 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Classes"
                         android:textColor="#64748B"
@@ -231,8 +231,8 @@
                     android:padding="8dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_teacher" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="TEACHER"
                         android:textColor="#0F3D6E"
@@ -244,9 +244,9 @@
                         android:letterSpacing="0.035"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
                         android:id="@+id/tvTeacherCount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="0"
@@ -254,8 +254,8 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Faculty"
                         android:textColor="#64748B"
@@ -286,23 +286,23 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:padding="14dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_payment" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="TRACK PAYMENT"
                         android:textColor="#1E40AF"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
                         android:id="@+id/tvDailyCollection"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="₹0.00"
@@ -310,8 +310,8 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Today's receipts →"
@@ -335,23 +335,23 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:padding="14dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_marksheet" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="APPROVED MARKSHEET"
                         android:textColor="#92400E"
                         android:textSize="10sp"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
                         android:id="@+id/tvPendingMarksheetCount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="0 Pending"
@@ -359,8 +359,8 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Review &amp; Approve →"
@@ -392,22 +392,22 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:padding="14dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_exam" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="SET EXAMS"
                         android:textColor="#6B21A8"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Schedule"
@@ -415,8 +415,8 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Input &amp; configure tests →"
@@ -440,22 +440,22 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:padding="14dp">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_result" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="PUBLISH RESULT"
                         android:textColor="#115E59"
                         android:textSize="11sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Print 2-Page"
@@ -463,8 +463,8 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Generate PDF marksheets →"
@@ -499,8 +499,8 @@
                     android:orientation="vertical">
 
                     <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_message" android:contentDescription="" />
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="MESSAGE"
                         android:textColor="@android:color/white"
@@ -508,8 +508,8 @@
                         android:letterSpacing="0.04"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Direct WhatsApp messaging to students &amp; parents"
