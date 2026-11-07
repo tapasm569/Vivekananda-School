@@ -1013,8 +1013,8 @@ class MainActivity : AppCompatActivity() {
 
                     for (student in classStudents) {
                         val approved = db.schoolDao()
-                            .getStudentExamResults(
-                                student.id, exam.examName
+                            .getStudentExamResultsForYear(
+                                student.id, exam.examName, exam.academicYear
                             )
                             .filter {
                                 it.approvalStatus.equals(

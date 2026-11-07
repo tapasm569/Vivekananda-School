@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.room.withTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vidyamandir.schoolmanager.data.AppDatabase
@@ -197,24 +198,41 @@ class ResultPublishActivity : AppCompatActivity() {
         val student = classStudents[currentStudentIndex]
         val status = if (userRole == "ADMIN") "APPROVED" else "PENDING"
 
-        val results = subjectRows.map {
-            ExamResult(
-                studentId = student.id,
-                examName = exam.examName,
-                academicYear = exam.academicYear,
-                subjectName = it.subjectName,
-                fullMarks = it.fullMarks,
-                writtenMarks = it.writtenMarks,
-                oralMarks = it.oralMarks,
-                practicalMarks = it.practicalMarks,
-                grade = it.grade,
-                submittedByTeacher = loggedInTeacherName,
-                approvalStatus = status
-            )
-        }
+        val results = subjectRows
+            .distinctBy { it.subjectName.trim().lowercase() }
+            .map {
+                ExamResult(
+                    studentId = student.id,
+                    examName = exam.examName,
+                    academicYear = exam.academicYear,
+                    subjectName = it.subjectName.trim(),
+                    fullMarks = it.fullMarks,
+                    writtenMarks = it.writtenMarks,
+                    oralMarks = it.oralMarks,
+                    practicalMarks = it.practicalMarks,
+                    grade = it.grade,
+                    submittedByTeacher = loggedInTeacherName,
+                    approvalStatus = status
+                )
+            }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            db.schoolDao().insertResults(results)
+            db.withTransaction {
+                val dao = db.schoolDao()
+                results.forEach { result ->
+                    val existing = dao.getExistingExamResult(
+                        result.studentId,
+                        result.examName,
+                        result.academicYear,
+                        result.subjectName
+                    )
+                    if (existing != null) {
+                        dao.updateExamResult(result.copy(id = existing.id))
+                    } else {
+                        dao.insertExamResult(result)
+                    }
+                }
+            }
             withContext(Dispatchers.Main) {
                 onComplete()
             }
@@ -226,7 +244,7 @@ class ResultPublishActivity : AppCompatActivity() {
         val exam = selectedExam ?: return
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val examResults = db.schoolDao().getStudentExamResults(student.id, exam.examName)
+            val examResults = db.schoolDao().getStudentExamResultsForYear(student.id, exam.examName, exam.academicYear)
             withContext(Dispatchers.Main) {
                 if (examResults.isEmpty()) {
                     Toast.makeText(this@ResultPublishActivity, "Please save marks first", Toast.LENGTH_SHORT).show()

@@ -15,7 +15,17 @@ interface SchoolDao {
     @Query("SELECT COUNT(*) FROM teachers")
     fun getTeacherCount(): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM exam_results WHERE approvalStatus = 'PENDING'")
+    @Query("""
+        SELECT COUNT(*) FROM exam_results e
+        WHERE e.approvalStatus = 'PENDING'
+        AND e.id = (
+            SELECT MAX(x.id) FROM exam_results x
+            WHERE x.studentId = e.studentId
+            AND x.examName = e.examName
+            AND x.academicYear = e.academicYear
+            AND x.subjectName = e.subjectName
+        )
+    """)
     fun getPendingMarksheetCount(): Flow<Int>
 
     // Classes
@@ -90,7 +100,22 @@ interface SchoolDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertResults(results: List<ExamResult>)
 
-    @Query("SELECT * FROM exam_results WHERE studentId = :studentId AND examName = :examName")
+    @Update
+    suspend fun updateExamResult(result: ExamResult)
+
+    @Query("""
+        SELECT * FROM exam_results e
+        WHERE e.studentId = :studentId
+        AND e.examName = :examName
+        AND e.id = (
+            SELECT MAX(x.id) FROM exam_results x
+            WHERE x.studentId = e.studentId
+            AND x.examName = e.examName
+            AND x.academicYear = e.academicYear
+            AND x.subjectName = e.subjectName
+        )
+        ORDER BY e.id ASC
+    """)
     suspend fun getStudentExamResults(studentId: Long, examName: String): List<ExamResult>
 
     @Query("""
@@ -98,6 +123,13 @@ interface SchoolDao {
         WHERE studentId = :studentId
         AND examName = :examName
         AND academicYear = :academicYear
+        AND id = (
+            SELECT MAX(x.id) FROM exam_results x
+            WHERE x.studentId = exam_results.studentId
+            AND x.examName = exam_results.examName
+            AND x.academicYear = exam_results.academicYear
+            AND x.subjectName = exam_results.subjectName
+        )
         ORDER BY id ASC
     """)
     suspend fun getStudentExamResultsForYear(
@@ -112,6 +144,7 @@ interface SchoolDao {
         AND examName = :examName
         AND academicYear = :academicYear
         AND subjectName = :subjectName
+        ORDER BY id DESC
         LIMIT 1
     """)
     suspend fun getExistingExamResult(
@@ -125,6 +158,13 @@ interface SchoolDao {
         SELECT * FROM exam_results
         WHERE examName = :examName
         AND academicYear = :academicYear
+        AND id = (
+            SELECT MAX(x.id) FROM exam_results x
+            WHERE x.studentId = exam_results.studentId
+            AND x.examName = exam_results.examName
+            AND x.academicYear = exam_results.academicYear
+            AND x.subjectName = exam_results.subjectName
+        )
         ORDER BY studentId ASC, id ASC
     """)
     suspend fun getResultsForExam(
@@ -132,7 +172,18 @@ interface SchoolDao {
         academicYear: Int
     ): List<ExamResult>
 
-    @Query("SELECT * FROM exam_results WHERE approvalStatus = 'PENDING'")
+    @Query("""
+        SELECT * FROM exam_results e
+        WHERE e.approvalStatus = 'PENDING'
+        AND e.id = (
+            SELECT MAX(x.id) FROM exam_results x
+            WHERE x.studentId = e.studentId
+            AND x.examName = e.examName
+            AND x.academicYear = e.academicYear
+            AND x.subjectName = e.subjectName
+        )
+        ORDER BY e.id DESC
+    """)
     fun getPendingMarksheets(): Flow<List<ExamResult>>
 
     @Query("UPDATE exam_results SET approvalStatus = :status WHERE id = :id")

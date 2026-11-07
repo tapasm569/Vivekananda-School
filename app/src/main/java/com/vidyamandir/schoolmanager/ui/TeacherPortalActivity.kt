@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.room.withTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.data.ExamResult
@@ -90,23 +91,40 @@ class TeacherPortalActivity : AppCompatActivity() {
         val teacherName = getSharedPreferences("vv_auth_session", Context.MODE_PRIVATE)
             .getString("teacher_name", "Teacher") ?: "Teacher"
 
-        val results = scoreItems.map {
-            ExamResult(
-                studentId = student.id,
-                examName = examName,
-                academicYear = 2026,
-                subjectName = it.subjectName,
-                fullMarks = it.fullMarks,
-                writtenMarks = it.writtenMarks,
-                practicalMarks = it.practicalMarks,
-                grade = it.grade,
-                submittedByTeacher = teacherName,
-                approvalStatus = "PENDING"
-            )
-        }
+        val results = scoreItems
+            .distinctBy { it.subjectName.trim().lowercase() }
+            .map {
+                ExamResult(
+                    studentId = student.id,
+                    examName = examName,
+                    academicYear = 2026,
+                    subjectName = it.subjectName.trim(),
+                    fullMarks = it.fullMarks,
+                    writtenMarks = it.writtenMarks,
+                    practicalMarks = it.practicalMarks,
+                    grade = it.grade,
+                    submittedByTeacher = teacherName,
+                    approvalStatus = "PENDING"
+                )
+            }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            db.schoolDao().insertResults(results)
+            db.withTransaction {
+                val dao = db.schoolDao()
+                results.forEach { result ->
+                    val existing = dao.getExistingExamResult(
+                        result.studentId,
+                        result.examName,
+                        result.academicYear,
+                        result.subjectName
+                    )
+                    if (existing != null) {
+                        dao.updateExamResult(result.copy(id = existing.id))
+                    } else {
+                        dao.insertExamResult(result)
+                    }
+                }
+            }
             withContext(Dispatchers.Main) {
                 Toast.makeText(
                     this@TeacherPortalActivity,
