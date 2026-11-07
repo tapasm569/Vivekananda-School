@@ -80,124 +80,262 @@ class ResultPdfGenerator(private val context: Context) {
         }
     }
 
+
     private fun drawPageOne(canvas: Canvas, student: Student, examName: String) {
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        val navy = Color.parseColor("#123B65")
+        val gold = Color.parseColor("#D69A28")
+        val pale = Color.parseColor("#F3F7FC")
+        val center = a4Width / 2f
 
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 3f
-        paint.color = Color.parseColor("#0F3D6E")
-        canvas.drawRect(24f, 24f, (a4Width - 24).toFloat(), (a4Height - 24).toFloat(), paint)
-
-        paint.strokeWidth = 1f
-        canvas.drawRect(28f, 28f, (a4Width - 28).toFloat(), (a4Height - 28).toFloat(), paint)
-
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor("#0F3D6E")
         val profile = context.getSharedPreferences(
             "vv_school_profile", Context.MODE_PRIVATE
         )
         val schoolName = profile.getString(
             "school_name", "Vivekananda Vidyamandir"
         ) ?: "Vivekananda Vidyamandir"
-        val schoolAddress = profile.getString(
-            "address", "Dhupguri, Jalpaiguri, West Bengal - 735210"
-        ) ?: ""
-        val schoolContact = profile.getString("contact_number", "") ?: ""
+        val address = profile.getString("address", "") ?: ""
+        val contact = profile.getString("contact_number", "") ?: ""
+        val email = profile.getString("email", "") ?: ""
 
-        paint.textSize = 24f
-        paint.isFakeBoldText = true
-        paint.textAlign = Paint.Align.CENTER
-        canvas.drawText(
-            schoolName.uppercase().take(42),
-            (a4Width / 2).toFloat(), 95f, paint
-        )
+        // Main page background and border.
+        canvas.drawColor(Color.WHITE)
+        p.color = navy
+        p.style = Paint.Style.STROKE
+        p.strokeWidth = 2.5f
+        canvas.drawRect(22f, 22f, 573f, 820f, p)
 
-        paint.textSize = 12f
-        paint.isFakeBoldText = false
-        paint.color = Color.DKGRAY
-        canvas.drawText(
-            schoolAddress.take(75),
-            (a4Width / 2).toFloat(), 120f, paint
-        )
-        if (schoolContact.isNotBlank()) {
-            canvas.drawText(
-                "Contact: $schoolContact",
-                (a4Width / 2).toFloat(), 137f, paint
-            )
+        // TOP PANEL: school and student details.
+        p.style = Paint.Style.FILL
+        p.color = navy
+        p.textAlign = Paint.Align.CENTER
+        p.textSize = 23f
+        p.isFakeBoldText = true
+        canvas.drawText(schoolName.uppercase().take(42), center, 55f, p)
+
+        p.textSize = 10f
+        p.isFakeBoldText = false
+        p.color = Color.DKGRAY
+        if (address.isNotBlank()) {
+            canvas.drawText(address.take(90), center, 74f, p)
+        }
+        val contactLine = listOf(
+            if (contact.isNotBlank()) "Phone: $contact" else "",
+            if (email.isNotBlank()) "Email: $email" else ""
+        ).filter { it.isNotBlank() }.joinToString("   |   ")
+        if (contactLine.isNotBlank()) {
+            canvas.drawText(contactLine.take(100), center, 91f, p)
         }
 
-        paint.textSize = 14f
-        paint.isFakeBoldText = true
-        paint.color = Color.parseColor("#D97706")
-        canvas.drawText(examName.uppercase(), (a4Width / 2).toFloat(), 160f, paint)
+        p.color = gold
+        p.textSize = 15f
+        p.isFakeBoldText = true
+        canvas.drawText(examName.uppercase().take(45), center, 116f, p)
 
-        val centerX = (a4Width / 2).toFloat()
-        val centerY = 310f
-
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor("#FEF3C7")
-        canvas.drawCircle(centerX, centerY, 100f, paint)
-
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 2f
-        paint.color = Color.parseColor("#D97706")
-        canvas.drawCircle(centerX, centerY, 102f, paint)
-
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor("#0F3D6E")
-        paint.textSize = 13f
-        paint.isFakeBoldText = true
-        canvas.drawText("SWAMI VIVEKANANDA", centerX, centerY - 15f, paint)
-        paint.textSize = 10f
-        paint.color = Color.parseColor("#B45309")
-        canvas.drawText("★ MOTTO OF EDUCATION ★", centerX, centerY + 10f, paint)
-
-        val quoteTop = 460f
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor("#F8FAFC")
-        canvas.drawRoundRect(45f, quoteTop, (a4Width - 45).toFloat(), quoteTop + 95f, 10f, 10f, paint)
-
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1f
-        paint.color = Color.parseColor("#E2E8F0")
-        canvas.drawRoundRect(45f, quoteTop, (a4Width - 45).toFloat(), quoteTop + 95f, 10f, 10f, paint)
-
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor("#0F3D6E")
-        paint.textSize = 13f
-        paint.isFakeBoldText = true
-        canvas.drawText(
-            "\"Education is the manifestation of the perfection already in man.\"",
-            centerX,
-            quoteTop + 40f,
-            paint
+        // Load the supplied Swami Vivekananda photograph.
+        val imageId = context.resources.getIdentifier(
+            "swami_vivekananda", "drawable", context.packageName
         )
-        paint.textSize = 11f
-        paint.isFakeBoldText = false
-        paint.color = Color.DKGRAY
-        canvas.drawText("— Swami Vivekananda", centerX, quoteTop + 68f, paint)
+        val portrait = if (imageId != 0) {
+            BitmapFactory.decodeResource(context.resources, imageId)
+        } else null
 
-        val profileTop = 590f
-        paint.color = Color.parseColor("#FFFFFF")
-        canvas.drawRoundRect(45f, profileTop, (a4Width - 45).toFloat(), profileTop + 140f, 10f, 10f, paint)
+        if (portrait != null) {
+            drawCircularPortrait(canvas, portrait, center, 190f, 57f, gold)
+        } else {
+            p.color = pale
+            canvas.drawCircle(center, 190f, 57f, p)
+            p.color = navy
+            p.textSize = 9f
+            canvas.drawText("SWAMI VIVEKANANDA", center, 193f, p)
+        }
+
+        p.color = navy
+        p.textSize = 10f
+        p.isFakeBoldText = true
+        canvas.drawText("STUDENT INFORMATION", center, 270f, p)
+
+        p.color = pale
+        canvas.drawRoundRect(42f, 282f, 553f, 397f, 10f, 10f, p)
+        p.style = Paint.Style.STROKE
+        p.strokeWidth = 1f
+        p.color = Color.parseColor("#C8D6E5")
+        canvas.drawRoundRect(42f, 282f, 553f, 397f, 10f, 10f, p)
+
+        p.style = Paint.Style.FILL
+        p.textAlign = Paint.Align.LEFT
+        p.color = navy
+        p.textSize = 12f
+        p.isFakeBoldText = true
+        canvas.drawText("Student Name", 58f, 310f, p)
+        canvas.drawText("Admission No.", 58f, 342f, p)
+        canvas.drawText("Class", 315f, 342f, p)
+        canvas.drawText("Roll Number", 315f, 374f, p)
+
+        p.color = Color.BLACK
+        p.textSize = 11f
+        p.isFakeBoldText = false
+        canvas.drawText(student.fullName.take(34), 58f, 327f, p)
+        canvas.drawText(student.admissionNo.take(22), 58f, 359f, p)
+        canvas.drawText(student.displayClass.take(22), 315f, 359f, p)
+        canvas.drawText(student.rollNo.toString(), 315f, 389f, p)
+
+        // Fold guide between the two panels.
+        p.color = gold
+        p.strokeWidth = 1.5f
+        p.pathEffect = DashPathEffect(floatArrayOf(7f, 5f), 0f)
+        canvas.drawLine(30f, 421f, 565f, 421f, p)
+        p.pathEffect = null
+        p.textAlign = Paint.Align.CENTER
+        p.textSize = 8f
+        p.isFakeBoldText = true
+        canvas.drawText("FOLD HERE", center, 416f, p)
+
+        // BOTTOM PANEL: rotate the complete guide 90 degrees clockwise.
+        canvas.save()
+        canvas.translate(center, 619.5f)
+        canvas.rotate(90f)
+        canvas.translate(-198.5f, -297.5f)
+        drawGradingGuide(canvas, portrait, navy, gold, pale)
+        canvas.restore()
+
+        portrait?.recycle()
+    }
+
+    private fun drawCircularPortrait(
+        canvas: Canvas,
+        bitmap: Bitmap,
+        cx: Float,
+        cy: Float,
+        radius: Float,
+        ringColor: Int
+    ) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        val path = Path().apply { addCircle(cx, cy, radius, Path.Direction.CW) }
+        val save = canvas.save()
+        canvas.clipPath(path)
+
+        val side = minOf(bitmap.width, bitmap.height)
+        val left = (bitmap.width - side) / 2
+        val top = (bitmap.height - side) / 2
+        val src = Rect(left, top, left + side, top + side)
+        val dst = RectF(cx - radius, cy - radius, cx + radius, cy + radius)
+        canvas.drawBitmap(bitmap, src, dst, paint)
+        canvas.restoreToCount(save)
+
         paint.style = Paint.Style.STROKE
-        paint.color = Color.parseColor("#CBD5E1")
-        canvas.drawRoundRect(45f, profileTop, (a4Width - 45).toFloat(), profileTop + 140f, 10f, 10f, paint)
+        paint.strokeWidth = 3f
+        paint.color = ringColor
+        canvas.drawCircle(cx, cy, radius + 2f, paint)
+    }
 
-        paint.style = Paint.Style.FILL
-        paint.color = Color.parseColor("#0F3D6E")
-        paint.textSize = 14f
-        paint.isFakeBoldText = true
-        canvas.drawText("STUDENT PROFILE", centerX, profileTop + 30f, paint)
+    private fun drawGradingGuide(
+        canvas: Canvas,
+        portrait: Bitmap?,
+        navy: Int,
+        gold: Int,
+        pale: Int
+    ) {
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cx = 198.5f
 
-        paint.textSize = 12f
-        paint.color = Color.BLACK
-        paint.isFakeBoldText = false
-        paint.textAlign = Paint.Align.LEFT
-        canvas.drawText("Student Name: ${student.fullName}", 70f, profileTop + 65f, paint)
-        canvas.drawText("Admission ID: ${student.admissionNo}", 70f, profileTop + 95f, paint)
-        canvas.drawText("Class: ${student.displayClass}", 320f, profileTop + 65f, paint)
-        canvas.drawText("Roll Number: ${student.rollNo}", 320f, profileTop + 95f, paint)
+        p.color = Color.WHITE
+        canvas.drawRect(0f, 0f, 397f, 595f, p)
+
+        p.color = navy
+        p.style = Paint.Style.STROKE
+        p.strokeWidth = 2f
+        canvas.drawRect(8f, 8f, 389f, 587f, p)
+
+        p.style = Paint.Style.FILL
+        p.textAlign = Paint.Align.CENTER
+        p.textSize = 18f
+        p.isFakeBoldText = true
+        p.color = navy
+        canvas.drawText("GRADING & RESULT GUIDE", cx, 34f, p)
+
+        if (portrait != null) {
+            drawCircularPortrait(canvas, portrait, cx, 91f, 39f, gold)
+        }
+
+        p.textSize = 11f
+        p.color = gold
+        canvas.drawText("VIVEKANANDA VIDYAMANDIR", cx, 145f, p)
+
+        p.textSize = 12f
+        p.color = navy
+        p.isFakeBoldText = true
+        canvas.drawText("OVERALL GRADE SCALE", cx, 177f, p)
+
+        val rows = listOf(
+            "90% and above" to "AA",
+            "80% - 89.99%" to "A+",
+            "70% - 79.99%" to "A",
+            "60% - 69.99%" to "B+",
+            "50% - 59.99%" to "B",
+            "35% - 49.99%" to "C",
+            "25% - 34.99%" to "D",
+            "Below 25%" to "F"
+        )
+
+        var y = 202f
+        p.textAlign = Paint.Align.LEFT
+        p.textSize = 10f
+        p.isFakeBoldText = false
+
+        for ((range, grade) in rows) {
+            p.color = pale
+            canvas.drawRoundRect(35f, y - 13f, 362f, y + 5f, 4f, 4f, p)
+            p.color = navy
+            canvas.drawText(range, 48f, y, p)
+            p.isFakeBoldText = true
+            canvas.drawText(grade, 325f, y, p)
+            p.isFakeBoldText = false
+            y += 22f
+        }
+
+        p.textAlign = Paint.Align.CENTER
+        p.color = navy
+        p.textSize = 12f
+        p.isFakeBoldText = true
+        canvas.drawText("HOW PERCENTAGE IS CALCULATED", cx, 398f, p)
+
+        p.textSize = 10f
+        p.isFakeBoldText = false
+        canvas.drawText(
+            "(Total Marks Obtained / Total Maximum Marks) x 100",
+            cx, 420f, p
+        )
+
+        p.textSize = 12f
+        p.isFakeBoldText = true
+        canvas.drawText("PASSING RULE", cx, 453f, p)
+
+        p.textSize = 10f
+        p.isFakeBoldText = false
+        canvas.drawText(
+            "A student must score at least 35% in every subject.",
+            cx, 474f, p
+        )
+        canvas.drawText(
+            "Overall result is FAILED if any subject is below 35%.",
+            cx, 491f, p
+        )
+
+        p.textSize = 11f
+        p.isFakeBoldText = true
+        p.color = gold
+        canvas.drawText("IMPORTANT GUIDELINES", cx, 522f, p)
+
+        p.textSize = 9f
+        p.isFakeBoldText = false
+        p.color = Color.DKGRAY
+        canvas.drawText("Please check all details and marks carefully.", cx, 541f, p)
+        canvas.drawText("Contact the school for any correction or query.", cx, 556f, p)
+
+        if (portrait != null) {
+            drawCircularPortrait(canvas, portrait, cx, 570f, 17f, gold)
+        }
     }
 
     private fun drawPageTwo(canvas: Canvas, student: Student, results: List<ExamResult>) {
