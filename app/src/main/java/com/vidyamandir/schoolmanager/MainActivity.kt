@@ -15,6 +15,7 @@ import com.vidyamandir.schoolmanager.util.SchoolDataBackup
 import com.vidyamandir.schoolmanager.data.ExamDefinition
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.data.LateFeeRule
 import androidx.lifecycle.lifecycleScope
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
@@ -518,81 +519,246 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showPenaltyDialog() {
-        val prefs = profilePrefs()
+        lifecycleScope.launch {
+            try {
+                val database = AppDatabase.getDatabase(
+                    this@MainActivity, lifecycleScope
+                )
 
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(20), dp(8), dp(20), dp(8))
-        }
-
-        val graceInput = EditText(this).apply {
-            hint = "Grace days after month-end"
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            setText(
-                prefs.getInt("penalty_grace_days", 10).toString()
-            )
-        }
-
-        val amountInput = EditText(this).apply {
-            hint = "Penalty amount (₹)"
-            inputType =
-                android.text.InputType.TYPE_CLASS_NUMBER or
-                android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-            setText(
-                prefs.getFloat("penalty_amount", 50f).toString()
-            )
-        }
-
-        container.addView(graceInput)
-        container.addView(amountInput)
-
-        val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle("Late Fee Penalty Settings")
-            .setMessage(
-                "Set how many days after each month's end " +
-                "the penalty should apply."
-            )
-            .setView(container)
-            .setPositiveButton("Save", null)
-            .setNegativeButton("Cancel", null)
-            .create()
-
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setOnClickListener {
-                    val grace = graceInput.text.toString()
-                        .toIntOrNull()
-                    val amount = amountInput.text.toString()
-                        .toFloatOrNull()
-
-                    if (grace == null || grace < 0) {
-                        graceInput.error = "Enter valid grace days"
-                        return@setOnClickListener
-                    }
-
-                    if (amount == null || amount < 0f) {
-                        amountInput.error = "Enter valid penalty amount"
-                        return@setOnClickListener
-                    }
-
-                    prefs.edit()
-                        .putInt("penalty_grace_days", grace)
-                        .putFloat("penalty_amount", amount)
-                        .apply()
-
-                    Toast.makeText(
-                        this,
-                        "Penalty settings saved",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    dialog.dismiss()
+                var rules = withContext(Dispatchers.IO) {
+                    database.schoolDao().getAllLateFeeRules()
                 }
+
+                val isOldDefault =
+                    rules.size == 3 &&
+                    rules[0].dayFrom == 1 && rules[0].dayTo == 10 &&
+                    rules[0].fineAmount == 0.0 &&
+                    rules[1].dayFrom == 11 && rules[1].dayTo == 20 &&
+                    rules[1].fineAmount == 50.0 &&
+                    rules[2].dayFrom == 21 && rules[2].dayTo == 30 &&
+                    rules[2].fineAmount == 100.0
+
+                if (rules.isEmpty() || isOldDefault) {
+                    rules = listOf(
+                        LateFeeRule(dayFrom = 1, dayTo = 4, fineAmount = 0.0),
+                        LateFeeRule(dayFrom = 5, dayTo = 9, fineAmount = 20.0),
+                        LateFeeRule(dayFrom = 10, dayTo = 19, fineAmount = 40.0),
+                        LateFeeRule(dayFrom = 20, dayTo = 29, fineAmount = 60.0),
+                        LateFeeRule(dayFrom = 30, dayTo = 9999, fineAmount = 100.0)
+                    )
+                }
+
+                val container = LinearLayout(this@MainActivity).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(dp(16), dp(8), dp(16), dp(8))
+                }
+
+                val explanation = TextView(this@MainActivity).apply {
+                    text = "Penalty is calculated separately for each unpaid month. " +
+                        "Counting starts on the 1st of the following month."
+                    textSize = 13f
+                    setPadding(0, 0, 0, dp(12))
+                }
+                container.addView(explanation)
+
+                val header = LinearLayout(this@MainActivity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                }
+
+                listOf("From", "To", "Penalty ₹", "").forEach {
+                    val label = TextView(this@MainActivity).apply {
+                        text = it
+                        textSize = 12f
+                        setPadding(dp(3), dp(5), dp(3), dp(5))
+                    }
+                    header.addView(
+                        label,
+                        LinearLayout.LayoutParams(0, dp(35), 1f)
+                    )
+                }
+                container.addView(header)
+
+                val rowsContainer = LinearLayout(this@MainActivity).apply {
+                    orientation = LinearLayout.VERTICAL
+                }
+
+                val rows = mutableListOf<List<EditText>>()
+
+                fun addSlabRow(from: String, to: String, amount: String) {
+                    val row = LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        gravity = Gravity.CENTER_VERTICAL
+                    }
+
+                    fun numberField(value: String, hintText: String): EditText {
+                        return EditText(this@MainActivity).apply {
+                            hint = hintText
+                            setText(value)
+                            textSize = 14f
+                            inputType = InputType.TYPE_CLASS_NUMBER or
+                                InputType.TYPE_NUMBER_FLAG_DECIMAL
+                            setSingleLine(true)
+                            setPadding(dp(5), 0, dp(5), 0)
+                        }
+                    }
+
+                    val fromInput = numberField(from, "1")
+                    val toInput = numberField(to, "4")
+                    val amountInput = numberField(amount, "0")
+
+                    row.addView(fromInput, LinearLayout.LayoutParams(0, dp(48), 1f))
+                    row.addView(toInput, LinearLayout.LayoutParams(0, dp(48), 1f))
+                    row.addView(amountInput, LinearLayout.LayoutParams(0, dp(48), 1f))
+
+                    val deleteButton = Button(this@MainActivity).apply {
+                        text = "×"
+                        textSize = 18f
+                        minWidth = dp(42)
+                        setPadding(0, 0, 0, 0)
+                    }
+
+                    val fields = listOf(fromInput, toInput, amountInput)
+                    rows.add(fields)
+
+                    deleteButton.setOnClickListener {
+                        rows.remove(fields)
+                        rowsContainer.removeView(row)
+                    }
+
+                    row.addView(
+                        deleteButton,
+                        LinearLayout.LayoutParams(dp(42), dp(44))
+                    )
+
+                    rowsContainer.addView(row)
+                }
+
+                rules.sortedBy { it.dayFrom }.forEach {
+                    addSlabRow(
+                        it.dayFrom.toString(),
+                        if (it.dayTo >= 9999) "" else it.dayTo.toString(),
+                        it.fineAmount.toString()
+                    )
+                }
+
+                val scroll = ScrollView(this@MainActivity).apply {
+                    addView(rowsContainer)
+                    isFillViewport = true
+                }
+
+                container.addView(
+                    scroll,
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        dp(260)
+                    )
+                )
+
+                val addButton = Button(this@MainActivity).apply {
+                    text = "+ Add Penalty Slab"
+                    setOnClickListener {
+                        addSlabRow("", "", "")
+                    }
+                }
+                container.addView(addButton)
+
+                val dialog = MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle("Day-wise Penalty Slabs")
+                    .setView(container)
+                    .setPositiveButton("Save", null)
+                    .setNegativeButton("Cancel", null)
+                    .create()
+
+                dialog.setOnShowListener {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener {
+                            if (rows.isEmpty()) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Add at least one penalty slab",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@setOnClickListener
+                            }
+
+                            val parsed = mutableListOf<LateFeeRule>()
+
+                            for (fields in rows) {
+                                val from = fields[0].text.toString().toIntOrNull()
+                                val toText = fields[1].text.toString().trim()
+                                val to = if (toText.isEmpty()) 9999
+                                    else toText.toIntOrNull()
+                                val amount = fields[2].text.toString().toDoubleOrNull()
+
+                                if (from == null || from < 1 ||
+                                    to == null || to < from ||
+                                    amount == null || amount < 0.0
+                                ) {
+                                    fields[0].error = "Check slab values"
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Enter valid day ranges and penalty amounts",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    return@setOnClickListener
+                                }
+
+                                parsed.add(
+                                    LateFeeRule(
+                                        dayFrom = from,
+                                        dayTo = to,
+                                        fineAmount = amount
+                                    )
+                                )
+                            }
+
+                            val sorted = parsed.sortedBy { it.dayFrom }
+
+                            for (i in 1 until sorted.size) {
+                                if (sorted[i].dayFrom <= sorted[i - 1].dayTo) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Penalty day ranges must not overlap",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    return@setOnClickListener
+                                }
+                            }
+
+                            lifecycleScope.launch {
+                                try {
+                                    withContext(Dispatchers.IO) {
+                                        database.schoolDao().replaceAllLateFeeRules(sorted)
+                                    }
+
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Penalty slabs saved successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    dialog.dismiss()
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Could not save slabs: ${e.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
+                }
+
+                dialog.show()
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Unable to open penalty settings: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
-
-        dialog.show()
     }
-
 
     private fun startBackup() {
         val timestamp = SimpleDateFormat(

@@ -12,11 +12,11 @@ class MonthAdapter(
 ) : RecyclerView.Adapter<MonthAdapter.MonthViewHolder>() {
 
     private var items: List<MonthDueStatus> = emptyList()
-    private val selectedMonthIndices = mutableSetOf<Int>()
+    private val selectedPeriodKeys = mutableSetOf<String>()
 
     fun submitList(newList: List<MonthDueStatus>) {
         items = newList
-        selectedMonthIndices.clear()
+        selectedPeriodKeys.clear()
         notifyDataSetChanged()
         onSelectionChanged(emptyList())
     }
@@ -34,11 +34,12 @@ class MonthAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    inner class MonthViewHolder(private val binding: ItemMonthFeeBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class MonthViewHolder(
+        private val binding: ItemMonthFeeBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: MonthDueStatus) {
-            binding.tvMonthName.text = item.monthName
+            binding.tvMonthName.text = "${item.monthName} ${item.academicYear}"
 
             if (item.isPaid) {
                 binding.cbSelectMonth.isChecked = false
@@ -48,36 +49,44 @@ class MonthAdapter(
                 binding.tvStatusBadge.setTextColor(Color.parseColor("#16A34A"))
                 binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#DCFCE7"))
                 binding.root.setOnClickListener(null)
-            } else {
-                binding.cbSelectMonth.isEnabled = true
-                binding.cbSelectMonth.isChecked = selectedMonthIndices.contains(item.monthIndex)
-
-                if (item.isDue) {
-                    binding.tvStatusBadge.text = "DUE"
-                    binding.tvStatusBadge.setTextColor(Color.parseColor("#DC2626"))
-                    binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEE2E2"))
-                    binding.tvFeeBreakdown.text = "Fee: ₹${item.baseFee} | Fine: ₹${item.lateFee}"
-                } else {
-                    binding.tvStatusBadge.text = "ADVANCE"
-                    binding.tvStatusBadge.setTextColor(Color.parseColor("#D97706"))
-                    binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEF3C7"))
-                    binding.tvFeeBreakdown.text = "Fee: ₹${item.baseFee} | Fine: ₹0"
-                }
-
-                val toggleAction = {
-                    if (selectedMonthIndices.contains(item.monthIndex)) {
-                        selectedMonthIndices.remove(item.monthIndex)
-                    } else {
-                        selectedMonthIndices.add(item.monthIndex)
-                    }
-                    notifyItemChanged(adapterPosition)
-                    val selectedItems = items.filter { selectedMonthIndices.contains(it.monthIndex) }
-                    onSelectionChanged(selectedItems)
-                }
-
-                binding.cbSelectMonth.setOnClickListener { toggleAction() }
-                binding.root.setOnClickListener { toggleAction() }
+                binding.cbSelectMonth.setOnClickListener(null)
+                return
             }
+
+            binding.cbSelectMonth.isEnabled = true
+            binding.cbSelectMonth.isChecked =
+                selectedPeriodKeys.contains(item.periodKey)
+
+            if (item.isDue) {
+                binding.tvStatusBadge.text = "DUE"
+                binding.tvStatusBadge.setTextColor(Color.parseColor("#DC2626"))
+                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEE2E2"))
+            } else {
+                binding.tvStatusBadge.text = "ADVANCE"
+                binding.tvStatusBadge.setTextColor(Color.parseColor("#D97706"))
+                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEF3C7"))
+            }
+
+            binding.tvFeeBreakdown.text =
+                "Fee: ₹${item.baseFee} | Fine: ₹${item.lateFee}"
+
+            val toggleAction = {
+                if (selectedPeriodKeys.contains(item.periodKey)) {
+                    selectedPeriodKeys.remove(item.periodKey)
+                } else {
+                    selectedPeriodKeys.add(item.periodKey)
+                }
+
+                notifyItemChanged(bindingAdapterPosition)
+
+                val selectedItems = items.filter {
+                    selectedPeriodKeys.contains(it.periodKey)
+                }
+                onSelectionChanged(selectedItems)
+            }
+
+            binding.cbSelectMonth.setOnClickListener { toggleAction() }
+            binding.root.setOnClickListener { toggleAction() }
         }
     }
 }

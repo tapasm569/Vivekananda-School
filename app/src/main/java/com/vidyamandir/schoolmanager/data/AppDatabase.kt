@@ -61,9 +61,11 @@ abstract class AppDatabase : RoomDatabase() {
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
                         val dao = database.schoolDao()
-                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 1, dayTo = 10, fineAmount = 0.0))
-                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 11, dayTo = 20, fineAmount = 50.0))
-                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 21, dayTo = 30, fineAmount = 100.0))
+                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 1, dayTo = 4, fineAmount = 0.0))
+                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 5, dayTo = 9, fineAmount = 20.0))
+                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 10, dayTo = 19, fineAmount = 40.0))
+                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 20, dayTo = 29, fineAmount = 60.0))
+                        dao.insertLateFeeRule(LateFeeRule(dayFrom = 30, dayTo = 9999, fineAmount = 100.0))
                     }
                 }
             }

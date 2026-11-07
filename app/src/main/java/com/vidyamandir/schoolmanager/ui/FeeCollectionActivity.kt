@@ -237,42 +237,23 @@ class FeeCollectionActivity : AppCompatActivity() {
     private fun loadStudentFeeMonths(student: Student) {
         lifecycleScope.launch {
             try {
-                val payments = withContext(Dispatchers.IO) {
-                    db.schoolDao()
-                        .getStudentPayments(student.id, 2026)
+                val data = withContext(Dispatchers.IO) {
+                    val payments = db.schoolDao()
+                        .getAllStudentPayments(student.id)
                         .first()
+
+                    val rules = FeeCalculator.effectiveRules(db.schoolDao().getAllLateFeeRules())
+
+                    Pair(
+                        FeeCalculator.parsePaidPeriodKeys(payments),
+                        rules
+                    )
                 }
-
-                val paidMonthsSet = mutableSetOf<Int>()
-
-                payments.forEach { payment ->
-                    payment.paidMonths.split(",")
-                        .filter { it.isNotBlank() }
-                        .forEach { month ->
-                            month.trim().toIntOrNull()?.let {
-                                paidMonthsSet.add(it)
-                            }
-                        }
-                }
-
-                val penaltyPrefs = getSharedPreferences(
-                    "vv_school_profile",
-                    MODE_PRIVATE
-                )
-
-                val graceDays = penaltyPrefs.getInt(
-                    "penalty_grace_days", 10
-                )
-
-                val penaltyAmount = penaltyPrefs.getFloat(
-                    "penalty_amount", 50f
-                ).toDouble()
 
                 val statusList = FeeCalculator.calculateDueMonths(
                     student,
-                    paidMonthsSet,
-                    graceDays,
-                    penaltyAmount
+                    data.first,
+                    data.second
                 )
 
                 if (selectedStudent?.id == student.id) {
@@ -332,7 +313,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         val total = baseSum + lateSum
 
         val monthsString = monthsToPay.joinToString(",") {
-            it.monthIndex.toString()
+            it.periodKey
         }
 
         val receipt = "REC-${System.currentTimeMillis()}"
@@ -345,7 +326,7 @@ class FeeCollectionActivity : AppCompatActivity() {
                     studentId = student.id,
                     studentName = student.fullName,
                     receiptNo = receipt,
-                    academicYear = 2026,
+                    academicYear = monthsToPay.first().academicYear,
                     paidMonths = monthsString,
                     baseAmount = baseSum,
                     lateFeeAmount = lateSum,

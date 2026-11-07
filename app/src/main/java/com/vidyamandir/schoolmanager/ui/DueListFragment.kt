@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.FragmentDueListBinding
 import com.vidyamandir.schoolmanager.databinding.ItemStudentCardBinding
@@ -55,21 +56,31 @@ class DueListFragment : Fragment() {
     private fun loadDues() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
-            val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+            val rules = FeeCalculator.effectiveRules(
+                db.schoolDao().getAllLateFeeRules()
+            )
             val dueList = mutableListOf<DueStudentCardItem>()
             var grandTotalDue = 0.0
 
             for (student in students) {
-                val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
-                val paidMonths = payments.flatMap { p ->
-                    p.paidMonths.split(",").filter { it.isNotBlank() }.map { it.trim().toInt() }
-                }.toSet()
+                val payments = db.schoolDao()
+                    .getAllStudentPayments(student.id).first()
+                val paidKeys = FeeCalculator.parsePaidPeriodKeys(payments)
+                val unpaid = FeeCalculator.calculateDueMonths(
+                    student, paidKeys, rules
+                ).filter { it.isDue && !it.isPaid }
 
-                val dueCount = (student.admissionMonth..currentMonth).count { !paidMonths.contains(it) }
-                if (dueCount > 0) {
-                    val amount = dueCount * student.monthlyFee
+                if (unpaid.isNotEmpty()) {
+                    val amount = unpaid.sumOf { it.baseFee + it.lateFee }
+                    val penalty = unpaid.sumOf { it.lateFee }
                     grandTotalDue += amount
-                    dueList.add(DueStudentCardItem(student, amount, "Due: $dueCount Month(s) unpaid"))
+                    dueList.add(
+                        DueStudentCardItem(
+                            student,
+                            amount,
+                            "Due: ${unpaid.size} month(s) • Penalty: ₹${String.format("%.2f", penalty)}"
+                        )
+                    )
                 }
             }
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityStudentManagementBinding
 import com.vidyamandir.schoolmanager.databinding.ItemStudentCardBinding
@@ -49,31 +50,31 @@ class StudentDuesListActivity : AppCompatActivity() {
     private fun loadDuesData(mode: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
-            val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+            val rules = FeeCalculator.effectiveRules(
+                db.schoolDao().getAllLateFeeRules()
+            )
             val displayList = mutableListOf<StudentDueEntry>()
 
             for (student in students) {
-                val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
-                val paidMonths = payments.flatMap { p ->
-                    p.paidMonths.split(",").filter { it.isNotBlank() }.map { it.trim().toInt() }
-                }.toSet()
+                val payments = db.schoolDao()
+                    .getAllStudentPayments(student.id).first()
+                val paidKeys = FeeCalculator.parsePaidPeriodKeys(payments)
+                val statuses = FeeCalculator.calculateDueMonths(
+                    student, paidKeys, rules
+                ).filter { it.isDue }
+                val unpaid = statuses.filter { !it.isPaid }
 
-                val startMonth = student.admissionMonth.coerceAtMost(12)
-                val dueMonthIndices = mutableListOf<Int>()
-
-                for (m in startMonth..currentMonth) {
-                    if (!paidMonths.contains(m)) {
-                        dueMonthIndices.add(m)
-                    }
-                }
-
-                if (mode == "DUE" && dueMonthIndices.isNotEmpty()) {
-                    val dueAmt = dueMonthIndices.size * student.monthlyFee
-                    val text = "Unpaid: ${dueMonthIndices.size} Month(s) [₹${student.monthlyFee}/m]"
+                if (mode == "DUE" && unpaid.isNotEmpty()) {
+                    val dueAmt = unpaid.sumOf { it.baseFee + it.lateFee }
+                    val text = "Unpaid: ${unpaid.size} month(s) • " +
+                        "Penalty: ₹${String.format("%.2f", unpaid.sumOf { it.lateFee })}"
                     displayList.add(StudentDueEntry(student, dueAmt, text))
-                } else if (mode == "PAID" && dueMonthIndices.isEmpty()) {
-                    val text = "All dues cleared up to current month"
-                    displayList.add(StudentDueEntry(student, student.monthlyFee, text))
+                } else if (mode == "PAID" && unpaid.isEmpty()) {
+                    displayList.add(
+                        StudentDueEntry(
+                            student, 0.0, "All dues cleared up to current month"
+                        )
+                    )
                 }
             }
 

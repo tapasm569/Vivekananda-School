@@ -79,8 +79,21 @@ object PaymentReceiptPdf {
         text("Academic Year", 42f, 486f, 10f, muted)
         text(payment.academicYear.toString(), 200f, 486f, 10f, muted)
         text("Fee month(s)", 42f, 520f, 10f, muted)
-        val months = payment.paidMonths.split(",").mapNotNull { it.trim().toIntOrNull() }
-            .mapNotNull { DateFormatSymbols().months.getOrNull(it - 1) }.joinToString(", ")
+        val months = payment.paidMonths.split(",")
+            .mapNotNull { token ->
+                val value = token.trim()
+                if (value.matches(Regex("\\d{4}-\\d{2}"))) {
+                    val parts = value.split("-")
+                    val year = parts[0].toIntOrNull() ?: return@mapNotNull null
+                    val month = parts[1].toIntOrNull() ?: return@mapNotNull null
+                    DateFormatSymbols().months.getOrNull(month - 1)?.let {
+                        "$it $year"
+                    }
+                } else {
+                    val month = value.toIntOrNull() ?: return@mapNotNull null
+                    DateFormatSymbols().months.getOrNull(month - 1)
+                }
+            }.joinToString(", ")
         text(months.ifBlank { "-" }, 200f, 520f, 10f, ink, true)
         line(540f)
         text("Base fee", 42f, 575f, 12f, ink)
@@ -103,8 +116,21 @@ object PaymentReceiptPdf {
     }
 
     fun thermalText(student: Student, payment: FeePayment): String {
-        val months = payment.paidMonths.split(",").mapNotNull { it.trim().toIntOrNull() }
-            .mapNotNull { DateFormatSymbols().months.getOrNull(it - 1) }.joinToString(", ")
+        val months = payment.paidMonths.split(",")
+            .mapNotNull { token ->
+                val value = token.trim()
+                if (value.matches(Regex("\\d{4}-\\d{2}"))) {
+                    val parts = value.split("-")
+                    val year = parts[0].toIntOrNull() ?: return@mapNotNull null
+                    val month = parts[1].toIntOrNull() ?: return@mapNotNull null
+                    DateFormatSymbols().months.getOrNull(month - 1)?.let {
+                        "$it $year"
+                    }
+                } else {
+                    val month = value.toIntOrNull() ?: return@mapNotNull null
+                    DateFormatSymbols().months.getOrNull(month - 1)
+                }
+            }.joinToString(", ")
         val date = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date(payment.paymentDate))
         return """VIVEKANANDA VIDYAMANDIR
 Dhupguri, Jalpaiguri

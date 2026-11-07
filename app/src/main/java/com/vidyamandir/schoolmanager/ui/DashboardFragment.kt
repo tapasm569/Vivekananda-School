@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.databinding.FragmentDashboardBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -87,13 +88,20 @@ class DashboardFragment : Fragment() {
     private fun observeFeeLists() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
-            val month = Calendar.getInstance().get(Calendar.MONTH) + 1
+            val rules = FeeCalculator.effectiveRules(
+                db.schoolDao().getAllLateFeeRules()
+            )
             var due = 0
             var paid = 0
+
             for (student in students) {
-                val payments = db.schoolDao().getStudentPayments(student.id, Calendar.getInstance().get(Calendar.YEAR)).first()
-                val paidMonths = payments.flatMap { it.paidMonths.split(",").filter(String::isNotBlank).mapNotNull(String::toIntOrNull) }.toSet()
-                val outstanding = (student.admissionMonth.coerceIn(1, 12)..month).any { it !in paidMonths }
+                val payments = db.schoolDao()
+                    .getAllStudentPayments(student.id).first()
+                val paidKeys = FeeCalculator.parsePaidPeriodKeys(payments)
+                val outstanding = FeeCalculator.calculateDueMonths(
+                    student, paidKeys, rules
+                ).any { it.isDue && !it.isPaid }
+
                 if (outstanding) due++ else paid++
             }
             withContext(Dispatchers.Main) {

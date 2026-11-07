@@ -102,4 +102,13 @@ interface SchoolDao {
 
     @Query("SELECT * FROM late_fee_rules ORDER BY dayFrom ASC")
     suspend fun getAllLateFeeRules(): List<LateFeeRule>
+
+    @Query("DELETE FROM late_fee_rules")
+    suspend fun deleteAllLateFeeRules()
+
+    @Transaction
+    suspend fun replaceAllLateFeeRules(rules: List<LateFeeRule>) {
+        deleteAllLateFeeRules()
+        rules.forEach { insertLateFeeRule(it) }
+    }
 }

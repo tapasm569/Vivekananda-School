@@ -27,6 +27,35 @@ class StudentReceiptHistoryActivity : AppCompatActivity() {
     private lateinit var summary: TextView
     private var student: Student? = null
 
+
+    private fun formatPaidMonths(value: String, academicYear: Int): String {
+        val monthNames = listOf(
+            "January", "February", "March", "April",
+            "May", "June", "July", "August",
+            "September", "October", "November", "December"
+        )
+
+        return value.split(",").mapNotNull { raw ->
+            val token = raw.trim()
+            if (token.isBlank()) return@mapNotNull null
+
+            val parts = token.split("-")
+            val year: Int
+            val month: Int
+
+            if (parts.size == 2) {
+                year = parts[0].toIntOrNull() ?: return@mapNotNull token
+                month = parts[1].toIntOrNull() ?: return@mapNotNull token
+            } else {
+                year = academicYear
+                month = token.toIntOrNull() ?: return@mapNotNull token
+            }
+
+            if (month !in 1..12) token
+            else "${monthNames[month - 1]} $year"
+        }.joinToString(", ")
+    }
+
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,7 +183,7 @@ class StudentReceiptHistoryActivity : AppCompatActivity() {
 
                 val details = TextView(this@StudentReceiptHistoryActivity).apply {
                     text = "Academic Year: ${payment.academicYear}\n" +
-                        "Paid Months: ${payment.paidMonths}\n" +
+                        "Paid Months: ${formatPaidMonths(payment.paidMonths, payment.academicYear)}\n" +
                         "Base Fee: ₹${payment.baseAmount}   •   Late Fee: ₹${payment.lateFeeAmount}"
                     textSize = 12f
                     setTextColor(Color.GRAY)

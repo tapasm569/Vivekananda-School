@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vidyamandir.schoolmanager.data.AppDatabase
+import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.FragmentPaidListBinding
 import com.vidyamandir.schoolmanager.databinding.ItemStudentCardBinding
@@ -50,17 +51,20 @@ class PaidListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
             val allPayments = db.schoolDao().getAllPayments().first()
-            val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+            val rules = FeeCalculator.effectiveRules(
+                db.schoolDao().getAllLateFeeRules()
+            )
             val paidList = mutableListOf<Student>()
 
             for (student in students) {
-                val studentPayments = db.schoolDao().getStudentPayments(student.id, 2026).first()
-                val paidMonths = studentPayments.flatMap { p ->
-                    p.paidMonths.split(",").filter { it.isNotBlank() }.map { it.trim().toInt() }
-                }.toSet()
+                val studentPayments = db.schoolDao()
+                    .getAllStudentPayments(student.id).first()
+                val paidKeys = FeeCalculator.parsePaidPeriodKeys(studentPayments)
+                val unpaid = FeeCalculator.calculateDueMonths(
+                    student, paidKeys, rules
+                ).any { it.isDue && !it.isPaid }
 
-                val dueCount = (student.admissionMonth..currentMonth).count { !paidMonths.contains(it) }
-                if (dueCount == 0) {
+                if (!unpaid) {
                     paidList.add(student)
                 }
             }
@@ -80,7 +84,7 @@ class PaidListFragment : Fragment() {
 
     private fun openStudentReceipts(student: Student) {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val payments = db.schoolDao().getStudentPayments(student.id, 2026).first()
+            val payments = db.schoolDao().getAllStudentPayments(student.id).first()
                 .sortedByDescending { it.paymentDate }
             withContext(Dispatchers.Main) {
                 if (!isAdded) return@withContext
