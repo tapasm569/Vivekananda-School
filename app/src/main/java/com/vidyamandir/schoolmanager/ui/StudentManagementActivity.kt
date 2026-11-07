@@ -90,7 +90,8 @@ class StudentManagementActivity : AppCompatActivity() {
             allStudents.filter { it.displayClass.equals(selectedClassFilter, ignoreCase = true) }
         }
         binding.rvStudents.adapter = StudentAdapter(filtered) { student ->
-            openStudentReceipts(student)
+            startActivity(Intent(this, StudentReceiptHistoryActivity::class.java)
+                .putExtra("STUDENT_ID", student.id))
         }
     }
 
@@ -198,7 +199,10 @@ class StudentManagementActivity : AppCompatActivity() {
             holder.binding.btnStudentReceipts.setOnClickListener {
                 onReceiptsClick(s)
             }
-            holder.binding.btnCollectDue.visibility = android.view.View.GONE
+            holder.binding.btnCollectDue.visibility = android.view.View.VISIBLE
+            holder.binding.btnCollectDue.setOnClickListener {
+                StudentCardActions.collect(holder.itemView.context, s)
+            }
         }
 
         override fun getItemCount() = list.size

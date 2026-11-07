@@ -41,6 +41,9 @@ interface SchoolDao {
     // Students
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStudent(student: Student): Long
+    @Update
+    suspend fun updateStudent(student: Student)
+
 
     @Query("SELECT * FROM students WHERE isActive = 1 ORDER BY className ASC, rollNo ASC")
     fun getAllActiveStudents(): Flow<List<Student>>
@@ -83,6 +86,9 @@ interface SchoolDao {
 
     @Query("SELECT * FROM fee_payments ORDER BY paymentDate DESC")
     fun getAllPayments(): Flow<List<FeePayment>>
+    @Query("SELECT * FROM fee_payments WHERE studentId = :studentId ORDER BY paymentDate DESC")
+    fun getAllStudentPayments(studentId: Long): Flow<List<FeePayment>>
+
 
     @Query("SELECT * FROM fee_payments WHERE paymentDate >= :startOfDayTimestamp ORDER BY paymentDate DESC")
     fun getTodayPayments(startOfDayTimestamp: Long): Flow<List<FeePayment>>

@@ -48,6 +48,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <activity android:name=".ui.StudentReceiptHistoryActivity" android:exported="false" />
     </application>
 
 </manifest>

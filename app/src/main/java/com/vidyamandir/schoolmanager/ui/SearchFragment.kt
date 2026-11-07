@@ -34,16 +34,14 @@ class SearchFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         db = AppDatabase.getDatabase(requireContext(), viewLifecycleOwner.lifecycleScope)
         binding.rvSearchResults.layoutManager = LinearLayoutManager(requireContext())
-
         loadStudents()
 
         binding.etSearchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                filter(s?.toString()?.trim() ?: "")
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filter(s?.toString()?.trim().orEmpty())
             }
             override fun afterTextChanged(s: Editable?) {}
         })
@@ -53,30 +51,22 @@ class SearchFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             allStudents = db.schoolDao().getAllActiveStudents().first()
             withContext(Dispatchers.Main) {
-                if (_binding != null) {
-                    filter(binding.etSearchInput.text?.toString()?.trim() ?: "")
-                }
+                if (_binding != null) filter(binding.etSearchInput.text?.toString()?.trim().orEmpty())
             }
         }
     }
 
     private fun filter(query: String) {
-        val filtered = if (query.isEmpty()) {
-            allStudents
-        } else {
-            allStudents.filter { s ->
-                s.fullName.contains(query, ignoreCase = true) ||
-                s.className.contains(query, ignoreCase = true) ||
-                s.section.contains(query, ignoreCase = true) ||
+        val filtered = allStudents.filter { s ->
+            query.isEmpty() ||
+                s.fullName.contains(query, true) ||
+                s.className.contains(query, true) ||
+                s.section.contains(query, true) ||
                 s.rollNo.toString() == query ||
                 s.parentPhone.contains(query)
-            }
         }
 
-        binding.rvSearchResults.adapter = SearchAdapter(filtered) { selectedStudent ->
-            val intent = Intent(requireContext(), FeeCollectionActivity::class.java)
-            startActivity(intent)
-        }
+        binding.rvSearchResults.adapter = SearchAdapter(filtered)
     }
 
     override fun onDestroyView() {
@@ -84,10 +74,8 @@ class SearchFragment : Fragment() {
         _binding = null
     }
 
-    class SearchAdapter(
-        private val list: List<Student>,
-        private val onClick: (Student) -> Unit
-    ) : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
+    class SearchAdapter(private val list: List<Student>) :
+        RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
 
         class ViewHolder(val b: ItemStudentCardBinding) : RecyclerView.ViewHolder(b.root)
 
@@ -98,6 +86,8 @@ class SearchFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val s = list[position]
+            val context = holder.itemView.context
+
             holder.b.tvStudentName.text = s.fullName
             holder.b.tvStudentMeta.text = "${s.displayClass} • Roll: ${s.rollNo}"
             holder.b.tvParentsName.text = "Father: ${s.fatherName} • 📞 ${s.parentPhone}"
@@ -106,7 +96,21 @@ class SearchFragment : Fragment() {
             ImageHelper.loadProfilePhoto(s.photoUri, holder.b.ivStudentAvatar, android.R.drawable.sym_def_app_icon)
 
             holder.b.root.setOnClickListener {
-                onClick(s)
+                StudentCardActions.openProfile(context, s)
+            }
+            holder.b.btnStudentWhatsApp.setOnClickListener {
+                StudentCardActions.whatsapp(context, s)
+            }
+            holder.b.btnStudentCall.setOnClickListener {
+                StudentCardActions.call(context, s)
+            }
+            holder.b.btnCollectDue.visibility = View.VISIBLE
+            holder.b.btnCollectDue.setOnClickListener {
+                StudentCardActions.collect(context, s)
+            }
+            holder.b.btnStudentReceipts.setOnClickListener {
+                context.startActivity(Intent(context, StudentReceiptHistoryActivity::class.java)
+                    .putExtra("STUDENT_ID", s.id))
             }
         }
 
