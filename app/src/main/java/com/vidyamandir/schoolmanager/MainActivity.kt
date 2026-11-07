@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.PopupMenu
+import android.view.MenuItem
+import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -29,12 +31,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        // Put the three-line hamburger control on the LEFT as the toolbar navigation icon.
+        // Place the three-line menu on the RIGHT side of the toolbar.
+        binding.topAppBar.navigationIcon = null
         binding.topAppBar.menu.clear()
-        binding.topAppBar.navigationIcon = getDrawable(R.drawable.ic_menu_lines)
-        binding.topAppBar.contentDescription = "Open menu"
-        binding.topAppBar.setNavigationOnClickListener {
-            val popup = PopupMenu(this, binding.topAppBar)
+        val menuItem = binding.topAppBar.menu.add(0, R.id.action_logout, 0, "Menu")
+        menuItem.setIcon(R.drawable.ic_menu_lines)
+        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        menuItem.setOnMenuItemClickListener {
+            val popup = PopupMenu(this, binding.topAppBar, Gravity.END)
             popup.menu.add(0, R.id.action_logout, 0, "Sign out")
             popup.setOnMenuItemClickListener { selected ->
                 if (selected.itemId == R.id.action_logout) {
@@ -48,6 +52,7 @@ class MainActivity : AppCompatActivity() {
                 } else false
             }
             popup.show()
+            true
         }
     }
 

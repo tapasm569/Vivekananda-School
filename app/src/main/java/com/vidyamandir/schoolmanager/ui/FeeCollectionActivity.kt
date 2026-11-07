@@ -13,6 +13,7 @@ import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
 import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.domain.MonthDueStatus
+import com.vidyamandir.schoolmanager.util.ThermalReceiptPrinter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -163,26 +164,31 @@ class FeeCollectionActivity : AppCompatActivity() {
         }.joinToString(", ")
         val date = java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date())
         val message = """VIVEKANANDA VIDYAMANDIR
+Dhupguri, Jalpaiguri
 FEE PAYMENT RECEIPT
+================================
 Receipt No: $receipt
 Date: $date
 Student: ${student.fullName}
 Admission No: ${student.admissionNo}
 Class: ${student.displayClass} | Roll: ${student.rollNo}
+Academic Year: 2026
 Paid For: $monthNames
-Base Fee: ₹${String.format("%.2f", base)}
-Late Fee: ₹${String.format("%.2f", late)}
-TOTAL PAID: ₹${String.format("%.2f", total)}
-
-Thank you.
+--------------------------------
+Base Fee: Rs. ${String.format("%.2f", base)}
+Late Fee: Rs. ${String.format("%.2f", late)}
+TOTAL PAID: Rs. ${String.format("%.2f", total)}
+================================
+Payment Status: PAID
+Thank you for your payment.
 """.trimIndent()
         val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(android.content.Intent.EXTRA_TEXT, message)
         }
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Payment receipt ready")
-            .setMessage("Receipt $receipt generated for ${student.fullName}.")
+            .setTitle("Payment receipt generated")
+            .setMessage("Receipt $receipt is saved in payment history. Choose how to deliver it.")
             .setPositiveButton("WhatsApp") { _, _ ->
                 try {
                     send.setPackage("com.whatsapp")
@@ -192,11 +198,14 @@ Thank you.
                     startActivity(android.content.Intent.createChooser(send, "Share payment receipt"))
                 }
             }
-            .setNegativeButton("Other apps") { _, _ ->
+            .setNegativeButton("Print receipt") { _, _ ->
+                ThermalReceiptPrinter.choosePrinterAndPrint(this, message)
+            }
+            .setNeutralButton("Other apps") { _, _ ->
                 send.setPackage(null)
                 startActivity(android.content.Intent.createChooser(send, "Share payment receipt"))
             }
-            .setNeutralButton("Done", null)
             .show()
     }
+
 }
