@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.data.FeePayment
-import com.vidyamandir.schoolmanager.data.LateFeeRule
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
 import com.vidyamandir.schoolmanager.domain.FeeCalculator
@@ -33,7 +32,6 @@ class FeeCollectionActivity : AppCompatActivity() {
     private var studentsList: List<Student> = emptyList()
     private var visibleStudents: List<Student> = emptyList()
     private var selectedStudent: Student? = null
-    private var activeRules: List<LateFeeRule> = emptyList()
     private var currentlySelectedMonths: List<MonthDueStatus> = emptyList()
 
     private var selectedClassFilter = "All Classes"
@@ -115,15 +113,9 @@ class FeeCollectionActivity : AppCompatActivity() {
     private fun loadInitialData() {
         lifecycleScope.launch {
             try {
-                val result = withContext(Dispatchers.IO) {
-                    Pair(
-                        db.schoolDao().getAllLateFeeRules(),
-                        db.schoolDao().getAllActiveStudents().first()
-                    )
+                studentsList = withContext(Dispatchers.IO) {
+                    db.schoolDao().getAllActiveStudents().first()
                 }
-
-                activeRules = result.first
-                studentsList = result.second
 
                 val classNames = listOf("All Classes") +
                     studentsList.map { it.displayClass }
@@ -263,10 +255,24 @@ class FeeCollectionActivity : AppCompatActivity() {
                         }
                 }
 
+                val penaltyPrefs = getSharedPreferences(
+                    "vv_school_profile",
+                    MODE_PRIVATE
+                )
+
+                val graceDays = penaltyPrefs.getInt(
+                    "penalty_grace_days", 10
+                )
+
+                val penaltyAmount = penaltyPrefs.getFloat(
+                    "penalty_amount", 50f
+                ).toDouble()
+
                 val statusList = FeeCalculator.calculateDueMonths(
                     student,
                     paidMonthsSet,
-                    activeRules
+                    graceDays,
+                    penaltyAmount
                 )
 
                 if (selectedStudent?.id == student.id) {

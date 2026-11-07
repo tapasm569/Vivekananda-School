@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        if (inputPassword == ADMIN_PASSWORD) {
+        if (inputPassword == getSharedPreferences("vv_school_profile", Context.MODE_PRIVATE).getString("admin_password", ADMIN_PASSWORD)) {
             getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
                 .putString(KEY_ROLE, "ADMIN")
                 .apply()

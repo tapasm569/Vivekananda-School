@@ -37,6 +37,49 @@ class ResultPdfGenerator(private val context: Context) {
         document.close()
     }
 
+
+    fun generateClassReportCards(
+        students: List<Student>,
+        examName: String,
+        resultsByStudent: Map<Long, List<ExamResult>>,
+        outputFile: File
+    ) {
+        val document = PdfDocument()
+        var pageNumber = 1
+
+        try {
+            for (student in students) {
+                val results = resultsByStudent[student.id].orEmpty()
+                if (results.isEmpty()) continue
+
+                val pageInfo1 = PdfDocument.PageInfo.Builder(
+                    a4Width, a4Height, pageNumber++
+                ).create()
+                val page1 = document.startPage(pageInfo1)
+                drawPageOne(page1.canvas, student, examName)
+                document.finishPage(page1)
+
+                val pageInfo2 = PdfDocument.PageInfo.Builder(
+                    a4Width, a4Height, pageNumber++
+                ).create()
+                val page2 = document.startPage(pageInfo2)
+                drawPageTwo(page2.canvas, student, results)
+                document.finishPage(page2)
+            }
+
+            require(pageNumber > 1) {
+                "No approved marksheets are available for this class and exam"
+            }
+
+            outputFile.parentFile?.mkdirs()
+            FileOutputStream(outputFile).use { output ->
+                document.writeTo(output)
+            }
+        } finally {
+            document.close()
+        }
+    }
+
     private fun drawPageOne(canvas: Canvas, student: Student, examName: String) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -50,15 +93,38 @@ class ResultPdfGenerator(private val context: Context) {
 
         paint.style = Paint.Style.FILL
         paint.color = Color.parseColor("#0F3D6E")
+        val profile = context.getSharedPreferences(
+            "vv_school_profile", Context.MODE_PRIVATE
+        )
+        val schoolName = profile.getString(
+            "school_name", "Vivekananda Vidyamandir"
+        ) ?: "Vivekananda Vidyamandir"
+        val schoolAddress = profile.getString(
+            "address", "Dhupguri, Jalpaiguri, West Bengal - 735210"
+        ) ?: ""
+        val schoolContact = profile.getString("contact_number", "") ?: ""
+
         paint.textSize = 24f
         paint.isFakeBoldText = true
         paint.textAlign = Paint.Align.CENTER
-        canvas.drawText("VIVEKANANDA VIDYAMANDIR", (a4Width / 2).toFloat(), 95f, paint)
+        canvas.drawText(
+            schoolName.uppercase().take(42),
+            (a4Width / 2).toFloat(), 95f, paint
+        )
 
         paint.textSize = 12f
         paint.isFakeBoldText = false
         paint.color = Color.DKGRAY
-        canvas.drawText("Dhupguri, Jalpaiguri, West Bengal - 735210", (a4Width / 2).toFloat(), 120f, paint)
+        canvas.drawText(
+            schoolAddress.take(75),
+            (a4Width / 2).toFloat(), 120f, paint
+        )
+        if (schoolContact.isNotBlank()) {
+            canvas.drawText(
+                "Contact: $schoolContact",
+                (a4Width / 2).toFloat(), 137f, paint
+            )
+        }
 
         paint.textSize = 14f
         paint.isFakeBoldText = true

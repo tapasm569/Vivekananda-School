@@ -46,6 +46,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        fun closeDatabase() {
+            synchronized(this) {
+                INSTANCE?.close()
+                INSTANCE = null
+            }
+        }
+
         private class DatabaseCallback(
             private val scope: CoroutineScope
         ) : RoomDatabase.Callback() {
