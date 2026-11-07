@@ -14,13 +14,13 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#0F3D6E"
+            android:background="@drawable/bg_toolbar_modern"
             app:title="Vivekananda Vidyamandir"
             app:subtitle="Dhupguri, Jalpaiguri • Admin Panel"
             app:titleTextColor="@android:color/white"
             app:subtitleTextColor="#93C5FD"
-            app:navigationIcon="@drawable/ic_menu_lines"
-            app:titleTextAppearance="@style/ToolbarTitle" />
+            app:titleTextAppearance="@style/ToolbarTitle"
+            app:subtitleTextAppearance="@style/ToolbarSubtitle" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout

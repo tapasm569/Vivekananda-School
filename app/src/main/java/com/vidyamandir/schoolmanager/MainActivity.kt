@@ -29,21 +29,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        binding.topAppBar.setNavigationOnClickListener { anchor ->
-            val popup = PopupMenu(this, anchor)
-            popup.menu.add(0, R.id.action_logout, 0, "Sign out")
-            popup.setOnMenuItemClickListener { item ->
-                if (item.itemId == R.id.action_logout) {
-                    val prefs = getSharedPreferences("vv_auth_session", Context.MODE_PRIVATE)
-                    prefs.edit().clear().apply()
-                    val intent = Intent(this, LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                    true
-                } else false
-            }
-            popup.show()
+        // Place the three-line menu on the RIGHT side of the header.
+        binding.topAppBar.navigationIcon = null
+        val menuItem = binding.topAppBar.menu.add(0, R.id.action_logout, 0, "Menu")
+        menuItem.setIcon(R.drawable.ic_menu_lines)
+        menuItem.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+        binding.topAppBar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_logout) {
+                val popup = PopupMenu(this, binding.topAppBar.findViewById(item.itemId) ?: binding.topAppBar)
+                popup.menu.add(0, R.id.action_logout, 0, "Sign out")
+                popup.setOnMenuItemClickListener { selected ->
+                    if (selected.itemId == R.id.action_logout) {
+                        val prefs = getSharedPreferences("vv_auth_session", Context.MODE_PRIVATE)
+                        prefs.edit().clear().apply()
+                        val intent = Intent(this, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        finish()
+                        true
+                    } else false
+                }
+                popup.show()
+                true
+            } else false
         }
     }
 
