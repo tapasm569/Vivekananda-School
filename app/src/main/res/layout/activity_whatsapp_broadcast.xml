@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8FAFC">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#0F3D6E"
+        app:title="WhatsApp Parents Broadcast"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_arrow_back_modern" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilClassFilter"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="8dp"
+        android:hint="Filter by Class">
+
+        <AutoCompleteTextView
+            android:id="@+id/actvClassFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSearch"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="5dp"
+        android:hint="Search student or admission number"
+        app:startIconDrawable="@android:drawable/ic_menu_search">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="5dp">
+
+        <CheckBox
+            android:id="@+id/cbSelectAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select All" />
+
+        <TextView
+            android:id="@+id/tvSelectedCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="0 selected"
+            android:textColor="#0F3D6E"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvStudents"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="10dp"
+        android:paddingBottom="6dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilMessage"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="5dp"
+        android:hint="Write your message">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            android:inputType="textCapSentences|textMultiLine"
+            android:minLines="2"
+            android:maxLines="4" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSendBroadcast"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_margin="12dp"
+        android:text="Send to Selected Parents"
+        android:textStyle="bold"
+        app:backgroundTint="#128C7E"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>

@@ -24,28 +24,44 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="14dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilClassSelect"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="1. Select Class">
+
+            <AutoCompleteTextView
+                android:id="@+id/actvClassSelect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilStudentSelect"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select Student">
+            android:layout_marginTop="9dp"
+            android:hint="2. Search or Select Student">
 
             <AutoCompleteTextView
                 android:id="@+id/actvStudentSelect"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none" />
+                android:inputType="text"
+                android:imeOptions="actionDone" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardStudentInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             app:cardCornerRadius="12dp"
             app:strokeWidth="1dp"
             app:strokeColor="#CBD5E1"
@@ -59,7 +75,7 @@
 
                 <TextView
                     android:id="@+id/tvSelectedStudentName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Student: Please select above"
                     android:textColor="#0F3D6E"
@@ -68,10 +84,10 @@
 
                 <TextView
                     android:id="@+id/tvSelectedStudentMeta"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Monthly Fee: ₹0.00"
+                    android:layout_marginTop="4dp"
+                    android:text="Class and monthly fee will appear here"
                     android:textColor="#475569"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -80,23 +96,25 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="6dp"
-            android:text="Academic Year Months (Select to Pay / Advance)"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="5dp"
+            android:text="3. Select Fee Months"
             android:textColor="#1E293B"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMonths"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="5dp" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             app:cardCornerRadius="14dp"
             app:cardBackgroundColor="#FEF3C7">
 
@@ -104,7 +122,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -130,7 +148,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="3dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -182,12 +200,25 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSubmitPayment"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="9dp"
                     android:text="Confirm Payment &amp; Record"
                     android:textStyle="bold"
                     app:backgroundTint="#0F3D6E"
                     app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnViewPaymentHistory"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="5dp"
+                    android:enabled="false"
+                    android:text="View Payment History"
+                    android:textColor="#0F3D6E"
+                    app:cornerRadius="10dp"
+                    app:strokeColor="#0F3D6E" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
