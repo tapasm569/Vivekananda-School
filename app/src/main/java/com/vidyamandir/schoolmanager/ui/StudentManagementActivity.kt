@@ -2,6 +2,13 @@ package com.vidyamandir.schoolmanager.ui
 
 import android.content.Intent
 import android.os.Bundle
+import java.util.Locale
+import java.util.Date
+import java.text.SimpleDateFormat
+import com.vidyamandir.schoolmanager.util.ThermalReceiptPrinter
+import com.vidyamandir.schoolmanager.util.PaymentReceiptPdf
+import androidx.appcompat.app.AlertDialog
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -82,10 +89,92 @@ class StudentManagementActivity : AppCompatActivity() {
         } else {
             allStudents.filter { it.displayClass.equals(selectedClassFilter, ignoreCase = true) }
         }
-        binding.rvStudents.adapter = StudentAdapter(filtered)
+        binding.rvStudents.adapter = StudentAdapter(filtered) { student ->
+            openStudentReceipts(student)
+        }
     }
 
-    class StudentAdapter(private val list: List<Student>) :
+    private fun openStudentReceipts(student: Student) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val payments = db.schoolDao().getAllPayments().first()
+                .filter { it.studentId == student.id }
+                .sortedByDescending { it.paymentDate }
+
+            withContext(Dispatchers.Main) {
+                if (isFinishing || isDestroyed) return@withContext
+
+                if (payments.isEmpty()) {
+                    android.widget.Toast.makeText(
+                        this@StudentManagementActivity,
+                        "No payment receipts found for ${student.fullName}",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    return@withContext
+                }
+
+                val formatter = SimpleDateFormat(
+                    "dd MMM yyyy, hh:mm a", Locale.getDefault()
+                )
+                val labels = payments.map {
+                    "${it.receiptNo}  •  ₹${String.format(Locale.US, "%.2f", it.totalAmount)}  •  ${formatter.format(Date(it.paymentDate))}"
+                }.toTypedArray()
+
+                AlertDialog.Builder(this@StudentManagementActivity)
+                    .setTitle("Payment Receipts — ${student.fullName}")
+                    .setItems(labels) { _, index ->
+                        showReceiptActions(student, payments[index])
+                    }
+                    .setNegativeButton("Close", null)
+                    .show()
+            }
+        }
+    }
+
+    private fun showReceiptActions(
+        student: Student,
+        payment: com.vidyamandir.schoolmanager.data.FeePayment
+    ) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val file = runCatching {
+                PaymentReceiptPdf.create(this@StudentManagementActivity, student, payment)
+            }.getOrNull()
+
+            withContext(Dispatchers.Main) {
+                if (isFinishing || isDestroyed) return@withContext
+                if (file == null) {
+                    Toast.makeText(this@StudentManagementActivity,
+                        "Could not prepare receipt PDF", Toast.LENGTH_LONG).show()
+                    return@withContext
+                }
+
+                AlertDialog.Builder(this@StudentManagementActivity)
+                    .setTitle(payment.receiptNo)
+                    .setItems(arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")) { _, choice ->
+                        runCatching {
+                            when (choice) {
+                                0 -> PaymentReceiptPdf.view(this@StudentManagementActivity, file)
+                                1 -> PaymentReceiptPdf.print(this@StudentManagementActivity, file)
+                                2 -> ThermalReceiptPrinter.choosePrinterAndPrint(
+                                    this@StudentManagementActivity,
+                                    PaymentReceiptPdf.thermalText(student, payment)
+                                )
+                                3 -> PaymentReceiptPdf.share(this@StudentManagementActivity, file)
+                            }
+                        }.onFailure {
+                            Toast.makeText(this@StudentManagementActivity,
+                                "Receipt action failed: ${it.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        }
+    }
+
+    class StudentAdapter(
+        private val list: List<Student>,
+        private val onReceiptsClick: (Student) -> Unit
+    ) :
         RecyclerView.Adapter<StudentAdapter.ViewHolder>() {
 
         class ViewHolder(val binding: ItemStudentCardBinding) : RecyclerView.ViewHolder(binding.root)
@@ -106,6 +195,9 @@ class StudentManagementActivity : AppCompatActivity() {
             holder.binding.root.setOnClickListener { StudentCardActions.openProfile(holder.itemView.context, s) }
             holder.binding.btnStudentWhatsApp.setOnClickListener { StudentCardActions.whatsapp(holder.itemView.context, s) }
             holder.binding.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
+            holder.binding.btnStudentReceipts.setOnClickListener {
+                onReceiptsClick(s)
+            }
             holder.binding.btnCollectDue.visibility = android.view.View.GONE
         }
 
