@@ -17,7 +17,7 @@
             android:background="#0F3D6E"
             app:title="Student Directory"
             app:titleTextColor="@android:color/white"
-            app:navigationIcon="@android:drawable/ic_menu_revert" />
+            app:navigationIcon="@drawable/ic_arrow_back_modern" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout

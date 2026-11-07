@@ -3,6 +3,7 @@ package com.vidyamandir.schoolmanager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -28,9 +29,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        binding.topAppBar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_logout -> {
+        binding.topAppBar.setNavigationOnClickListener { anchor ->
+            val popup = PopupMenu(this, anchor)
+            popup.menu.add(0, R.id.action_logout, 0, "Sign out")
+            popup.setOnMenuItemClickListener { item ->
+                if (item.itemId == R.id.action_logout) {
                     val prefs = getSharedPreferences("vv_auth_session", Context.MODE_PRIVATE)
                     prefs.edit().clear().apply()
                     val intent = Intent(this, LoginActivity::class.java)
@@ -38,9 +41,9 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                     true
-                }
-                else -> false
+                } else false
             }
+            popup.show()
         }
     }
 

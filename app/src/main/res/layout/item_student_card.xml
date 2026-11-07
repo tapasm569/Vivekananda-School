@@ -82,18 +82,18 @@
                 android:layout_width="42dp"
                 android:layout_height="36dp"
                 android:gravity="center"
-                android:text="WA"
-                android:textColor="#16A34A"
-                android:textStyle="bold"
-                android:textSize="19sp"
+                android:text=""
+                android:background="@drawable/bg_action_whatsapp"
+                android:drawableTop="@drawable/ic_whatsapp"
                 android:contentDescription="WhatsApp parent" />
             <TextView
                 android:id="@+id/btnStudentCall"
                 android:layout_width="42dp"
                 android:layout_height="36dp"
                 android:gravity="center"
-                android:text="☎"
-                android:textSize="19sp"
+                android:text=""
+                android:background="@drawable/bg_action_call"
+                android:drawableTop="@drawable/ic_call"
                 android:contentDescription="Call parent" />
             <TextView
                 android:id="@+id/btnCollectDue"
