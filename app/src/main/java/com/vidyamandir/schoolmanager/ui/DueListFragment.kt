@@ -77,9 +77,7 @@ class DueListFragment : Fragment() {
                 if (_binding != null) {
                     binding.tvTotalDueHeader.text = "₹${String.format("%.2f", grandTotalDue)}"
                     binding.tvDueStudentCount.text = "${dueList.size} Students"
-                    binding.rvDueList.adapter = DueAdapter(dueList) { student, dueAmt ->
-                        sendReminder(student, dueAmt)
-                    }
+                    binding.rvDueList.adapter = DueAdapter(dueList)
                 }
             }
         }
@@ -101,10 +99,7 @@ class DueListFragment : Fragment() {
         _binding = null
     }
 
-    class DueAdapter(
-        private val list: List<DueStudentCardItem>,
-        private val onReminder: (Student, Double) -> Unit
-    ) : RecyclerView.Adapter<DueAdapter.ViewHolder>() {
+    class DueAdapter(private val list: List<DueStudentCardItem>) : RecyclerView.Adapter<DueAdapter.ViewHolder>() {
 
         class ViewHolder(val b: ItemStudentCardBinding) : RecyclerView.ViewHolder(b.root)
 
@@ -126,9 +121,11 @@ class DueListFragment : Fragment() {
 
             ImageHelper.loadProfilePhoto(s.photoUri, holder.b.ivStudentAvatar, android.R.drawable.sym_def_app_icon)
 
-            holder.b.root.setOnClickListener {
-                onReminder(s, entry.totalDue)
-            }
+            holder.b.root.setOnClickListener { StudentCardActions.openProfile(holder.itemView.context, s) }
+            holder.b.btnStudentWhatsApp.setOnClickListener { StudentCardActions.whatsapp(holder.itemView.context, s) }
+            holder.b.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
+            holder.b.btnCollectDue.visibility = View.VISIBLE
+            holder.b.btnCollectDue.setOnClickListener { StudentCardActions.collect(holder.itemView.context, s) }
         }
 
         override fun getItemCount() = list.size

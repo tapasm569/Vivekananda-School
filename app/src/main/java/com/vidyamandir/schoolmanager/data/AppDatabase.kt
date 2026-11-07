@@ -38,7 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "vivekananda_vidyamandir.db"
                 )
-                .fallbackToDestructiveMigration()
+                // Keep existing school records safe. Add explicit Room migrations before any schema upgrade.
                 .addCallback(DatabaseCallback(scope))
                 .build()
                 INSTANCE = instance

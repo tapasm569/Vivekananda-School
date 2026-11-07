@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.SchoolManager" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">#0F3D6E</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#D97706</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#0F3D6E</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+    </style>
+</resources>

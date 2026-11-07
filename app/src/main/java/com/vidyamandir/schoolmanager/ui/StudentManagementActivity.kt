@@ -102,11 +102,11 @@ class StudentManagementActivity : AppCompatActivity() {
             holder.binding.tvParentsName.text = "Father: ${s.fatherName} • 📞 ${s.parentPhone}"
             holder.binding.tvMonthlyFeeBadge.text = "₹${s.monthlyFee}/m"
 
-            ImageHelper.loadProfilePhoto(
-                s.photoUri,
-                holder.binding.ivStudentAvatar,
-                android.R.drawable.sym_def_app_icon
-            )
+            ImageHelper.loadProfilePhoto(s.photoUri, holder.binding.ivStudentAvatar, android.R.drawable.sym_def_app_icon)
+            holder.binding.root.setOnClickListener { StudentCardActions.openProfile(holder.itemView.context, s) }
+            holder.binding.btnStudentWhatsApp.setOnClickListener { StudentCardActions.whatsapp(holder.itemView.context, s) }
+            holder.binding.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
+            holder.binding.btnCollectDue.visibility = android.view.View.GONE
         }
 
         override fun getItemCount() = list.size

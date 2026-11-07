@@ -24,6 +24,7 @@
         <activity android:name=".ui.SetExamsActivity" android:exported="false" />
         <activity android:name=".ui.ResultPublishActivity" android:exported="false" />
         <activity android:name=".ui.StudentManagementActivity" android:exported="false" />
+        <activity android:name=".ui.StudentProfileActivity" android:exported="false" />
         <activity android:name=".ui.AddStudentActivity" android:exported="false" />
         <activity android:name=".ui.ClassManagementActivity" android:exported="false" />
         <activity android:name=".ui.TeacherManagementActivity" android:exported="false" />

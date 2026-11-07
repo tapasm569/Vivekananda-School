@@ -45,6 +45,9 @@ interface SchoolDao {
     @Query("SELECT * FROM students WHERE isActive = 1 ORDER BY className ASC, rollNo ASC")
     fun getAllActiveStudents(): Flow<List<Student>>
 
+    @Query("SELECT * FROM students WHERE id = :studentId LIMIT 1")
+    suspend fun getStudentById(studentId: Long): Student?
+
     // Exam Definitions
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExam(exam: ExamDefinition): Long

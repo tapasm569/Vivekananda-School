@@ -99,6 +99,10 @@ class PaidListFragment : Fragment() {
             holder.b.tvMonthlyFeeBadge.setBackgroundColor(android.graphics.Color.parseColor("#DCFCE7"))
 
             ImageHelper.loadProfilePhoto(s.photoUri, holder.b.ivStudentAvatar, android.R.drawable.sym_def_app_icon)
+            holder.b.root.setOnClickListener { StudentCardActions.openProfile(holder.itemView.context, s) }
+            holder.b.btnStudentWhatsApp.setOnClickListener { StudentCardActions.whatsapp(holder.itemView.context, s) }
+            holder.b.btnStudentCall.setOnClickListener { StudentCardActions.call(holder.itemView.context, s) }
+            holder.b.btnCollectDue.visibility = View.GONE
         }
 
         override fun getItemCount() = list.size

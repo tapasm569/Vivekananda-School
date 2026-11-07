@@ -31,12 +31,14 @@ class DashboardFragment : Fragment() {
         db = AppDatabase.getDatabase(requireContext(), viewLifecycleOwner.lifecycleScope)
 
         observeStats()
+        observeFeeLists()
         setupListeners()
     }
 
     override fun onResume() {
         super.onResume()
         refreshTodayPayment()
+        if (_binding != null) observeFeeLists()
     }
 
     private fun observeStats() {
@@ -82,7 +84,32 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    private fun observeFeeLists() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val students = db.schoolDao().getAllActiveStudents().first()
+            val month = Calendar.getInstance().get(Calendar.MONTH) + 1
+            var due = 0
+            var paid = 0
+            for (student in students) {
+                val payments = db.schoolDao().getStudentPayments(student.id, Calendar.getInstance().get(Calendar.YEAR)).first()
+                val paidMonths = payments.flatMap { it.paidMonths.split(",").filter(String::isNotBlank).mapNotNull(String::toIntOrNull) }.toSet()
+                val outstanding = (student.admissionMonth.coerceIn(1, 12)..month).any { it !in paidMonths }
+                if (outstanding) due++ else paid++
+            }
+            withContext(Dispatchers.Main) {
+                _binding?.tvDashboardDueCount?.text = "$due Students"
+                _binding?.tvDashboardPaidCount?.text = "$paid Students"
+            }
+        }
+    }
+
     private fun setupListeners() {
+        binding.cardDueList.setOnClickListener {
+            startActivity(Intent(requireContext(), StudentDuesListActivity::class.java).putExtra("VIEW_MODE", "DUE"))
+        }
+        binding.cardPaidList.setOnClickListener {
+            startActivity(Intent(requireContext(), StudentDuesListActivity::class.java).putExtra("VIEW_MODE", "PAID"))
+        }
         binding.cardCollectFee.setOnClickListener {
             startActivity(Intent(requireContext(), FeeCollectionActivity::class.java))
         }

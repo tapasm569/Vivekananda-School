@@ -68,6 +68,16 @@ class FeeCollectionActivity : AppCompatActivity() {
                     val names = studentsList.map { "${it.fullName} (${it.displayClass}) - Roll ${it.rollNo}" }
                     val arrayAdapter = ArrayAdapter(this@FeeCollectionActivity, android.R.layout.simple_dropdown_item_1line, names)
                     binding.actvStudentSelect.setAdapter(arrayAdapter)
+                    val requestedId = intent.getLongExtra("STUDENT_ID", -1L)
+                    if (requestedId > 0L) {
+                        val index = studentsList.indexOfFirst { it.id == requestedId }
+                        if (index >= 0) {
+                            selectedStudent = studentsList[index]
+                            binding.actvStudentSelect.setText(names[index], false)
+                            displayStudentInfo(selectedStudent!!)
+                            loadStudentFeeMonths(selectedStudent!!)
+                        }
+                    }
                 }
             }
         }
@@ -140,13 +150,53 @@ class FeeCollectionActivity : AppCompatActivity() {
             db.schoolDao().recordPayment(payment)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    this@FeeCollectionActivity,
-                    "Payment Recorded Successfully! Receipt: $receipt",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@FeeCollectionActivity, "Payment recorded. Receipt: $receipt", Toast.LENGTH_LONG).show()
+                shareReceipt(student, receipt, monthsString, baseSum, lateSum, total)
                 loadStudentFeeMonths(student)
             }
         }
+    }
+
+    private fun shareReceipt(student: Student, receipt: String, months: String, base: Double, late: Double, total: Double) {
+        val monthNames = months.split(",").mapNotNull { it.toIntOrNull() }.mapNotNull { index ->
+            java.text.DateFormatSymbols().months.getOrNull(index - 1)
+        }.joinToString(", ")
+        val date = java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date())
+        val message = """VIVEKANANDA VIDYAMANDIR
+FEE PAYMENT RECEIPT
+Receipt No: $receipt
+Date: $date
+Student: ${student.fullName}
+Admission No: ${student.admissionNo}
+Class: ${student.displayClass} | Roll: ${student.rollNo}
+Paid For: $monthNames
+Base Fee: ₹${String.format("%.2f", base)}
+Late Fee: ₹${String.format("%.2f", late)}
+TOTAL PAID: ₹${String.format("%.2f", total)}
+
+Thank you.
+""".trimIndent()
+        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(android.content.Intent.EXTRA_TEXT, message)
+        }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Payment receipt ready")
+            .setMessage("Receipt $receipt generated for ${student.fullName}.")
+            .setPositiveButton("WhatsApp") { _, _ ->
+                try {
+                    send.setPackage("com.whatsapp")
+                    startActivity(send)
+                } catch (_: Exception) {
+                    send.setPackage(null)
+                    startActivity(android.content.Intent.createChooser(send, "Share payment receipt"))
+                }
+            }
+            .setNegativeButton("Other apps") { _, _ ->
+                send.setPackage(null)
+                startActivity(android.content.Intent.createChooser(send, "Share payment receipt"))
+            }
+            .setNeutralButton("Done", null)
+            .show()
     }
 }
