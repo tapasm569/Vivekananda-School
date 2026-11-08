@@ -54,9 +54,9 @@ interface SchoolDao {
     // Students
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStudent(student: Student): Long
+
     @Update
     suspend fun updateStudent(student: Student)
-
 
     @Query("SELECT * FROM students WHERE isActive = 1 ORDER BY className ASC, rollNo ASC")
     fun getAllActiveStudents(): Flow<List<Student>>
@@ -230,14 +230,14 @@ interface SchoolDao {
     suspend fun getExamResultComponents(resultId: Long): List<ExamResultComponent>
 
     // Payments
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun recordPayment(payment: FeePayment): Long
 
     @Query("SELECT * FROM fee_payments ORDER BY paymentDate DESC")
     fun getAllPayments(): Flow<List<FeePayment>>
+
     @Query("SELECT * FROM fee_payments WHERE studentId = :studentId ORDER BY paymentDate DESC")
     fun getAllStudentPayments(studentId: Long): Flow<List<FeePayment>>
-
 
     @Query("SELECT * FROM fee_payments WHERE paymentDate >= :startOfDayTimestamp ORDER BY paymentDate DESC")
     fun getTodayPayments(startOfDayTimestamp: Long): Flow<List<FeePayment>>
@@ -260,4 +260,17 @@ interface SchoolDao {
         deleteAllLateFeeRules()
         rules.forEach { insertLateFeeRule(it) }
     }
+
+    // Bulk Sync Helpers
+    @Query("SELECT * FROM exam_results")
+    suspend fun getAllExamResults(): List<ExamResult>
+
+    @Query("SELECT * FROM exam_result_components")
+    suspend fun getAllExamResultComponents(): List<ExamResultComponent>
+
+    @Query("SELECT * FROM exam_subjects")
+    suspend fun getAllExamSubjects(): List<ExamSubject>
+
+    @Query("SELECT * FROM exam_subject_components")
+    suspend fun getAllExamSubjectComponents(): List<ExamSubjectComponent>
 }

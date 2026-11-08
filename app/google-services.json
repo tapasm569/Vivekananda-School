@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "923518481194",
+    "firebase_url": "https://vidyamandir-a3340-default-rtdb.firebaseio.com",
+    "project_id": "vidyamandir-a3340",
+    "storage_bucket": "vidyamandir-a3340.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:923518481194:android:7c36a8e250d1f225dda453",
+        "android_client_info": {
+          "package_name": "com.vidyamandir.schoolmanager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoU90YgnNPlfg8N-oKKTslnX0L7guYgzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

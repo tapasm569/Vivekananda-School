@@ -4,17 +4,24 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
+import com.google.firebase.database.IgnoreExtraProperties
 
+@IgnoreExtraProperties
 @Entity(tableName = "classes")
 data class SchoolClass(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val className: String,
-    val monthlyFee: Double,
+    val className: String = "",
+    val monthlyFee: Double = 0.0,
     val hasSections: Boolean = false,
     val sections: String = "",
     @androidx.room.ColumnInfo(defaultValue = "''")
     val subjects: String = ""
 ) {
+    @get:Exclude
+    val displayUnits: List<Pair<String, String>>
+        get() = getDisplayUnits()
+
     fun getDisplayUnits(): List<Pair<String, String>> {
         if (!hasSections || sections.isBlank()) {
             return listOf(Pair(className, ""))
@@ -26,45 +33,50 @@ data class SchoolClass(
     }
 }
 
+@IgnoreExtraProperties
 @Entity(tableName = "teachers")
 data class Teacher(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val name: String,
-    val phone: String,
-    val password: String,
+    val name: String = "",
+    val phone: String = "",
+    val password: String = "",
     val photoUri: String? = null
 )
 
+@IgnoreExtraProperties
 @Entity(tableName = "students")
 data class Student(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val admissionNo: String,
-    val fullName: String,
-    val className: String,
+    val admissionNo: String = "",
+    val fullName: String = "",
+    val className: String = "",
     val section: String = "",
-    val rollNo: Int,
+    val rollNo: Int = 1,
     val fatherName: String = "",
     val motherName: String = "",
-    val parentPhone: String,
+    val parentPhone: String = "",
     val address: String = "",
     val photoUri: String? = null,
     val admissionMonth: Int = 1,
-    val monthlyFee: Double,
+    val monthlyFee: Double = 0.0,
     val isActive: Boolean = true
 ) {
+    @get:Exclude
     val displayClass: String
         get() = if (section.isNotBlank()) "$className (Sec $section)" else className
 }
 
+@IgnoreExtraProperties
 @Entity(tableName = "exams")
 data class ExamDefinition(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val examName: String,
-    val targetClass: String,
-    val examDate: String,
+    val examName: String = "",
+    val targetClass: String = "",
+    val examDate: String = "",
     val academicYear: Int = 2026
 )
 
+@IgnoreExtraProperties
 @Entity(
     tableName = "exam_subjects",
     foreignKeys = [
@@ -79,8 +91,8 @@ data class ExamDefinition(
 )
 data class ExamSubject(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val examId: Long,
-    val subjectName: String,
+    val examId: Long = 0,
+    val subjectName: String = "",
     val fullMarks: Int = 100,
     val hasWritten: Boolean = true,
     val maxWritten: Int = 70,
@@ -90,6 +102,7 @@ data class ExamSubject(
     val maxPractical: Int = 20
 )
 
+@IgnoreExtraProperties
 @Entity(
     tableName = "exam_results",
     foreignKeys = [
@@ -104,21 +117,23 @@ data class ExamSubject(
 )
 data class ExamResult(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val studentId: Long,
-    val examName: String,
-    val academicYear: Int,
-    val subjectName: String,
-    val fullMarks: Int,
+    val studentId: Long = 0,
+    val examName: String = "",
+    val academicYear: Int = 2026,
+    val subjectName: String = "",
+    val fullMarks: Int = 100,
     val writtenMarks: Int = 0,
     val oralMarks: Int = 0,
     val practicalMarks: Int = 0,
-    val grade: String,
+    val grade: String = "",
     val submittedByTeacher: String = "Admin",
-    val approvalStatus: String = "APPROVED" // "PENDING", "APPROVED", "REJECTED"
+    val approvalStatus: String = "APPROVED"
 ) {
+    @get:Exclude
     val obtainedMarks: Int get() = writtenMarks + oralMarks + practicalMarks
 }
 
+@IgnoreExtraProperties
 @Entity(
     tableName = "exam_subject_components",
     foreignKeys = [
@@ -133,12 +148,13 @@ data class ExamResult(
 )
 data class ExamSubjectComponent(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val examSubjectId: Long,
-    val componentName: String,
-    val maxMarks: Int,
+    val examSubjectId: Long = 0,
+    val componentName: String = "",
+    val maxMarks: Int = 0,
     val position: Int = 0
 )
 
+@IgnoreExtraProperties
 @Entity(
     tableName = "exam_result_components",
     foreignKeys = [
@@ -153,13 +169,14 @@ data class ExamSubjectComponent(
 )
 data class ExamResultComponent(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val examResultId: Long,
-    val componentName: String,
-    val maxMarks: Int,
-    val obtainedMarks: Int,
+    val examResultId: Long = 0,
+    val componentName: String = "",
+    val maxMarks: Int = 0,
+    val obtainedMarks: Int = 0,
     val position: Int = 0
 )
 
+@IgnoreExtraProperties
 @Entity(
     tableName = "fee_payments",
     foreignKeys = [
@@ -174,21 +191,22 @@ data class ExamResultComponent(
 )
 data class FeePayment(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val studentId: Long,
+    val studentId: Long = 0,
     val studentName: String = "",
-    val receiptNo: String,
-    val academicYear: Int,
-    val paidMonths: String,
-    val baseAmount: Double,
-    val lateFeeAmount: Double,
-    val totalAmount: Double,
-    val paymentDate: Long
+    val receiptNo: String = "",
+    val academicYear: Int = 2026,
+    val paidMonths: String = "",
+    val baseAmount: Double = 0.0,
+    val lateFeeAmount: Double = 0.0,
+    val totalAmount: Double = 0.0,
+    val paymentDate: Long = 0L
 )
 
+@IgnoreExtraProperties
 @Entity(tableName = "late_fee_rules")
 data class LateFeeRule(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val dayFrom: Int,
-    val dayTo: Int,
-    val fineAmount: Double
+    val dayFrom: Int = 0,
+    val dayTo: Int = 0,
+    val fineAmount: Double = 0.0
 )

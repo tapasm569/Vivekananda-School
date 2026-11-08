@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Dispatchers
 import com.vidyamandir.schoolmanager.util.ResultPdfGenerator
 import com.vidyamandir.schoolmanager.util.SchoolDataBackup
+import com.vidyamandir.schoolmanager.util.FirebaseSyncManager
 import com.vidyamandir.schoolmanager.data.ExamDefinition
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.data.AppDatabase
@@ -65,21 +66,17 @@ class MainActivity : AppCompatActivity() {
         else pendingMarksheetFile = null
     }
 
-
     companion object {
         private const val PROFILE_PREFS = "vv_school_profile"
         private const val DEFAULT_SCHOOL_NAME = "Vivekananda Vidyamandir"
 
-        private const val MENU_PROFILE = 101
-        private const val MENU_PENALTY = 102
-        private const val MENU_BACKUP = 103
-        private const val MENU_RESTORE = 104
-        private const val MENU_MARKSHEET = 105
         private const val MENU_LOGOUT = 106
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        FirebaseSyncManager.init(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -231,6 +228,30 @@ class MainActivity : AppCompatActivity() {
             showPenaltyDialog()
         }
 
+        val cloudSync = createMenuCard(
+            "⚡", "Upload Cloud", "Sync local to Firebase",
+            android.graphics.Color.parseColor("#EA580C")
+        ) {
+            dialog.dismiss()
+            performFirebaseCloudSync()
+        }
+
+        val cloudPull = createMenuCard(
+            "⬇", "Pull Cloud", "Fetch from Firebase",
+            android.graphics.Color.parseColor("#2563EB")
+        ) {
+            dialog.dismiss()
+            performFirebaseCloudPull()
+        }
+
+        val marksheet = createMenuCard(
+            "▤", "Export Marksheet", "Create class PDF",
+            android.graphics.Color.parseColor("#7C3AED")
+        ) {
+            dialog.dismiss()
+            startMarksheetExport()
+        }
+
         val backup = createMenuCard(
             "☁", "BackUp Data", "Save school records",
             navy
@@ -247,16 +268,9 @@ class MainActivity : AppCompatActivity() {
             startRestore()
         }
 
-        val marksheet = createMenuCard(
-            "▤", "Export Marksheet", "Create class PDF",
-            android.graphics.Color.parseColor("#7C3AED")
-        ) {
-            dialog.dismiss()
-            startMarksheetExport()
-        }
-
-        addMenuCardRow(grid, penalty, backup)
-        addMenuCardRow(grid, restore, marksheet)
+        addMenuCardRow(grid, penalty, cloudSync)
+        addMenuCardRow(grid, cloudPull, marksheet)
+        addMenuCardRow(grid, backup, restore)
         root.addView(grid)
 
         val logout = LinearLayout(this).apply {
@@ -307,6 +321,20 @@ class MainActivity : AppCompatActivity() {
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
         dialog.window?.setGravity(Gravity.BOTTOM)
+    }
+
+    private fun performFirebaseCloudSync() {
+        Toast.makeText(this, "Uploading records to Firebase Cloud...", Toast.LENGTH_SHORT).show()
+        FirebaseSyncManager.syncAllLocalToCloud(this, lifecycleScope) { success, msg ->
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun performFirebaseCloudPull() {
+        Toast.makeText(this, "Downloading records from Firebase Cloud...", Toast.LENGTH_SHORT).show()
+        FirebaseSyncManager.syncAllCloudToLocal(this, lifecycleScope) { success, msg ->
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun createMenuCard(
@@ -562,7 +590,7 @@ class MainActivity : AppCompatActivity() {
                 container.addView(explanation)
 
                 val header = LinearLayout(this@MainActivity).apply {
-                    orientation = LinearLayout.HORIZONTAL
+    orientation = LinearLayout.HORIZONTAL
                 }
 
                 listOf("From", "To", "Penalty ₹", "").forEach {
@@ -856,12 +884,10 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
 
-                // Reopen the database if restoration closed it.
                 AppDatabase.getDatabase(
                     applicationContext, lifecycleScope
                 )
 
-                // Recreate the screen so fragments use the reopened database.
                 val intent = Intent(
                     this@MainActivity,
                     MainActivity::class.java
@@ -893,7 +919,6 @@ class MainActivity : AppCompatActivity() {
                 val students = data.first
                 val exams = data.second
 
-                // Keep sections separate in the export class picker.
                 val classes = students
                     .map { it.displayClass }
                     .distinct()
@@ -919,8 +944,6 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
 
-                        // An exam may target either the displayed section
-                        // or the parent class containing that section.
                         val parentClassNames = selectedStudents
                             .map { it.className }
                             .distinct()
@@ -962,7 +985,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showExamSelection(
+private fun showExamSelection(
         selectedClass: String,
         allStudents: List<Student>,
         exams: List<ExamDefinition>
