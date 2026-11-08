@@ -24,45 +24,153 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="12dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilClassSelect"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        <!-- Top Section: Compact Selector Controls & Student Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="1. Select Class">
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="4dp">
 
-            <AutoCompleteTextView
-                android:id="@+id/actvClassSelect"
+            <!-- Side-by-side Class and Student Search -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:orientation="horizontal">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilStudentSelect"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilClassSelect"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:hint="Class"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvClassSelect"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilStudentSelect"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.6"
+                    android:layout_marginStart="4dp"
+                    android:hint="Search Student"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvStudentSelect"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:inputType="text"
+                        android:imeOptions="actionDone" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Compact Student Profile Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardStudentInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#CBD5E1"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="9dp">
+
+                    <TextView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_action_receipt"
+                        android:gravity="center"
+                        android:text="👤"
+                        android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvSelectedStudentName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Student: Please select above"
+                            android:textColor="#0F3D6E"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSelectedStudentMeta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="Class and monthly fee will appear here"
+                            android:textColor="#64748B"
+                            android:textSize="11.5sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="2dp"
+                android:text="SELECT FEE MONTHS"
+                android:letterSpacing="0.04"
+                android:textColor="#475569"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Scrollable Months List (Spacious & Clean) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMonths"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="2. Search or Select Student">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingHorizontal="6dp"
+            android:paddingBottom="4dp" />
 
-            <AutoCompleteTextView
-                android:id="@+id/actvStudentSelect"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:imeOptions="actionDone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
+        <!-- Modern Elevated Payment Bottom Sheet -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardStudentInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
             app:strokeWidth="1dp"
             app:strokeColor="#CBD5E1"
             app:cardBackgroundColor="@android:color/white">
@@ -71,85 +179,146 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:paddingHorizontal="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="12dp">
 
-                <TextView
-                    android:id="@+id/tvSelectedStudentName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Student: Please select above"
-                    android:textColor="#0F3D6E"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                <!-- Subtle Top Drag Indicator -->
+                <View
+                    android:layout_width="36dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/bg_action_call" />
 
-                <TextView
-                    android:id="@+id/tvSelectedStudentMeta"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="Class and monthly fee will appear here"
-                    android:textColor="#475569"
-                    android:textSize="12sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:text="3. Select Fee Months"
-            android:textColor="#1E293B"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvMonths"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="4dp" />
-
-        <!-- Counter Calculation Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            app:cardCornerRadius="14dp"
-            app:cardBackgroundColor="#FEF3C7">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <!-- Base fee row -->
+                <!-- 3-Column Financial Metric Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Base Fee"
+                            android:textSize="11sp"
+                            android:textColor="#64748B" />
+
+                        <TextView
+                            android:id="@+id/tvTotalBaseFee"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₹0.00"
+                            android:textSize="14sp"
+                            android:textColor="#0F3D6E"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Late Fine"
+                            android:textSize="11sp"
+                            android:textColor="#64748B" />
+
+                        <TextView
+                            android:id="@+id/tvWaivedNote"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Fine: ₹0.00"
+                            android:textSize="14sp"
+                            android:textColor="#DC2626"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Total Billable"
+                            android:textSize="11sp"
+                            android:textColor="#64748B" />
+
+                        <TextView
+                            android:id="@+id/tvTotalPayable"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₹0.00"
+                            android:textSize="15sp"
+                            android:textColor="#0F3D6E"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="8dp"
+                    android:background="#F1F5F9" />
+
+                <!-- Penalty to Charge Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Selected Base Fee:"
-                        android:textSize="13sp"
-                        android:textColor="#78350F" />
-
-                    <TextView
-                        android:id="@+id/tvTotalBaseFee"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="₹0.00"
-                        android:textColor="#78350F"
+                        android:text="Fine to Charge (₹):"
+                        android:textColor="#DC2626"
                         android:textSize="13sp"
                         android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etCustomFine"
+                        android:layout_width="85dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_action_call"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        android:text="0.00"
+                        android:textColor="#DC2626"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnWaiveFine"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:minWidth="0dp"
+                        android:paddingHorizontal="10dp"
+                        android:text="Waive ₹0"
+                        android:textColor="#DC2626"
+                        app:backgroundTint="#FEE2E2"
+                        android:textSize="11sp"
+                        app:cornerRadius="8dp" />
                 </LinearLayout>
 
-                <!-- Penalty Charge / Waive Row -->
+                <!-- Cash Received Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -161,154 +330,75 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Penalty to Charge:"
-                        android:textSize="13sp"
-                        android:textColor="#DC2626"
-                        android:textStyle="bold" />
-
-                    <EditText
-                        android:id="@+id/etCustomFine"
-                        android:layout_width="85dp"
-                        android:layout_height="38dp"
-                        android:background="@android:color/white"
-                        android:gravity="center"
-                        android:inputType="numberDecimal"
-                        android:paddingHorizontal="4dp"
-                        android:text="0.00"
-                        android:textColor="#DC2626"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnWaiveFine"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="38dp"
-                        android:layout_marginStart="6dp"
-                        android:minWidth="0dp"
-                        android:paddingHorizontal="8dp"
-                        android:text="Waive / ₹0"
-                        android:textSize="11sp"
-                        app:cornerRadius="8dp" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvWaivedNote"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="Calculated Fine: ₹0.00 (Waived: ₹0.00)"
-                    android:textColor="#92400E"
-                    android:textSize="10.5sp" />
-
-                <!-- Total Amount Due Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Total Billable Amount:"
-                        android:textColor="#78350F"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvTotalPayable"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="₹0.00"
-                        android:textColor="#78350F"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="6dp"
-                    android:background="#FDE68A" />
-
-                <!-- Cash Tendered / Paid Now Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="Cash Received (₹):"
-                        android:textSize="14sp"
-                        android:textColor="#15803D"
+                        android:textColor="#16A34A"
+                        android:textSize="13.5sp"
                         android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/etCashReceived"
-                        android:layout_width="100dp"
-                        android:layout_height="40dp"
-                        android:background="@android:color/white"
+                        android:layout_width="95dp"
+                        android:layout_height="38dp"
+                        android:background="@drawable/bg_action_whatsapp"
                         android:gravity="center"
                         android:inputType="numberDecimal"
-                        android:paddingHorizontal="4dp"
                         android:text="0.00"
-                        android:textColor="#15803D"
-                        android:textSize="15sp"
+                        android:textColor="#16A34A"
+                        android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnFullPay"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                        android:layout_height="38dp"
                         android:layout_marginStart="6dp"
                         android:minWidth="0dp"
-                        android:paddingHorizontal="8dp"
-                        android:text="Full"
+                        android:paddingHorizontal="10dp"
+                        android:text="Exact / Full"
+                        android:textColor="#16A34A"
+                        app:backgroundTint="#DCFCE7"
                         android:textSize="11sp"
                         app:cornerRadius="8dp" />
                 </LinearLayout>
 
-                <!-- Live Allocation Breakdown Preview -->
+                <!-- Live Allocation Ribbon -->
                 <TextView
                     android:id="@+id/tvAllocationPreview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:background="#FFFBEB"
-                    android:padding="6dp"
+                    android:layout_marginTop="8dp"
+                    android:background="#F8FAFC"
+                    android:gravity="center"
+                    android:paddingVertical="6dp"
+                    android:paddingHorizontal="8dp"
                     android:text="Select months to begin"
-                    android:textColor="#B45309"
-                    android:textSize="11sp" />
+                    android:textColor="#0F3D6E"
+                    android:textSize="11.5sp" />
 
-                <!-- Action Buttons -->
+                <!-- Confirm Payment Action Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSubmitPayment"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
                     android:text="Confirm Payment &amp; Record"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="#0F3D6E"
-                    app:cornerRadius="10dp" />
+                    app:cornerRadius="12dp" />
 
+                <!-- Secondary Link -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnViewPaymentHistory"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_height="38dp"
+                    android:layout_marginTop="2dp"
                     android:enabled="false"
-                    android:text="View Payment History"
-                    android:textColor="#0F3D6E"
-                    app:cornerRadius="10dp"
-                    app:strokeColor="#0F3D6E" />
+                    android:text="View Payment History →"
+                    android:textColor="#2563EB"
+                    android:textSize="12sp" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

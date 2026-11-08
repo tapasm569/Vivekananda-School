@@ -1,8 +1,10 @@
 package com.vidyamandir.schoolmanager.ui
 
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.vidyamandir.schoolmanager.databinding.ItemMonthFeeBinding
 import com.vidyamandir.schoolmanager.domain.MonthDueStatus
@@ -38,38 +40,52 @@ class MonthAdapter(
         private val binding: ItemMonthFeeBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        private fun setPillBadge(view: TextView, text: String, textColor: String, bgColor: String) {
+            view.text = text
+            view.setTextColor(Color.parseColor(textColor))
+            val radius = 20 * view.resources.displayMetrics.density
+            val drawable = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = radius
+                setColor(Color.parseColor(bgColor))
+            }
+            view.background = drawable
+        }
+
         fun bind(item: MonthDueStatus) {
             binding.tvMonthName.text = "${item.monthName} ${item.academicYear}"
 
             if (item.isPaid) {
                 binding.cbSelectMonth.isChecked = false
                 binding.cbSelectMonth.isEnabled = false
-                binding.tvFeeBreakdown.text = "Monthly fee settled (₹${String.format("%.0f", item.paidAmount)})"
-                binding.tvStatusBadge.text = "PAID"
-                binding.tvStatusBadge.setTextColor(Color.parseColor("#16A34A"))
-                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#DCFCE7"))
+                binding.tvFeeBreakdown.text = "Settled (₹${String.format("%.0f", item.paidAmount)})"
+                setPillBadge(binding.tvStatusBadge, "PAID", "#16A34A", "#DCFCE7")
                 binding.root.setOnClickListener(null)
                 binding.cbSelectMonth.setOnClickListener(null)
                 return
             }
 
             binding.cbSelectMonth.isEnabled = true
-            binding.cbSelectMonth.isChecked = selectedPeriodKeys.contains(item.periodKey)
+            val isChecked = selectedPeriodKeys.contains(item.periodKey)
+            binding.cbSelectMonth.isChecked = isChecked
+
+            // Visual feedback on card border
+            if (isChecked) {
+                binding.cardMonth.strokeColor = Color.parseColor("#0F3D6E")
+                binding.cardMonth.strokeWidth = (2 * binding.root.resources.displayMetrics.density).toInt()
+            } else {
+                binding.cardMonth.strokeColor = Color.parseColor("#E2E8F0")
+                binding.cardMonth.strokeWidth = (1 * binding.root.resources.displayMetrics.density).toInt()
+            }
 
             if (item.paidAmount > 0.0) {
-                binding.tvStatusBadge.text = "PARTIAL: ₹${String.format("%.0f", item.baseFee)} Due"
-                binding.tvStatusBadge.setTextColor(Color.parseColor("#EA580C"))
-                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FFEDD5"))
+                setPillBadge(binding.tvStatusBadge, "PARTIAL: ₹${String.format("%.0f", item.baseFee)} Due", "#EA580C", "#FFEDD5")
                 binding.tvFeeBreakdown.text = "Paid: ₹${String.format("%.0f", item.paidAmount)} / ₹${String.format("%.0f", item.fullMonthlyFee)} | Fine: ₹${item.lateFee}"
             } else if (item.isDue) {
-                binding.tvStatusBadge.text = "DUE"
-                binding.tvStatusBadge.setTextColor(Color.parseColor("#DC2626"))
-                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEE2E2"))
+                setPillBadge(binding.tvStatusBadge, "DUE", "#DC2626", "#FEE2E2")
                 binding.tvFeeBreakdown.text = "Fee: ₹${item.baseFee} | Fine: ₹${item.lateFee}"
             } else {
-                binding.tvStatusBadge.text = "ADVANCE"
-                binding.tvStatusBadge.setTextColor(Color.parseColor("#D97706"))
-                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEF3C7"))
+                setPillBadge(binding.tvStatusBadge, "ADVANCE", "#D97706", "#FEF3C7")
                 binding.tvFeeBreakdown.text = "Fee: ₹${item.baseFee}"
             }
 
@@ -81,6 +97,7 @@ class MonthAdapter(
                 }
 
                 binding.cbSelectMonth.isChecked = selectedPeriodKeys.contains(item.periodKey)
+                notifyItemChanged(adapterPosition)
                 val selectedItems = items.filter { selectedPeriodKeys.contains(it.periodKey) }
                 onSelectionChanged(selectedItems)
             }
