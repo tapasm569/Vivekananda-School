@@ -14,7 +14,9 @@ data class MonthDueStatus(
     val baseFee: Double,
     val lateFee: Double,
     val isDue: Boolean,
-    val isPaid: Boolean
+    val isPaid: Boolean,
+    val fullMonthlyFee: Double = baseFee,
+    val paidAmount: Double = 0.0
 ) {
     val periodKey: String
         get() = "%04d-%02d".format(academicYear, monthIndex)
@@ -48,7 +50,6 @@ object FeeCalculator {
         }
     }
 
-
     private val MONTH_NAMES = arrayOf(
         "January", "February", "March", "April",
         "May", "June", "July", "August",
@@ -57,25 +58,23 @@ object FeeCalculator {
 
     fun parsePaidPeriodKeys(payments: List<FeePayment>): Set<String> {
         val result = mutableSetOf<String>()
-
         payments.forEach { payment ->
             payment.paidMonths.split(",")
                 .map { it.trim() }
                 .filter { it.isNotBlank() }
                 .forEach { token ->
-                    if (token.matches(Regex("\\d{4}-\\d{2}"))) {
-                        val parts = token.split("-")
+                    val cleanToken = if (token.contains(":")) token.substringBefore(":") else token
+                    if (cleanToken.matches(Regex("\\d{4}-\\d{2}"))) {
+                        val parts = cleanToken.split("-")
                         val year = parts[0].toIntOrNull()
                         val month = parts[1].toIntOrNull()
                         if (year != null && month != null && month in 1..12) {
                             result.add("%04d-%02d".format(year, month))
                         }
                     } else {
-                        val month = token.toIntOrNull()
+                        val month = cleanToken.toIntOrNull()
                         if (month != null && month in 1..12) {
-                            result.add(
-                                "%04d-%02d".format(payment.academicYear, month)
-                            )
+                            result.add("%04d-%02d".format(payment.academicYear, month))
                         }
                     }
                 }
@@ -83,9 +82,58 @@ object FeeCalculator {
         return result
     }
 
+    fun parsePaidMonthAmounts(payments: List<FeePayment>, studentMonthlyFee: Double): Map<String, Double> {
+        val allocations = mutableMapOf<String, Double>()
+        payments.forEach { payment ->
+            val tokens = payment.paidMonths.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+            if (tokens.isEmpty()) return@forEach
+
+            tokens.forEach { token ->
+                val key: String
+                val amt: Double
+
+                if (token.contains(":")) {
+                    val parts = token.split(":")
+                    val rawKey = parts[0].trim()
+                    amt = parts.getOrNull(1)?.trim()?.toDoubleOrNull() ?: 0.0
+                    key = if (rawKey.matches(Regex("\\d{4}-\\d{2}"))) {
+                        rawKey
+                    } else {
+                        val m = rawKey.toIntOrNull() ?: 1
+                        "%04d-%02d".format(payment.academicYear, m)
+                    }
+                } else {
+                    key = if (token.matches(Regex("\\d{4}-\\d{2}"))) {
+                        token
+                    } else {
+                        val m = token.toIntOrNull() ?: 1
+                        "%04d-%02d".format(payment.academicYear, m)
+                    }
+                    amt = if (tokens.isNotEmpty()) payment.baseAmount / tokens.size else studentMonthlyFee
+                }
+
+                allocations[key] = (allocations[key] ?: 0.0) + amt
+            }
+        }
+        return allocations
+    }
+
     fun calculateDueMonths(
         student: Student,
         paidPeriodKeys: Set<String>,
+        rules: List<LateFeeRule>,
+        currentCalendar: Calendar = Calendar.getInstance(),
+        startYear: Int = 2026
+    ): List<MonthDueStatus> {
+        val map = paidPeriodKeys.associateWith { student.monthlyFee }
+        return calculateDueMonthsWithAmounts(student, map, rules, currentCalendar, startYear)
+    }
+
+    fun calculateDueMonthsWithAmounts(
+        student: Student,
+        paidAmounts: Map<String, Double>,
         rules: List<LateFeeRule>,
         currentCalendar: Calendar = Calendar.getInstance(),
         startYear: Int = 2026
@@ -101,30 +149,24 @@ object FeeCalculator {
         )
 
         val statuses = mutableListOf<MonthDueStatus>()
-
         if (currentYear < startYear) return emptyList()
 
         for (year in startYear..currentYear) {
             val firstMonth = if (year == startYear) {
                 student.admissionMonth.coerceIn(1, 12)
-            } else {
-                1
-            }
+            } else 1
 
-            val lastMonth = if (year == currentYear) 12 else 12
-
-            for (month in firstMonth..lastMonth) {
+            for (month in firstMonth..12) {
                 val key = "%04d-%02d".format(year, month)
-                val paid = paidPeriodKeys.contains(key)
-
-                val isDue = year < currentYear || month <= currentMonth
+                val totalPaid = paidAmounts[key] ?: 0.0
+                val isPaid = totalPaid >= (student.monthlyFee - 0.01)
+                val remainingBase = if (isPaid) 0.0 else maxOf(0.0, student.monthlyFee - totalPaid)
+                val isDue = (year < currentYear || month <= currentMonth) && !isPaid
 
                 var lateFee = 0.0
 
-                if (!paid) {
-                    val nextMonth = Calendar.getInstance(
-                        TimeZone.getTimeZone("UTC")
-                    ).apply {
+                if (!isPaid) {
+                    val nextMonth = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
                         clear()
                         set(Calendar.YEAR, year)
                         set(Calendar.MONTH, month - 1)
@@ -142,15 +184,12 @@ object FeeCalculator {
                         TimeUnit.MILLISECONDS.toDays(
                             today.timeInMillis - dueDate.timeInMillis
                         ).toInt() + 1
-                    } else {
-                        0
-                    }
+                    } else 0
 
                     lateFee = rules
                         .filter { overdueDays >= it.dayFrom && overdueDays <= it.dayTo }
                         .maxByOrNull { it.dayFrom }
-                        ?.fineAmount
-                        ?: 0.0
+                        ?.fineAmount ?: 0.0
                 }
 
                 statuses.add(
@@ -158,10 +197,12 @@ object FeeCalculator {
                         academicYear = year,
                         monthIndex = month,
                         monthName = MONTH_NAMES[month - 1],
-                        baseFee = student.monthlyFee,
+                        baseFee = remainingBase,
                         lateFee = lateFee,
                         isDue = isDue,
-                        isPaid = paid
+                        isPaid = isPaid,
+                        fullMonthlyFee = student.monthlyFee,
+                        paidAmount = totalPaid
                     )
                 )
             }

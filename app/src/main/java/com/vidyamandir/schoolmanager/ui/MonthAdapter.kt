@@ -44,7 +44,7 @@ class MonthAdapter(
             if (item.isPaid) {
                 binding.cbSelectMonth.isChecked = false
                 binding.cbSelectMonth.isEnabled = false
-                binding.tvFeeBreakdown.text = "Monthly fee already settled"
+                binding.tvFeeBreakdown.text = "Monthly fee settled (₹${String.format("%.0f", item.paidAmount)})"
                 binding.tvStatusBadge.text = "PAID"
                 binding.tvStatusBadge.setTextColor(Color.parseColor("#16A34A"))
                 binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#DCFCE7"))
@@ -54,21 +54,24 @@ class MonthAdapter(
             }
 
             binding.cbSelectMonth.isEnabled = true
-            binding.cbSelectMonth.isChecked =
-                selectedPeriodKeys.contains(item.periodKey)
+            binding.cbSelectMonth.isChecked = selectedPeriodKeys.contains(item.periodKey)
 
-            if (item.isDue) {
+            if (item.paidAmount > 0.0) {
+                binding.tvStatusBadge.text = "PARTIAL: ₹${String.format("%.0f", item.baseFee)} Due"
+                binding.tvStatusBadge.setTextColor(Color.parseColor("#EA580C"))
+                binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FFEDD5"))
+                binding.tvFeeBreakdown.text = "Paid: ₹${String.format("%.0f", item.paidAmount)} / ₹${String.format("%.0f", item.fullMonthlyFee)} | Fine: ₹${item.lateFee}"
+            } else if (item.isDue) {
                 binding.tvStatusBadge.text = "DUE"
                 binding.tvStatusBadge.setTextColor(Color.parseColor("#DC2626"))
                 binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEE2E2"))
+                binding.tvFeeBreakdown.text = "Fee: ₹${item.baseFee} | Fine: ₹${item.lateFee}"
             } else {
                 binding.tvStatusBadge.text = "ADVANCE"
                 binding.tvStatusBadge.setTextColor(Color.parseColor("#D97706"))
                 binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#FEF3C7"))
+                binding.tvFeeBreakdown.text = "Fee: ₹${item.baseFee}"
             }
-
-            binding.tvFeeBreakdown.text =
-                "Fee: ₹${item.baseFee} | Fine: ₹${item.lateFee}"
 
             val toggleAction = {
                 if (selectedPeriodKeys.contains(item.periodKey)) {
@@ -78,10 +81,7 @@ class MonthAdapter(
                 }
 
                 binding.cbSelectMonth.isChecked = selectedPeriodKeys.contains(item.periodKey)
-
-                val selectedItems = items.filter {
-                    selectedPeriodKeys.contains(it.periodKey)
-                }
+                val selectedItems = items.filter { selectedPeriodKeys.contains(it.periodKey) }
                 onSelectionChanged(selectedItems)
             }
 

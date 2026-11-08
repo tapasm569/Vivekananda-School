@@ -196,7 +196,8 @@ data class FeePayment(
     val baseAmount: Double = 0.0,
     val lateFeeAmount: Double = 0.0,
     val totalAmount: Double = 0.0,
-    val paymentDate: Long = 0L
+    val paymentDate: Long = 0L,
+    val waivedFineAmount: Double = 0.0
 )
 
 @IgnoreExtraProperties

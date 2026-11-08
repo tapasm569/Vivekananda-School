@@ -16,6 +16,7 @@ import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityFeeCounterBinding
 import com.vidyamandir.schoolmanager.domain.FeeCalculator
 import com.vidyamandir.schoolmanager.domain.MonthDueStatus
+import com.vidyamandir.schoolmanager.util.FirebaseSyncManager
 import com.vidyamandir.schoolmanager.util.PaymentReceiptPdf
 import com.vidyamandir.schoolmanager.util.ThermalReceiptPrinter
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,12 @@ class FeeCollectionActivity : AppCompatActivity() {
     private var selectedStudent: Student? = null
     private var currentlySelectedMonths: List<MonthDueStatus> = emptyList()
 
+    private var calculatedBaseSum: Double = 0.0
+    private var calculatedLateFine: Double = 0.0
+    private var userFineCharged: Double = 0.0
+    private var userCashReceived: Double = 0.0
+
+    private var isUpdatingInputs = false
     private var selectedClassFilter = "All Classes"
     private var isSettingStudentText = false
 
@@ -51,8 +58,10 @@ class FeeCollectionActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         adapter = MonthAdapter { selectedMonths ->
-            currentlySelectedMonths = selectedMonths
-            calculateTotals(selectedMonths)
+            currentlySelectedMonths = selectedMonths.sortedWith(
+                compareBy({ it.academicYear }, { it.monthIndex })
+            )
+            onSelectedMonthsChanged(currentlySelectedMonths)
         }
 
         binding.rvMonths.layoutManager = LinearLayoutManager(this)
@@ -71,31 +80,65 @@ class FeeCollectionActivity : AppCompatActivity() {
 
         binding.actvStudentSelect.setOnItemClickListener { parent, _, position, _ ->
             val label = parent.getItemAtPosition(position).toString()
-
-            val student = visibleStudents.firstOrNull {
-                studentLabel(it) == label
-            }
-
-            if (student != null) {
-                selectStudent(student)
-            }
+            val student = visibleStudents.firstOrNull { studentLabel(it) == label }
+            if (student != null) selectStudent(student)
         }
 
         binding.actvStudentSelect.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(
-                s: CharSequence?, start: Int, count: Int, after: Int
-            ) {}
-
-            override fun onTextChanged(
-                s: CharSequence?, start: Int, before: Int, count: Int
-            ) {
-                if (!isSettingStudentText) {
-                    if (selectedStudent != null) {
-                        resetStudentSelection()
-                    }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!isSettingStudentText && selectedStudent != null) {
+                    resetStudentSelection()
                 }
             }
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
+        // 1-Tap Waive Fine button
+        binding.btnWaiveFine.setOnClickListener {
+            isUpdatingInputs = true
+            binding.etCustomFine.setText("0.00")
+            userFineCharged = 0.0
+            isUpdatingInputs = false
+            recomputePayableAndAllocation()
+        }
+
+        // 1-Tap Full Pay button
+        binding.btnFullPay.setOnClickListener {
+            val totalBillable = calculatedBaseSum + userFineCharged
+            isUpdatingInputs = true
+            binding.etCashReceived.setText(String.format("%.2f", totalBillable))
+            userCashReceived = totalBillable
+            isUpdatingInputs = false
+            recomputePayableAndAllocation()
+        }
+
+        // Custom Fine listener
+        binding.etCustomFine.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!isUpdatingInputs) {
+                    userFineCharged = s?.toString()?.toDoubleOrNull() ?: 0.0
+                    val totalBillable = calculatedBaseSum + userFineCharged
+                    isUpdatingInputs = true
+                    binding.etCashReceived.setText(String.format("%.2f", totalBillable))
+                    userCashReceived = totalBillable
+                    isUpdatingInputs = false
+                    recomputePayableAndAllocation()
+                }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        // Cash Received listener
+        binding.etCashReceived.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!isUpdatingInputs) {
+                    userCashReceived = s?.toString()?.toDoubleOrNull() ?: 0.0
+                    recomputePayableAndAllocation()
+                }
+            }
             override fun afterTextChanged(s: Editable?) {}
         })
 
@@ -118,41 +161,26 @@ class FeeCollectionActivity : AppCompatActivity() {
                 }
 
                 val classNames = listOf("All Classes") +
-                    studentsList.map { it.displayClass }
-                        .distinct()
-                        .sorted()
+                    studentsList.map { it.displayClass }.distinct().sorted()
 
                 binding.actvClassSelect.setAdapter(
-                    ArrayAdapter(
-                        this@FeeCollectionActivity,
-                        android.R.layout.simple_dropdown_item_1line,
-                        classNames
-                    )
+                    ArrayAdapter(this@FeeCollectionActivity, android.R.layout.simple_dropdown_item_1line, classNames)
                 )
 
                 val requestedId = intent.getLongExtra("STUDENT_ID", -1L)
-                val requestedStudent = studentsList.firstOrNull {
-                    it.id == requestedId
-                }
+                val requestedStudent = studentsList.firstOrNull { it.id == requestedId }
 
                 if (requestedStudent != null) {
                     selectedClassFilter = requestedStudent.displayClass
-                    binding.actvClassSelect.setText(
-                        selectedClassFilter, false
-                    )
+                    binding.actvClassSelect.setText(selectedClassFilter, false)
                     updateStudentOptions(studentLabel(requestedStudent))
                     selectStudent(requestedStudent)
                 } else {
                     binding.actvClassSelect.setText("All Classes", false)
                     updateStudentOptions("")
                 }
-
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@FeeCollectionActivity,
-                    "Unable to load students: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@FeeCollectionActivity, "Unable to load students: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -164,44 +192,34 @@ class FeeCollectionActivity : AppCompatActivity() {
     private fun updateStudentOptions(query: String) {
         visibleStudents = studentsList.filter { student ->
             val matchesClass = selectedClassFilter == "All Classes" ||
-                student.displayClass.equals(
-                    selectedClassFilter,
-                    ignoreCase = true
-                )
+                student.displayClass.equals(selectedClassFilter, ignoreCase = true)
 
             matchesClass && (
                 query.isBlank() ||
                     student.fullName.contains(query, ignoreCase = true) ||
                     student.admissionNo.contains(query, ignoreCase = true)
-                )
+            )
         }
 
         val names = visibleStudents.map { studentLabel(it) }
-
         binding.actvStudentSelect.setAdapter(
-            ArrayAdapter(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                names
-            )
+            ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
         )
-
         binding.actvStudentSelect.threshold = 1
     }
 
     private fun selectStudent(student: Student) {
         selectedStudent = student
-
         isSettingStudentText = true
         binding.actvStudentSelect.setText(studentLabel(student), false)
         isSettingStudentText = false
 
-        binding.btnSubmitPayment.isEnabled = true
+        binding.btnSubmitPayment.isEnabled = false
         binding.btnViewPaymentHistory.isEnabled = true
 
         displayStudentInfo(student)
         currentlySelectedMonths = emptyList()
-        calculateTotals(emptyList())
+        onSelectedMonthsChanged(emptyList())
         loadStudentFeeMonths(student)
     }
 
@@ -213,109 +231,149 @@ class FeeCollectionActivity : AppCompatActivity() {
         binding.actvStudentSelect.setText("", false)
         isSettingStudentText = false
 
-        binding.tvSelectedStudentName.text =
-            "Student: Please select above"
-
-        binding.tvSelectedStudentMeta.text =
-            "Class and monthly fee will appear here"
+        binding.tvSelectedStudentName.text = "Student: Please select above"
+        binding.tvSelectedStudentMeta.text = "Class and monthly fee will appear here"
 
         binding.btnSubmitPayment.isEnabled = false
         binding.btnViewPaymentHistory.isEnabled = false
 
         adapter.submitList(emptyList())
-        calculateTotals(emptyList())
+        onSelectedMonthsChanged(emptyList())
     }
 
     private fun displayStudentInfo(student: Student) {
-        binding.tvSelectedStudentName.text =
-            "${student.fullName} (Roll: ${student.rollNo})"
-
-        binding.tvSelectedStudentMeta.text =
-            "Class: ${student.displayClass} | Monthly Fee: ₹${student.monthlyFee}"
+        binding.tvSelectedStudentName.text = "${student.fullName} (Roll: ${student.rollNo})"
+        binding.tvSelectedStudentMeta.text = "Class: ${student.displayClass} | Monthly Fee: ₹${student.monthlyFee}"
     }
 
     private fun loadStudentFeeMonths(student: Student) {
         lifecycleScope.launch {
             try {
                 val data = withContext(Dispatchers.IO) {
-                    val payments = db.schoolDao()
-                        .getAllStudentPayments(student.id)
-                        .first()
-
+                    val payments = db.schoolDao().getAllStudentPayments(student.id).first()
                     val rules = FeeCalculator.effectiveRules(db.schoolDao().getAllLateFeeRules())
-
-                    Pair(
-                        FeeCalculator.parsePaidPeriodKeys(payments),
-                        rules
-                    )
+                    val paidMap = FeeCalculator.parsePaidMonthAmounts(payments, student.monthlyFee)
+                    Pair(paidMap, rules)
                 }
 
-                val statusList = FeeCalculator.calculateDueMonths(
-                    student,
-                    data.first,
-                    data.second
+                val statusList = FeeCalculator.calculateDueMonthsWithAmounts(
+                    student, data.first, data.second
                 )
 
                 if (selectedStudent?.id == student.id) {
                     adapter.submitList(statusList)
                 }
-
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@FeeCollectionActivity,
-                    "Unable to load fee months: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@FeeCollectionActivity, "Unable to load fee months: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun calculateTotals(selectedMonths: List<MonthDueStatus>) {
-        val baseSum = selectedMonths.sumOf { it.baseFee }
-        val lateSum = selectedMonths.sumOf { it.lateFee }
-        val payableTotal = baseSum + lateSum
+    private fun onSelectedMonthsChanged(selectedMonths: List<MonthDueStatus>) {
+        calculatedBaseSum = selectedMonths.sumOf { it.baseFee }
+        calculatedLateFine = selectedMonths.sumOf { it.lateFee }
+        userFineCharged = calculatedLateFine
+        val total = calculatedBaseSum + userFineCharged
+        userCashReceived = total
 
-        binding.tvTotalBaseFee.text =
-            "₹${String.format("%.2f", baseSum)}"
+        isUpdatingInputs = true
+        binding.tvTotalBaseFee.text = "₹${String.format("%.2f", calculatedBaseSum)}"
+        binding.etCustomFine.setText(String.format("%.2f", userFineCharged))
+        binding.etCashReceived.setText(String.format("%.2f", userCashReceived))
+        isUpdatingInputs = false
 
-        binding.tvTotalLateFee.text =
-            "₹${String.format("%.2f", lateSum)}"
+        recomputePayableAndAllocation()
+    }
 
-        binding.tvTotalPayable.text =
-            "₹${String.format("%.2f", payableTotal)}"
+    private fun recomputePayableAndAllocation() {
+        val waivedFine = maxOf(0.0, calculatedLateFine - userFineCharged)
+        val totalBillable = calculatedBaseSum + userFineCharged
+
+        binding.tvTotalPayable.text = "₹${String.format("%.2f", totalBillable)}"
+        binding.tvWaivedNote.text = "Calculated Fine: ₹${String.format("%.2f", calculatedLateFine)} (Waived: ₹${String.format("%.2f", waivedFine)})"
+
+        if (currentlySelectedMonths.isEmpty()) {
+            binding.tvAllocationPreview.text = "Select due months to begin"
+            binding.btnSubmitPayment.isEnabled = false
+            binding.btnSubmitPayment.text = "Confirm Payment & Record"
+            return
+        }
+
+        // Sequential FIFO Allocation
+        val actualFinePaid = minOf(userFineCharged, userCashReceived)
+        val cashForBase = maxOf(0.0, userCashReceived - actualFinePaid)
+
+        var remainingCash = cashForBase
+        val lines = mutableListOf<String>()
+
+        if (userFineCharged > 0.0) {
+            lines.add("Fine Charged: ₹${String.format("%.2f", actualFinePaid)}")
+        } else if (waivedFine > 0.0) {
+            lines.add("Fine: Waived ₹${String.format("%.2f", waivedFine)}")
+        }
+
+        currentlySelectedMonths.forEach { m ->
+            val needed = m.baseFee
+            val allocated = minOf(remainingCash, needed)
+            val remAfter = needed - allocated
+
+            if (remAfter <= 0.01) {
+                lines.add("${m.monthName}: ₹${String.format("%.0f", allocated)} (Fully Paid)")
+            } else if (allocated > 0.0) {
+                lines.add("${m.monthName}: ₹${String.format("%.0f", allocated)} (Partial, ₹${String.format("%.0f", remAfter)} Due)")
+            } else {
+                lines.add("${m.monthName}: ₹0 (Unpaid, ₹${String.format("%.0f", needed)} Due)")
+            }
+            remainingCash = maxOf(0.0, remainingCash - allocated)
+        }
+
+        binding.tvAllocationPreview.text = lines.joinToString("  •  ")
+
+        val canSubmit = userCashReceived > 0.0 && currentlySelectedMonths.isNotEmpty()
+        binding.btnSubmitPayment.isEnabled = canSubmit
+        binding.btnSubmitPayment.text = if (canSubmit) {
+            "Confirm Payment (₹${String.format("%.2f", userCashReceived)}) & Record"
+        } else {
+            "Confirm Payment & Record"
+        }
     }
 
     private fun submitPayment() {
-        val student = selectedStudent
-
-        if (student == null) {
-            Toast.makeText(
-                this,
-                "Please select a student first",
-                Toast.LENGTH_SHORT
-            ).show()
+        val student = selectedStudent ?: return
+        if (currentlySelectedMonths.isEmpty()) {
+            Toast.makeText(this, "Select at least one month", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val monthsToPay = currentlySelectedMonths
-
-        if (monthsToPay.isEmpty()) {
-            Toast.makeText(
-                this,
-                "Please select at least one month to pay",
-                Toast.LENGTH_SHORT
-            ).show()
+        if (userCashReceived <= 0.0) {
+            Toast.makeText(this, "Cash received must be greater than zero", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val baseSum = monthsToPay.sumOf { it.baseFee }
-        val lateSum = monthsToPay.sumOf { it.lateFee }
-        val total = baseSum + lateSum
-
-        val monthsString = monthsToPay.joinToString(",") {
-            it.periodKey
+        val totalBillable = calculatedBaseSum + userFineCharged
+        if (userCashReceived > totalBillable + 0.01) {
+            Toast.makeText(this, "Cash received exceeds total billable amount (₹$totalBillable)", Toast.LENGTH_SHORT).show()
+            return
         }
 
+        val actualFinePaid = minOf(userFineCharged, userCashReceived)
+        val cashForBase = maxOf(0.0, userCashReceived - actualFinePaid)
+        val waivedFine = maxOf(0.0, calculatedLateFine - userFineCharged)
+
+        // Generate paid token string with allocated amounts (e.g., "2026-02:150.0,2026-03:100.0")
+        var remainingCash = cashForBase
+        val allocatedTokens = mutableListOf<String>()
+
+        currentlySelectedMonths.forEach { m ->
+            val needed = m.baseFee
+            val allocated = minOf(remainingCash, needed)
+            if (allocated > 0.0) {
+                allocatedTokens.add("${m.periodKey}:${String.format(java.util.Locale.US, "%.2f", allocated)}")
+            }
+            remainingCash = maxOf(0.0, remainingCash - allocated)
+        }
+
+        val paidMonthsString = allocatedTokens.joinToString(",")
         val receipt = "REC-${System.currentTimeMillis()}"
 
         binding.btnSubmitPayment.isEnabled = false
@@ -326,57 +384,44 @@ class FeeCollectionActivity : AppCompatActivity() {
                     studentId = student.id,
                     studentName = student.fullName,
                     receiptNo = receipt,
-                    academicYear = monthsToPay.first().academicYear,
-                    paidMonths = monthsString,
-                    baseAmount = baseSum,
-                    lateFeeAmount = lateSum,
-                    totalAmount = total,
-                    paymentDate = System.currentTimeMillis()
+                    academicYear = currentlySelectedMonths.first().academicYear,
+                    paidMonths = paidMonthsString,
+                    baseAmount = cashForBase,
+                    lateFeeAmount = actualFinePaid,
+                    totalAmount = userCashReceived,
+                    paymentDate = System.currentTimeMillis(),
+                    waivedFineAmount = waivedFine
                 )
 
                 val pdfFile = withContext(Dispatchers.IO) {
-                    db.schoolDao().recordPayment(payment)
+                    val id = db.schoolDao().recordPayment(payment)
+                    val savedPayment = payment.copy(id = id)
+                    FirebaseSyncManager.syncPayment(savedPayment)
 
                     PaymentReceiptPdf.create(
-                        this@FeeCollectionActivity,
-                        student,
-                        payment
+                        this@FeeCollectionActivity, student, savedPayment
                     )
                 }
 
-                Toast.makeText(
-                    this@FeeCollectionActivity,
-                    "Payment saved. Receipt: $receipt",
-                    Toast.LENGTH_LONG
-                ).show()
-
+                Toast.makeText(this@FeeCollectionActivity, "Payment saved. Receipt: $receipt", Toast.LENGTH_LONG).show()
                 showReceiptActions(pdfFile, receipt, student, payment)
 
                 if (selectedStudent?.id == student.id) {
                     loadStudentFeeMonths(student)
                 }
-
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@FeeCollectionActivity,
-                    "Payment failed: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@FeeCollectionActivity, "Payment failed: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
-                binding.btnSubmitPayment.isEnabled =
-                    selectedStudent != null
+                binding.btnSubmitPayment.isEnabled = selectedStudent != null
             }
         }
     }
 
     private fun openPaymentHistory() {
         val student = selectedStudent ?: return
-
         startActivity(
-            android.content.Intent(
-                this,
-                StudentReceiptHistoryActivity::class.java
-            ).putExtra("STUDENT_ID", student.id)
+            android.content.Intent(this, StudentReceiptHistoryActivity::class.java)
+                .putExtra("STUDENT_ID", student.id)
         )
     }
 
@@ -388,34 +433,21 @@ class FeeCollectionActivity : AppCompatActivity() {
     ) {
         AlertDialog.Builder(this)
             .setTitle("Receipt saved successfully")
-            .setMessage(
-                "Receipt $receipt is stored on this phone. " +
-                    "You can reopen it anytime from the Paid List."
-            )
+            .setMessage("Receipt $receipt recorded. Cash drawer updated with ₹${String.format("%.2f", payment.totalAmount)}.")
             .setItems(
-                arrayOf(
-                    "View PDF",
-                    "Print PDF",
-                    "Thermal Printer",
-                    "Share PDF"
-                )
+                arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")
             ) { _, choice ->
                 runCatching {
                     when (choice) {
                         0 -> PaymentReceiptPdf.view(this, file)
                         1 -> PaymentReceiptPdf.print(this, file)
                         2 -> ThermalReceiptPrinter.choosePrinterAndPrint(
-                            this,
-                            PaymentReceiptPdf.thermalText(student, payment)
+                            this, PaymentReceiptPdf.thermalText(student, payment)
                         )
                         3 -> PaymentReceiptPdf.share(this, file)
                     }
                 }.onFailure {
-                    Toast.makeText(
-                        this,
-                        "Receipt action failed: ${it.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Receipt action failed: ${it.message}", Toast.LENGTH_LONG).show()
                 }
             }
             .setNegativeButton("Close", null)

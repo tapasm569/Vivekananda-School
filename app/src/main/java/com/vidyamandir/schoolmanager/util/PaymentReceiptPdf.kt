@@ -1,5 +1,4 @@
 package com.vidyamandir.schoolmanager.util
-import android.print.PrintAttributes
 
 import android.content.Context
 import android.content.Intent
@@ -10,6 +9,7 @@ import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.print.PageRange
+import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
@@ -40,6 +40,7 @@ object PaymentReceiptPdf {
         val ink = android.graphics.Color.rgb(30, 41, 59)
         val muted = android.graphics.Color.rgb(100, 116, 139)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
         fun text(value: String, x: Float, y: Float, size: Float = 12f, color: Int = ink, bold: Boolean = false) {
             paint.color = color
             paint.textSize = size
@@ -51,6 +52,7 @@ object PaymentReceiptPdf {
             paint.strokeWidth = 1f
             canvas.drawLine(42f, y, 553f, y, paint)
         }
+
         paint.color = navy
         canvas.drawRect(0f, 0f, 595f, 150f, paint)
         text("VIVEKANANDA VIDYAMANDIR", 42f, 55f, 23f, android.graphics.Color.WHITE, true)
@@ -78,36 +80,35 @@ object PaymentReceiptPdf {
         text("PAYMENT DETAILS", 42f, 452f, 12f, navy, true)
         text("Academic Year", 42f, 486f, 10f, muted)
         text(payment.academicYear.toString(), 200f, 486f, 10f, muted)
-        text("Fee month(s)", 42f, 520f, 10f, muted)
-        val months = payment.paidMonths.split(",")
-            .mapNotNull { token ->
-                val value = token.trim()
-                if (value.matches(Regex("\\d{4}-\\d{2}"))) {
-                    val parts = value.split("-")
-                    val year = parts[0].toIntOrNull() ?: return@mapNotNull null
-                    val month = parts[1].toIntOrNull() ?: return@mapNotNull null
-                    DateFormatSymbols().months.getOrNull(month - 1)?.let {
-                        "$it $year"
-                    }
-                } else {
-                    val month = value.toIntOrNull() ?: return@mapNotNull null
-                    DateFormatSymbols().months.getOrNull(month - 1)
-                }
-            }.joinToString(", ")
-        text(months.ifBlank { "-" }, 200f, 520f, 10f, ink, true)
+        text("Fee Allocation", 42f, 520f, 10f, muted)
+
+        val monthsFormatted = formatPaidMonthTokens(payment.paidMonths, payment.academicYear)
+        text(monthsFormatted.ifBlank { "-" }, 200f, 520f, 10f, ink, true)
         line(540f)
-        text("Base fee", 42f, 575f, 12f, ink)
-        text("Rs. ${"%.2f".format(Locale.US, payment.baseAmount)}", 440f, 575f, 12f, ink, true)
-        text("Late fee", 42f, 610f, 12f, ink)
-        text("Rs. ${"%.2f".format(Locale.US, payment.lateFeeAmount)}", 440f, 610f, 12f, ink, true)
-        line(630f)
+
+        text("Base Fee Received", 42f, 570f, 12f, ink)
+        text("Rs. ${"%.2f".format(Locale.US, payment.baseAmount)}", 440f, 570f, 12f, ink, true)
+
+        text("Late Fine Charged", 42f, 600f, 12f, ink)
+        text("Rs. ${"%.2f".format(Locale.US, payment.lateFeeAmount)}", 440f, 600f, 12f, ink, true)
+
+        if (payment.waivedFineAmount > 0.0) {
+            text("Late Fine Concession (Waived)", 42f, 630f, 11f, android.graphics.Color.rgb(220, 38, 38))
+            text("- Rs. ${"%.2f".format(Locale.US, payment.waivedFineAmount)}", 440f, 630f, 11f, android.graphics.Color.rgb(220, 38, 38), true)
+            line(650f)
+        } else {
+            line(625f)
+        }
+
         paint.color = 0xFFEFF6FF.toInt()
-        canvas.drawRoundRect(35f, 650f, 560f, 720f, 12f, 12f, paint)
-        text("TOTAL AMOUNT PAID", 55f, 680f, 12f, navy, true)
-        text("Rs. ${"%.2f".format(Locale.US, payment.totalAmount)}", 365f, 692f, 20f, green, true)
-        text("Payment Status: PAID", 42f, 758f, 12f, green, true)
-        text("This is a computer-generated receipt. Please keep it for your records.", 42f, 790f, 9f, muted)
-        text("Thank you for your payment.", 42f, 812f, 10f, navy, true)
+        val cardTop = if (payment.waivedFineAmount > 0.0) 665f else 640f
+        canvas.drawRoundRect(35f, cardTop, 560f, cardTop + 70f, 12f, 12f, paint)
+        text("TOTAL AMOUNT PAID", 55f, cardTop + 30f, 12f, navy, true)
+        text("Rs. ${"%.2f".format(Locale.US, payment.totalAmount)}", 365f, cardTop + 42f, 20f, green, true)
+
+        text("Payment Status: PAID", 42f, cardTop + 90f, 12f, green, true)
+        text("This is an official computer-generated receipt. Please keep it safely.", 42f, cardTop + 115f, 9f, muted)
+        text("Thank you for your payment.", 42f, cardTop + 135f, 10f, navy, true)
 
         document.finishPage(page)
         FileOutputStream(file).use { document.writeTo(it) }
@@ -116,22 +117,10 @@ object PaymentReceiptPdf {
     }
 
     fun thermalText(student: Student, payment: FeePayment): String {
-        val months = payment.paidMonths.split(",")
-            .mapNotNull { token ->
-                val value = token.trim()
-                if (value.matches(Regex("\\d{4}-\\d{2}"))) {
-                    val parts = value.split("-")
-                    val year = parts[0].toIntOrNull() ?: return@mapNotNull null
-                    val month = parts[1].toIntOrNull() ?: return@mapNotNull null
-                    DateFormatSymbols().months.getOrNull(month - 1)?.let {
-                        "$it $year"
-                    }
-                } else {
-                    val month = value.toIntOrNull() ?: return@mapNotNull null
-                    DateFormatSymbols().months.getOrNull(month - 1)
-                }
-            }.joinToString(", ")
+        val months = formatPaidMonthTokens(payment.paidMonths, payment.academicYear)
         val date = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date(payment.paymentDate))
+        val waiverLine = if (payment.waivedFineAmount > 0.0) "Fine Concession: -Rs. ${"%.2f".format(Locale.US, payment.waivedFineAmount)}\n" else ""
+
         return """VIVEKANANDA VIDYAMANDIR
 Dhupguri, Jalpaiguri
 FEE PAYMENT RECEIPT
@@ -144,13 +133,36 @@ Class: ${student.displayClass} | Roll: ${student.rollNo}
 Academic Year: ${payment.academicYear}
 Paid For: $months
 --------------------------------
-Base Fee: Rs. ${"%.2f".format(Locale.US, payment.baseAmount)}
-Late Fee: Rs. ${"%.2f".format(Locale.US, payment.lateFeeAmount)}
+Base Fee Paid: Rs. ${"%.2f".format(Locale.US, payment.baseAmount)}
+Late Fine Paid: Rs. ${"%.2f".format(Locale.US, payment.lateFeeAmount)}
+$waiverLine--------------------------------
 TOTAL PAID: Rs. ${"%.2f".format(Locale.US, payment.totalAmount)}
 --------------------------------
 Payment Status: PAID
 Thank you for your payment.
 """.trimIndent()
+    }
+
+    private fun formatPaidMonthTokens(raw: String, academicYear: Int): String {
+        return raw.split(",")
+            .mapNotNull { token ->
+                val clean = token.trim()
+                if (clean.isBlank()) return@mapNotNull null
+                val parts = clean.split(":")
+                val key = parts[0].trim()
+                val amt = parts.getOrNull(1)?.trim()
+
+                val monthName = if (key.matches(Regex("\\d{4}-\\d{2}"))) {
+                    val p = key.split("-")
+                    val m = p[1].toIntOrNull() ?: 1
+                    DateFormatSymbols().months.getOrNull(m - 1) ?: key
+                } else {
+                    val m = key.toIntOrNull() ?: 1
+                    DateFormatSymbols().months.getOrNull(m - 1) ?: key
+                }
+
+                if (amt != null) "$monthName (₹$amt)" else monthName
+            }.joinToString(", ")
     }
 
     fun share(context: Context, file: File) {
