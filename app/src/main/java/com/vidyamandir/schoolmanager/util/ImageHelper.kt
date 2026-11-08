@@ -11,13 +11,8 @@ import java.io.File
 
 object ImageHelper {
 
-    /**
-     * Downsamples high-resolution camera photos to avoid OutOfMemoryError.
-     * Compresses the output to a compact Base64 JPEG string (~10-15 KB).
-     */
     fun convertUriToBase64(context: Context, uri: Uri, maxSize: Int = 180): String? {
         return try {
-            // First pass: query dimensions without allocating memory
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(uri)?.use { stream ->
                 BitmapFactory.decodeStream(stream, null, options)
@@ -31,7 +26,6 @@ object ImageHelper {
                 sampleSize *= 2
             }
 
-            // Second pass: decode with sample size and 16-bit RGB_565 configuration
             val decodeOptions = BitmapFactory.Options().apply {
                 inSampleSize = sampleSize
                 inPreferredConfig = Bitmap.Config.RGB_565
@@ -64,9 +58,15 @@ object ImageHelper {
         }
 
         try {
-            // If it's a Base64 string from Firebase
-            if (photoData.length > 200 && !photoData.startsWith("/")) {
-                val decodedBytes = Base64.decode(photoData, Base64.DEFAULT)
+            // Base64 strings are long (> 200 characters) regardless of starting character
+            if (photoData.length > 200) {
+                val cleanData = if (photoData.contains(",")) {
+                    photoData.substringAfter(",")
+                } else {
+                    photoData
+                }.trim()
+
+                val decodedBytes = Base64.decode(cleanData, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 if (bitmap != null) {
                     imageView.setImageBitmap(bitmap)
@@ -74,9 +74,9 @@ object ImageHelper {
                 }
             }
 
-            // Legacy local file path fallback
+            // Fallback for local disk file paths
             val file = File(photoData)
-            if (file.exists()) {
+            if (file.exists() && file.isFile) {
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
                 if (bitmap != null) {
                     imageView.setImageBitmap(bitmap)
