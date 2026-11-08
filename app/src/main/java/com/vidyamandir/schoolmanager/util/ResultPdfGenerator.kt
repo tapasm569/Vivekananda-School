@@ -39,7 +39,6 @@ class ResultPdfGenerator(private val context: Context) {
         document.close()
     }
 
-
     fun generateClassReportCards(
         students: List<Student>,
         examName: String,
@@ -86,7 +85,6 @@ class ResultPdfGenerator(private val context: Context) {
         }
     }
 
-
     private fun drawPageOne(canvas: Canvas, student: Student, examName: String) {
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
         val navy = Color.parseColor("#123B65")
@@ -104,14 +102,14 @@ class ResultPdfGenerator(private val context: Context) {
         val contact = profile.getString("contact_number", "") ?: ""
         val email = profile.getString("email", "") ?: ""
 
-        // Main page background and border.
+        // Main page background and border
         canvas.drawColor(Color.WHITE)
         p.color = navy
         p.style = Paint.Style.STROKE
         p.strokeWidth = 2.5f
-        canvas.drawRect(22f, 22f, 573f, 820f, p)
+        canvas.drawRect(22f, 22f, (a4Width - 22).toFloat(), (a4Height - 22).toFloat(), p)
 
-        // TOP PANEL: school and student details.
+        // School and student details header
         p.style = Paint.Style.FILL
         p.color = navy
         p.textAlign = Paint.Align.CENTER
@@ -138,7 +136,7 @@ class ResultPdfGenerator(private val context: Context) {
         p.isFakeBoldText = true
         canvas.drawText(examName.uppercase().take(45), center, 116f, p)
 
-        // Load the supplied Swami Vivekananda photograph.
+        // Swami Vivekananda Portrait
         val imageId = context.resources.getIdentifier(
             "swami_vivekananda", "drawable", context.packageName
         )
@@ -162,47 +160,48 @@ class ResultPdfGenerator(private val context: Context) {
         canvas.drawText("STUDENT INFORMATION", center, 270f, p)
 
         p.color = pale
-        canvas.drawRoundRect(42f, 282f, 553f, 397f, 10f, 10f, p)
+        canvas.drawRoundRect(42f, 282f, (a4Width - 42).toFloat(), 385f, 10f, 10f, p)
         p.style = Paint.Style.STROKE
         p.strokeWidth = 1f
         p.color = Color.parseColor("#C8D6E5")
-        canvas.drawRoundRect(42f, 282f, 553f, 397f, 10f, 10f, p)
+        canvas.drawRoundRect(42f, 282f, (a4Width - 42).toFloat(), 385f, 10f, 10f, p)
 
+        // Labels
         p.style = Paint.Style.FILL
         p.textAlign = Paint.Align.LEFT
         p.color = navy
-        p.textSize = 12f
+        p.textSize = 11f
         p.isFakeBoldText = true
-        canvas.drawText("Student Name", 58f, 310f, p)
-        canvas.drawText("Admission No.", 58f, 342f, p)
-        canvas.drawText("Class", 315f, 342f, p)
-        canvas.drawText("Roll Number", 315f, 374f, p)
+        canvas.drawText("Student Name", 58f, 308f, p)
+        canvas.drawText("Admission No.", 58f, 345f, p)
+        canvas.drawText("Class", 315f, 345f, p)
+        canvas.drawText("Roll Number", 435f, 345f, p)
 
+        // Values (Class and Roll Number on the same horizontal row)
         p.color = Color.BLACK
         p.textSize = 11f
         p.isFakeBoldText = false
-        canvas.drawText(student.fullName.take(34), 58f, 327f, p)
-        canvas.drawText(student.admissionNo.take(22), 58f, 359f, p)
-        canvas.drawText(student.displayClass.take(22), 315f, 359f, p)
-        canvas.drawText(student.rollNo.toString(), 315f, 389f, p)
+        canvas.drawText(student.fullName.take(34), 58f, 325f, p)
+        canvas.drawText(student.admissionNo.take(22), 58f, 363f, p)
+        canvas.drawText(student.displayClass.take(15), 315f, 363f, p)
+        canvas.drawText(student.rollNo.toString(), 435f, 363f, p)
 
-        // Fold guide between the two panels.
+        // Fold guide line
         p.color = gold
         p.strokeWidth = 1.5f
         p.pathEffect = DashPathEffect(floatArrayOf(7f, 5f), 0f)
-        canvas.drawLine(30f, 421f, 565f, 421f, p)
+        canvas.drawLine(30f, 412f, (a4Width - 30).toFloat(), 412f, p)
         p.pathEffect = null
         p.textAlign = Paint.Align.CENTER
         p.textSize = 8f
         p.isFakeBoldText = true
-        canvas.drawText("FOLD HERE", center, 416f, p)
+        canvas.drawText("FOLD HERE", center, 407f, p)
 
-        // BOTTOM PANEL: rotate 180 degrees from its previous orientation.
-        // Total rotation is 270 degrees so the landscape panel still fits.
+        // Rotate 90 degrees and scale to fit inside the bottom fold half
         canvas.save()
-        canvas.translate(center, 619.5f)
-        canvas.rotate(270f)
-        canvas.translate(-198.5f, -297.5f)
+        canvas.translate(center, 618f)
+        canvas.rotate(90f)
+        canvas.translate(-175f, -250f)
         drawGradingGuide(canvas, navy, gold, pale)
         canvas.restore()
 
@@ -243,31 +242,33 @@ class ResultPdfGenerator(private val context: Context) {
         pale: Int
     ) {
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
-        val cx = 198.5f
+        val boxWidth = 350f
+        val boxHeight = 500f
+        val cx = boxWidth / 2f
 
         p.color = Color.WHITE
-        canvas.drawRect(0f, 0f, 397f, 595f, p)
+        canvas.drawRect(0f, 0f, boxWidth, boxHeight, p)
 
         p.color = navy
         p.style = Paint.Style.STROKE
-        p.strokeWidth = 2f
-        canvas.drawRect(8f, 8f, 389f, 587f, p)
+        p.strokeWidth = 1.8f
+        canvas.drawRect(6f, 6f, boxWidth - 6f, boxHeight - 6f, p)
 
         p.style = Paint.Style.FILL
         p.textAlign = Paint.Align.CENTER
-        p.textSize = 18f
+        p.textSize = 15f
         p.isFakeBoldText = true
         p.color = navy
-        canvas.drawText("GRADING & RESULT GUIDE", cx, 34f, p)
+        canvas.drawText("GRADING & RESULT GUIDE", cx, 28f, p)
+
+        p.textSize = 10f
+        p.color = gold
+        canvas.drawText("VIVEKANANDA VIDYAMANDIR", cx, 48f, p)
 
         p.textSize = 11f
-        p.color = gold
-        canvas.drawText("VIVEKANANDA VIDYAMANDIR", cx, 145f, p)
-
-        p.textSize = 12f
         p.color = navy
         p.isFakeBoldText = true
-        canvas.drawText("OVERALL GRADE SCALE", cx, 177f, p)
+        canvas.drawText("OVERALL GRADE SCALE", cx, 74f, p)
 
         val rows = listOf(
             "90% and above" to "AA",
@@ -280,61 +281,60 @@ class ResultPdfGenerator(private val context: Context) {
             "Below 25%" to "F"
         )
 
-        var y = 202f
+        var y = 96f
         p.textAlign = Paint.Align.LEFT
-        p.textSize = 10f
+        p.textSize = 9f
         p.isFakeBoldText = false
 
         for ((range, grade) in rows) {
             p.color = pale
-            canvas.drawRoundRect(35f, y - 13f, 362f, y + 5f, 4f, 4f, p)
+            canvas.drawRoundRect(25f, y - 11f, boxWidth - 25f, y + 5f, 4f, 4f, p)
             p.color = navy
-            canvas.drawText(range, 48f, y, p)
+            canvas.drawText(range, 35f, y, p)
             p.isFakeBoldText = true
-            canvas.drawText(grade, 325f, y, p)
+            canvas.drawText(grade, boxWidth - 55f, y, p)
             p.isFakeBoldText = false
-            y += 22f
+            y += 18f
         }
 
         p.textAlign = Paint.Align.CENTER
         p.color = navy
-        p.textSize = 12f
+        p.textSize = 11f
         p.isFakeBoldText = true
-        canvas.drawText("HOW PERCENTAGE IS CALCULATED", cx, 398f, p)
+        canvas.drawText("HOW PERCENTAGE IS CALCULATED", cx, y + 20f, p)
 
-        p.textSize = 10f
+        p.textSize = 9f
         p.isFakeBoldText = false
         canvas.drawText(
             "(Total Marks Obtained / Total Maximum Marks) x 100",
-            cx, 420f, p
-        )
-
-        p.textSize = 12f
-        p.isFakeBoldText = true
-        canvas.drawText("PASSING RULE", cx, 453f, p)
-
-        p.textSize = 10f
-        p.isFakeBoldText = false
-        canvas.drawText(
-            "A student must score at least 35% in every subject.",
-            cx, 474f, p
-        )
-        canvas.drawText(
-            "Overall result is FAILED if any subject is below 35%.",
-            cx, 491f, p
+            cx, y + 36f, p
         )
 
         p.textSize = 11f
         p.isFakeBoldText = true
-        p.color = gold
-        canvas.drawText("IMPORTANT GUIDELINES", cx, 522f, p)
+        canvas.drawText("PASSING RULE", cx, y + 62f, p)
 
         p.textSize = 9f
         p.isFakeBoldText = false
-        p.color = Color.DKGRAY
-        canvas.drawText("Please check all details and marks carefully.", cx, 541f, p)
-        canvas.drawText("Contact the school for any correction or query.", cx, 556f, p)
+        canvas.drawText(
+            "A student must score at least 35% in every subject.",
+            cx, y + 78f, p
+        )
+        canvas.drawText(
+            "Overall result is FAILED if any subject is below 35%.",
+            cx, y + 92f, p
+        )
 
+        p.textSize = 10f
+        p.isFakeBoldText = true
+        p.color = gold
+        canvas.drawText("IMPORTANT GUIDELINES", cx, y + 116f, p)
+
+        p.textSize = 8.5f
+        p.isFakeBoldText = false
+        p.color = Color.DKGRAY
+        canvas.drawText("Please check all details and marks carefully.", cx, y + 130f, p)
+        canvas.drawText("Contact the school for any correction or query.", cx, y + 143f, p)
     }
 
     private fun drawPageTwo(
@@ -344,41 +344,47 @@ class ResultPdfGenerator(private val context: Context) {
         componentsByResult: Map<Long, List<ExamResultComponent>> = emptyMap()
     ) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val tableLeft = 40f
+        val tableRight = (a4Width - 40).toFloat()
 
         paint.color = Color.parseColor("#0F3D6E")
         paint.textSize = 18f
         paint.isFakeBoldText = true
         paint.textAlign = Paint.Align.CENTER
-        canvas.drawText("ACADEMIC PROGRESS STATEMENT", (a4Width / 2).toFloat(), 55f, paint)
+        canvas.drawText("ACADEMIC PROGRESS STATEMENT", a4Width / 2f, 55f, paint)
 
+        // Header info box
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 1f
-        paint.color = Color.LTGRAY
-        canvas.drawRect(40f, 75f, (a4Width - 40).toFloat(), 115f, paint)
+        paint.color = Color.parseColor("#CBD5E1")
+        canvas.drawRect(tableLeft, 75f, tableRight, 115f, paint)
 
         paint.style = Paint.Style.FILL
         paint.textSize = 10f
         paint.textAlign = Paint.Align.LEFT
         paint.color = Color.BLACK
         paint.isFakeBoldText = false
-        canvas.drawText("Student: ${student.fullName}", 50f, 98f, paint)
-        canvas.drawText("Class: ${student.displayClass}", 260f, 98f, paint)
+        canvas.drawText("Student: ${student.fullName}", tableLeft + 10f, 98f, paint)
+        canvas.drawText("Class: ${student.displayClass}", 250f, 98f, paint)
         canvas.drawText("Roll: ${student.rollNo}", 440f, 98f, paint)
 
-        var y = 145f
+        // Table Header
+        var currentY = 135f
+        val headerHeight = 26f
         paint.color = Color.parseColor("#0F3D6E")
-        canvas.drawRect(40f, y - 18f, (a4Width - 40).toFloat(), y + 8f, paint)
+        canvas.drawRect(tableLeft, currentY, tableRight, currentY + headerHeight, paint)
 
         paint.color = Color.WHITE
         paint.isFakeBoldText = true
-        paint.textSize = 10f
-        canvas.drawText("Subject Name", 50f, y - 4f, paint)
-        canvas.drawText("Full", 220f, y - 4f, paint)
-        canvas.drawText("Written", 270f, y - 4f, paint)
-        canvas.drawText("Oral", 330f, y - 4f, paint)
-        canvas.drawText("Practical", 380f, y - 4f, paint)
-        canvas.drawText("Obtained", 450f, y - 4f, paint)
-        canvas.drawText("Grade", 520f, y - 4f, paint)
+        paint.textSize = 9.5f
+        val textHeaderY = currentY + 17f
+        canvas.drawText("Subject Name", tableLeft + 10f, textHeaderY, paint)
+        canvas.drawText("Full", 220f, textHeaderY, paint)
+        canvas.drawText("Written", 270f, textHeaderY, paint)
+        canvas.drawText("Oral", 325f, textHeaderY, paint)
+        canvas.drawText("Practical", 380f, textHeaderY, paint)
+        canvas.drawText("Obtained", 445f, textHeaderY, paint)
+        canvas.drawText("Grade", 505f, textHeaderY, paint)
 
         paint.color = Color.BLACK
         paint.isFakeBoldText = false
@@ -386,7 +392,9 @@ class ResultPdfGenerator(private val context: Context) {
         var grandObtained = 0
         var isPassed = true
 
-        y += 24f
+        val tableTop = currentY
+        currentY += headerHeight
+
         for (res in results) {
             val components = componentsByResult[res.id].orEmpty()
             val customObtained = components.sumOf { it.obtainedMarks }
@@ -396,42 +404,51 @@ class ResultPdfGenerator(private val context: Context) {
             grandObtained += totalObtained
             if (totalObtained < (res.fullMarks * 0.35)) isPassed = false
 
-            canvas.drawText(res.subjectName, 50f, y, paint)
-            canvas.drawText(res.fullMarks.toString(), 220f, y, paint)
-            canvas.drawText(res.writtenMarks.toString(), 270f, y, paint)
-            canvas.drawText(res.oralMarks.toString(), 330f, y, paint)
-            canvas.drawText(res.practicalMarks.toString(), 380f, y, paint)
-            canvas.drawText(totalObtained.toString(), 450f, y, paint)
-            canvas.drawText(res.grade, 520f, y, paint)
+            val rowHeight = if (components.isNotEmpty()) 38f else 26f
+            val baseTextY = currentY + 17f
 
-            var rowHeight = 24f
+            paint.color = Color.BLACK
+            paint.textSize = 9.5f
+            canvas.drawText(res.subjectName, tableLeft + 10f, baseTextY, paint)
+            canvas.drawText(res.fullMarks.toString(), 220f, baseTextY, paint)
+            canvas.drawText(res.writtenMarks.toString(), 270f, baseTextY, paint)
+            canvas.drawText(res.oralMarks.toString(), 325f, baseTextY, paint)
+            canvas.drawText(res.practicalMarks.toString(), 380f, baseTextY, paint)
+            canvas.drawText(totalObtained.toString(), 445f, baseTextY, paint)
+            canvas.drawText(res.grade, 505f, baseTextY, paint)
 
             if (components.isNotEmpty()) {
                 val detailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = Color.DKGRAY
                     textSize = 7f
                 }
-
                 val details = components
                     .sortedBy { it.position }
                     .joinToString("  |  ") {
                         "${it.componentName}: ${it.obtainedMarks}/${it.maxMarks}"
                     }
-
-                canvas.drawText("Components: $details", 50f, y + 12f, detailPaint)
-                rowHeight = 38f
+                canvas.drawText("Components: $details", tableLeft + 10f, currentY + 30f, detailPaint)
             }
 
+            // Precisely aligned row bottom divider line
             paint.color = Color.parseColor("#E2E8F0")
-            canvas.drawLine(
-                40f, y + rowHeight - 5f,
-                (a4Width - 40).toFloat(), y + rowHeight - 5f, paint
-            )
-            paint.color = Color.BLACK
-            y += rowHeight
+            paint.strokeWidth = 1f
+            paint.style = Paint.Style.STROKE
+            canvas.drawLine(tableLeft, currentY + rowHeight, tableRight, currentY + rowHeight, paint)
+            paint.style = Paint.Style.FILL
+
+            currentY += rowHeight
         }
 
-        y += 20f
+        // Clean border around table
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1f
+        paint.color = Color.parseColor("#CBD5E1")
+        canvas.drawRect(tableLeft, tableTop, tableRight, currentY, paint)
+        paint.style = Paint.Style.FILL
+
+        // Summary Card
+        currentY += 18f
         val percentage = if (grandFull > 0) (grandObtained.toDouble() / grandFull * 100) else 0.0
         val finalStatus = if (isPassed) "PASSED" else "FAILED"
         val overallGrade = when {
@@ -446,29 +463,33 @@ class ResultPdfGenerator(private val context: Context) {
         }
 
         paint.color = Color.parseColor("#F1F5F9")
-        canvas.drawRoundRect(40f, y, (a4Width - 40).toFloat(), y + 60f, 6f, 6f, paint)
+        canvas.drawRoundRect(tableLeft, currentY, tableRight, currentY + 54f, 6f, 6f, paint)
 
         paint.color = Color.parseColor("#0F3D6E")
-        paint.textSize = 11f
+        paint.textSize = 10.5f
         paint.isFakeBoldText = true
-        canvas.drawText("Grand Total: $grandObtained / $grandFull", 55f, y + 26f, paint)
-        canvas.drawText(String.format("Percentage: %.2f%%", percentage), 55f, y + 46f, paint)
-        canvas.drawText("Overall Grade: $overallGrade", 270f, y + 36f, paint)
+        canvas.drawText("Grand Total: $grandObtained / $grandFull", tableLeft + 14f, currentY + 23f, paint)
+        canvas.drawText(String.format("Percentage: %.2f%%", percentage), tableLeft + 14f, currentY + 41f, paint)
+        canvas.drawText("Overall Grade: $overallGrade", 240f, currentY + 32f, paint)
 
         paint.color = if (isPassed) Color.parseColor("#16A34A") else Color.parseColor("#DC2626")
-        paint.textSize = 14f
-        canvas.drawText("Result: $finalStatus", 420f, y + 36f, paint)
+        paint.textSize = 13f
+        canvas.drawText("Result: $finalStatus", 420f, currentY + 32f, paint)
 
+        // Signatures
         val signY = a4Height - 90f
         paint.color = Color.GRAY
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1f
         canvas.drawLine(50f, signY, 180f, signY, paint)
-        canvas.drawLine((a4Width - 190).toFloat(), signY, (a4Width - 50).toFloat(), signY, paint)
+        canvas.drawLine((a4Width - 180).toFloat(), signY, (a4Width - 50).toFloat(), signY, paint)
 
+        paint.style = Paint.Style.FILL
         paint.color = Color.BLACK
-        paint.textSize = 10f
+        paint.textSize = 9.5f
         paint.isFakeBoldText = false
         paint.textAlign = Paint.Align.CENTER
         canvas.drawText("Class Teacher Signature", 115f, signY + 18f, paint)
-        canvas.drawText("Headmaster / Seal", (a4Width - 120).toFloat(), signY + 18f, paint)
+        canvas.drawText("Headmaster / Seal", (a4Width - 115).toFloat(), signY + 18f, paint)
     }
 }
