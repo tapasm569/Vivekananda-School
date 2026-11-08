@@ -1,12 +1,9 @@
 package com.vidyamandir.schoolmanager.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,8 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLEncoder
-import java.util.Calendar
 
 data class DueStudentCardItem(
     val student: Student,
@@ -56,18 +51,15 @@ class DueListFragment : Fragment() {
     private fun loadDues() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
-            val rules = FeeCalculator.effectiveRules(
-                db.schoolDao().getAllLateFeeRules()
-            )
+            val rules = FeeCalculator.effectiveRules(db.schoolDao().getAllLateFeeRules())
             val dueList = mutableListOf<DueStudentCardItem>()
             var grandTotalDue = 0.0
 
             for (student in students) {
-                val payments = db.schoolDao()
-                    .getAllStudentPayments(student.id).first()
-                val paidKeys = FeeCalculator.parsePaidPeriodKeys(payments)
-                val unpaid = FeeCalculator.calculateDueMonths(
-                    student, paidKeys, rules
+                val payments = db.schoolDao().getAllStudentPayments(student.id).first()
+                val paidAmounts = FeeCalculator.parsePaidMonthAmounts(payments, student.monthlyFee)
+                val unpaid = FeeCalculator.calculateDueMonthsWithAmounts(
+                    student, paidAmounts, rules
                 ).filter { it.isDue && !it.isPaid }
 
                 if (unpaid.isNotEmpty()) {
@@ -96,17 +88,6 @@ class DueListFragment : Fragment() {
                     }
                 }
             }
-        }
-    }
-
-    private fun sendReminder(student: Student, dueAmt: Double) {
-        try {
-            val phone = if (student.parentPhone.startsWith("+91")) student.parentPhone else "+91${student.parentPhone}"
-            val msg = "Namaskar, Vivekananda Vidyamandir Fee Reminder: Outstanding monthly fee of ₹$dueAmt is due for ${student.fullName} (${student.displayClass}). Please clear the dues soon."
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=$phone&text=${URLEncoder.encode(msg, "UTF-8")}"))
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), "WhatsApp not found or invalid phone number", Toast.LENGTH_SHORT).show()
         }
     }
 

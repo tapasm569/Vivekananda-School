@@ -3,7 +3,6 @@ package com.vidyamandir.schoolmanager.ui
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -360,7 +359,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         val cashForBase = maxOf(0.0, userCashReceived - actualFinePaid)
         val waivedFine = maxOf(0.0, calculatedLateFine - userFineCharged)
 
-        // Generate paid token string with allocated amounts (e.g., "2026-02:150.0,2026-03:100.0")
+        // Generate paid token string with allocated amounts
         var remainingCash = cashForBase
         val allocatedTokens = mutableListOf<String>()
 
@@ -433,7 +432,7 @@ class FeeCollectionActivity : AppCompatActivity() {
     ) {
         AlertDialog.Builder(this)
             .setTitle("Receipt saved successfully")
-            .setMessage("Receipt $receipt recorded. Cash drawer updated with ₹${String.format("%.2f", payment.totalAmount)}.")
+            .setMessage("Receipt $receipt recorded. Total: ₹${String.format("%.2f", payment.totalAmount)}.")
             .setItems(
                 arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")
             ) { _, choice ->

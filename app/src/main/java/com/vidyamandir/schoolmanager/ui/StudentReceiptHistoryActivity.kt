@@ -27,7 +27,6 @@ class StudentReceiptHistoryActivity : AppCompatActivity() {
     private lateinit var summary: TextView
     private var student: Student? = null
 
-
     private fun formatPaidMonths(value: String, academicYear: Int): String {
         val monthNames = listOf(
             "January", "February", "March", "April",
@@ -39,20 +38,27 @@ class StudentReceiptHistoryActivity : AppCompatActivity() {
             val token = raw.trim()
             if (token.isBlank()) return@mapNotNull null
 
-            val parts = token.split("-")
+            val parts = token.split(":")
+            val keyPart = parts[0].trim()
+            val amtPart = parts.getOrNull(1)?.trim()
+
+            val keySplit = keyPart.split("-")
             val year: Int
             val month: Int
 
-            if (parts.size == 2) {
-                year = parts[0].toIntOrNull() ?: return@mapNotNull token
-                month = parts[1].toIntOrNull() ?: return@mapNotNull token
+            if (keySplit.size == 2) {
+                year = keySplit[0].toIntOrNull() ?: return@mapNotNull token
+                month = keySplit[1].toIntOrNull() ?: return@mapNotNull token
             } else {
                 year = academicYear
-                month = token.toIntOrNull() ?: return@mapNotNull token
+                month = keyPart.toIntOrNull() ?: return@mapNotNull token
             }
 
             if (month !in 1..12) token
-            else "${monthNames[month - 1]} $year"
+            else {
+                val name = "${monthNames[month - 1]} $year"
+                if (amtPart != null) "$name (₹$amtPart)" else name
+            }
         }.joinToString(", ")
     }
 
@@ -182,9 +188,10 @@ class StudentReceiptHistoryActivity : AppCompatActivity() {
                 content.addView(date)
 
                 val details = TextView(this@StudentReceiptHistoryActivity).apply {
+                    val waiverText = if (payment.waivedFineAmount > 0.0) "   •   Waived Fine: ₹${payment.waivedFineAmount}" else ""
                     text = "Academic Year: ${payment.academicYear}\n" +
                         "Paid Months: ${formatPaidMonths(payment.paidMonths, payment.academicYear)}\n" +
-                        "Base Fee: ₹${payment.baseAmount}   •   Late Fee: ₹${payment.lateFeeAmount}"
+                        "Base Fee: ₹${payment.baseAmount}   •   Late Fee: ₹${payment.lateFeeAmount}$waiverText"
                     textSize = 12f
                     setTextColor(Color.GRAY)
                 }
@@ -231,7 +238,7 @@ class StudentReceiptHistoryActivity : AppCompatActivity() {
                             1 -> PaymentReceiptPdf.print(this@StudentReceiptHistoryActivity, file)
                             2 -> ThermalReceiptPrinter.choosePrinterAndPrint(
                                 this@StudentReceiptHistoryActivity,
-                                PaymentReceiptPdf.thermalText(s, payment)
+              PaymentReceiptPdf.thermalText(s, payment)
                             )
                             3 -> PaymentReceiptPdf.share(this@StudentReceiptHistoryActivity, file)
                         }

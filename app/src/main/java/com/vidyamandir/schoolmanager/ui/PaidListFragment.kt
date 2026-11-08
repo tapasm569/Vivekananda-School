@@ -22,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 
 class PaidListFragment : Fragment() {
 
@@ -51,20 +50,17 @@ class PaidListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
             val allPayments = db.schoolDao().getAllPayments().first()
-            val rules = FeeCalculator.effectiveRules(
-                db.schoolDao().getAllLateFeeRules()
-            )
+            val rules = FeeCalculator.effectiveRules(db.schoolDao().getAllLateFeeRules())
             val paidList = mutableListOf<Student>()
 
             for (student in students) {
-                val studentPayments = db.schoolDao()
-                    .getAllStudentPayments(student.id).first()
-                val paidKeys = FeeCalculator.parsePaidPeriodKeys(studentPayments)
-                val unpaid = FeeCalculator.calculateDueMonths(
-                    student, paidKeys, rules
+                val studentPayments = db.schoolDao().getAllStudentPayments(student.id).first()
+                val paidAmounts = FeeCalculator.parsePaidMonthAmounts(studentPayments, student.monthlyFee)
+                val hasUnpaid = FeeCalculator.calculateDueMonthsWithAmounts(
+                    student, paidAmounts, rules
                 ).any { it.isDue && !it.isPaid }
 
-                if (!unpaid) {
+                if (!hasUnpaid) {
                     paidList.add(student)
                 }
             }
@@ -80,7 +76,6 @@ class PaidListFragment : Fragment() {
             }
         }
     }
-
 
     private fun openStudentReceipts(student: Student) {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {

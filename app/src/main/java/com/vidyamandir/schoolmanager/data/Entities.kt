@@ -176,14 +176,6 @@ data class ExamResultComponent(
 @IgnoreExtraProperties
 @Entity(
     tableName = "fee_payments",
-    foreignKeys = [
-        ForeignKey(
-            entity = Student::class,
-            parentColumns = ["id"],
-            childColumns = ["studentId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
     indices = [Index(value = ["studentId"])]
 )
 data class FeePayment(

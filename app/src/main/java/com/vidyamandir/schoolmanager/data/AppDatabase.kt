@@ -72,11 +72,31 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // Drops the cascading foreign key and adds waivedFineAmount safely
         private val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
-                    "ALTER TABLE fee_payments ADD COLUMN waivedFineAmount REAL NOT NULL DEFAULT 0.0"
+                    """CREATE TABLE IF NOT EXISTS `fee_payments_new` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `studentId` INTEGER NOT NULL,
+                    `studentName` TEXT NOT NULL DEFAULT '',
+                    `receiptNo` TEXT NOT NULL DEFAULT '',
+                    `academicYear` INTEGER NOT NULL DEFAULT 2026,
+                    `paidMonths` TEXT NOT NULL DEFAULT '',
+                    `baseAmount` REAL NOT NULL DEFAULT 0.0,
+                    `lateFeeAmount` REAL NOT NULL DEFAULT 0.0,
+                    `totalAmount` REAL NOT NULL DEFAULT 0.0,
+                    `paymentDate` INTEGER NOT NULL DEFAULT 0,
+                    `waivedFineAmount` REAL NOT NULL DEFAULT 0.0)"""
                 )
+                database.execSQL(
+                    """INSERT INTO `fee_payments_new` (id, studentId, studentName, receiptNo, academicYear, paidMonths, baseAmount, lateFeeAmount, totalAmount, paymentDate, waivedFineAmount)
+                    SELECT id, studentId, studentName, receiptNo, academicYear, paidMonths, baseAmount, lateFeeAmount, totalAmount, paymentDate, 0.0
+                    FROM `fee_payments`"""
+                )
+                database.execSQL("DROP TABLE `fee_payments`")
+                database.execSQL("ALTER TABLE `fee_payments_new` RENAME TO `fee_payments`")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_fee_payments_studentId` ON `fee_payments` (`studentId`)")
             }
         }
 

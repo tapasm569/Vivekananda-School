@@ -62,17 +62,17 @@ object FeeCalculator {
             payment.paidMonths.split(",")
                 .map { it.trim() }
                 .filter { it.isNotBlank() }
-                .forEach { token ->
-                    val cleanToken = if (token.contains(":")) token.substringBefore(":") else token
-                    if (cleanToken.matches(Regex("\\d{4}-\\d{2}"))) {
-                        val parts = cleanToken.split("-")
+                .forEach { rawToken ->
+                    val token = if (rawToken.contains(":")) rawToken.substringBefore(":").trim() else rawToken
+                    if (token.matches(Regex("\\d{4}-\\d{2}"))) {
+                        val parts = token.split("-")
                         val year = parts[0].toIntOrNull()
                         val month = parts[1].toIntOrNull()
                         if (year != null && month != null && month in 1..12) {
                             result.add("%04d-%02d".format(year, month))
                         }
                     } else {
-                        val month = cleanToken.toIntOrNull()
+                        val month = token.toIntOrNull()
                         if (month != null && month in 1..12) {
                             result.add("%04d-%02d".format(payment.academicYear, month))
                         }
