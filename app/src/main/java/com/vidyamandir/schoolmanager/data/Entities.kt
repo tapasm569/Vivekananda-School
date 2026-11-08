@@ -18,10 +18,7 @@ data class SchoolClass(
     @androidx.room.ColumnInfo(defaultValue = "''")
     val subjects: String = ""
 ) {
-    @get:Exclude
-    val displayUnits: List<Pair<String, String>>
-        get() = getDisplayUnits()
-
+    @Exclude
     fun getDisplayUnits(): List<Pair<String, String>> {
         if (!hasSections || sections.isBlank()) {
             return listOf(Pair(className, ""))
