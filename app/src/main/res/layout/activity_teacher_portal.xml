@@ -40,17 +40,17 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Exam Name">
+            android:hint="Select Admin Configured Exam">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etExamName"
+            <AutoCompleteTextView
+                android:id="@+id/actvExam"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Annual Examination 2026" />
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

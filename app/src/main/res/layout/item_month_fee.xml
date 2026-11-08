@@ -61,6 +61,19 @@
             android:visibility="gone"
             app:cornerRadius="8dp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteExam"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:minWidth="0dp"
+            android:text="Delete"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:cornerRadius="8dp"
+            app:backgroundTint="#FEE2E2"
+            android:textColor="#B91C1C" />
+
         <TextView
             android:id="@+id/tvStatusBadge"
             android:layout_width="wrap_content"

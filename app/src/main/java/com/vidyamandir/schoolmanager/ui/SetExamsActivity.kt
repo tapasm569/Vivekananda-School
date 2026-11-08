@@ -49,6 +49,8 @@ class SetExamsActivity : AppCompatActivity() {
     private lateinit var subjectAdapter: SubjectConfigAdapter
     private var availableClassUnits = mutableListOf<String>()
     private val availableClassSubjects = mutableMapOf<String, List<String>>()
+    private var editingExamId: Long? = null
+    private var editingExam: ExamDefinition? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,10 +142,17 @@ class SetExamsActivity : AppCompatActivity() {
         val selectedClass = binding.actvClassSelect.text?.toString()?.trim().orEmpty()
         val examName = binding.etExamName.text?.toString()?.trim().orEmpty()
         val examDate = binding.etExamDate.text?.toString()?.trim().orEmpty()
-        val academicYear = 2026
+        val oldExam = editingExam
+        val academicYear = oldExam?.academicYear ?: 2026
 
         if (selectedClass.isBlank() || examName.isBlank() || examDate.isBlank()) {
             Toast.makeText(this, "Please enter class, exam name and date", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (oldExam != null &&
+            (examName != oldExam.examName || selectedClass != oldExam.targetClass)) {
+            Toast.makeText(this, "Exam name and class cannot be changed while editing.", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -152,56 +161,67 @@ class SetExamsActivity : AppCompatActivity() {
             return
         }
 
-        val subjectNames = configuredSubjects.map { it.name.trim() }
-
-        if (subjectNames.any { it.isBlank() } ||
-            subjectNames.distinctBy { it.lowercase() }.size != subjectNames.size) {
+        val names = configuredSubjects.map { it.name.trim() }
+        if (names.any { it.isBlank() } || names.distinctBy { it.lowercase() }.size != names.size) {
             Toast.makeText(this, "Subject names must be filled and unique", Toast.LENGTH_SHORT).show()
             return
         }
 
         for (subject in configuredSubjects) {
-            if (subject.fullMarks <= 0) {
-                Toast.makeText(this, "Full marks must be greater than zero", Toast.LENGTH_SHORT).show()
-                return
-            }
+            val components = subject.customComponents
+            val componentNames = components.map { it.name.trim() }
 
-            val customNames = subject.customComponents.map { it.name.trim() }
-
-            if (customNames.any { it.isBlank() } ||
-                customNames.distinctBy { it.lowercase() }.size != customNames.size ||
-                subject.customComponents.any { it.maxMarks <= 0 }) {
-                Toast.makeText(
-                    this,
-                    "Check custom component names and maximum marks for ${subject.name}",
-                    Toast.LENGTH_LONG
-                ).show()
+            if (subject.fullMarks <= 0 ||
+                componentNames.any { it.isBlank() } ||
+                componentNames.distinctBy { it.lowercase() }.size != componentNames.size ||
+                components.any { it.maxMarks <= 0 }) {
+                Toast.makeText(this, "Please check marks and components for ${subject.name}", Toast.LENGTH_LONG).show()
                 return
             }
         }
 
         lifecycleScope.launch {
             try {
+                var subjectsLocked = false
+
                 withContext(Dispatchers.IO) {
                     db.withTransaction {
-                        val existing = db.schoolDao().findExistingExam(
-                            examName, selectedClass, academicYear
-                        )
+                        val dao = db.schoolDao()
+                        val duplicate = dao.findExistingExam(examName, selectedClass, academicYear)
 
-                        check(existing == null) {
+                        check(duplicate == null || duplicate.id == editingExamId) {
                             "An exam with this name already exists for this class and year"
                         }
 
-                        val examId = db.schoolDao().insertExam(
-                            ExamDefinition(
-                                examName = examName,
-                                targetClass = selectedClass,
-                                examDate = examDate,
-                                academicYear = academicYear
+                        if (oldExam != null) {
+                            val resultCount = dao.countExamResults(
+                                oldExam.examName,
+                                oldExam.academicYear
                             )
-                        )
 
-                        val subjectEntities = configuredSubjects.map {
+                            if (resultCount > 0) {
+                                dao.updateExam(oldExam.copy(examDate = examDate))
+                                subjectsLocked = true
+                                return@withTransaction
+                            }
+                        }
+
+                        val examId = if (oldExam != null) {
+                            dao.updateExam(oldExam.copy(examDate = examDate))
+                            dao.deleteExamSubjects(oldExam.id)
+                            oldExam.id
+                        } else {
+                            dao.insertExam(
+                                ExamDefinition(
+                                    examName = examName,
+                                    targetClass = selectedClass,
+                                    examDate = examDate,
+                                    academicYear = academicYear
+                                )
+                            )
+                        }
+
+                        val subjects = configuredSubjects.map {
                             ExamSubject(
                                 examId = examId,
                                 subjectName = it.name.trim(),
@@ -215,34 +235,42 @@ class SetExamsActivity : AppCompatActivity() {
                             )
                         }
 
-                        val subjectIds = db.schoolDao().insertExamSubjects(subjectEntities)
+                        val ids = dao.insertExamSubjects(subjects)
                         val components = mutableListOf<ExamSubjectComponent>()
 
                         configuredSubjects.forEachIndexed { index, subject ->
-                            val subjectId = subjectIds.getOrNull(index)
-                                ?: error("Could not save subject ${subject.name}")
+                            val subjectId = ids.getOrNull(index)
+                                ?: error("Could not save ${subject.name}")
 
-                            subject.customComponents.forEachIndexed { componentIndex, component ->
+                            subject.customComponents.forEachIndexed { position, component ->
                                 components.add(
                                     ExamSubjectComponent(
                                         examSubjectId = subjectId,
                                         componentName = component.name.trim(),
                                         maxMarks = component.maxMarks,
-                                        position = componentIndex
+                                        position = position
                                     )
                                 )
                             }
                         }
 
                         if (components.isNotEmpty()) {
-                            db.schoolDao().insertExamSubjectComponents(components)
+                            dao.insertExamSubjectComponents(components)
                         }
                     }
                 }
 
+                editingExamId = null
+                editingExam = null
+                binding.btnSaveExamConfig.text = "Save Exam"
+
                 Toast.makeText(
                     this@SetExamsActivity,
-                    "Exam Configuration Saved for $selectedClass!",
+                    when {
+                        subjectsLocked -> "Exam date updated. Subjects and components are locked because marks already exist."
+                        oldExam != null -> "Exam updated successfully"
+                        else -> "Exam Configuration Saved for $selectedClass!"
+                    },
                     Toast.LENGTH_LONG
                 ).show()
 
@@ -258,29 +286,171 @@ class SetExamsActivity : AppCompatActivity() {
 
     private fun observeExams() {
         binding.rvExistingExams.layoutManager = LinearLayoutManager(this)
+
         lifecycleScope.launch {
             db.schoolDao().getAllExams().collect { exams ->
-                binding.rvExistingExams.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                        val b = ItemMonthFeeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                        return object : RecyclerView.ViewHolder(b.root) {}
+                binding.rvExistingExams.adapter =
+                    object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+                        override fun onCreateViewHolder(
+                            parent: ViewGroup,
+                            viewType: Int
+                        ): RecyclerView.ViewHolder {
+                            val b = ItemMonthFeeBinding.inflate(
+                                LayoutInflater.from(parent.context),
+                                parent,
+                                false
+                            )
+                            return object : RecyclerView.ViewHolder(b.root) {}
+                        }
+
+                        override fun onBindViewHolder(
+                            holder: RecyclerView.ViewHolder,
+                            position: Int
+                        ) {
+                            val exam = exams[position]
+                            val b = ItemMonthFeeBinding.bind(holder.itemView)
+
+                            b.tvMonthName.text = "${exam.examName} (${exam.targetClass})"
+                            b.tvFeeBreakdown.text =
+                                "Date: ${exam.examDate} • Academic Year: ${exam.academicYear}"
+                            b.tvStatusBadge.text = "READY"
+                            b.cbSelectMonth.visibility = android.view.View.GONE
+
+                            b.btnEditClass.visibility = android.view.View.VISIBLE
+                            b.btnDeleteExam.visibility = android.view.View.VISIBLE
+
+                            b.btnEditClass.setOnClickListener {
+                                loadExamForEditing(exam)
+                            }
+
+                            b.btnDeleteExam.setOnClickListener {
+                                androidx.appcompat.app.AlertDialog.Builder(this@SetExamsActivity)
+                                    .setTitle("Delete ${exam.examName}?")
+                                    .setMessage(
+                                        "This will remove the exam setup and its configured subjects. " +
+                                        "Existing student result records will be retained. Continue?"
+                                    )
+                                    .setNegativeButton("Cancel", null)
+                                    .setPositiveButton("Delete") { _, _ ->
+                                        lifecycleScope.launch {
+                                            try {
+                                                withContext(Dispatchers.IO) {
+                                                    db.withTransaction {
+                                                        db.schoolDao().deleteExam(exam)
+                                                    }
+                                                }
+                                                Toast.makeText(
+                                                    this@SetExamsActivity,
+                                                    "Exam setup deleted. Student results were retained.",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            } catch (e: Exception) {
+                                                Toast.makeText(
+                                                    this@SetExamsActivity,
+                                                    "Delete failed: ${e.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
+                                    }
+                                    .show()
+                            }
+                        }
+
+                        override fun getItemCount() = exams.size
                     }
-                    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, pos: Int) {
-                        val ex = exams[pos]
-                        val b = ItemMonthFeeBinding.bind(holder.itemView)
-                        b.tvMonthName.text = "${ex.examName} (${ex.targetClass})"
-                        b.tvFeeBreakdown.text = "Date: ${ex.examDate} • Academic Year: ${ex.academicYear}"
-                        b.tvStatusBadge.text = "READY"
-                        b.cbSelectMonth.visibility = android.view.View.GONE
+            }
+        }
+    }
+
+    private fun loadExamForEditing(exam: ExamDefinition) {
+        lifecycleScope.launch {
+            try {
+                val loadedSubjects = withContext(Dispatchers.IO) {
+                    val dao = db.schoolDao()
+                    dao.getSubjectsForExam(exam.id).map { subject ->
+                        val components = dao.getExamSubjectComponents(subject.id)
+
+                        SubjectConfigItem(
+                            name = subject.subjectName,
+                            fullMarks = subject.fullMarks,
+                            hasWritten = subject.hasWritten,
+                            maxWritten = subject.maxWritten,
+                            hasOral = subject.hasOral,
+                            maxOral = subject.maxOral,
+                            hasPractical = subject.hasPractical,
+                            maxPractical = subject.maxPractical,
+                            customComponents = components.map {
+                                CustomComponentConfig(it.componentName, it.maxMarks)
+                            }.toMutableList()
+                        )
                     }
-                    override fun getItemCount() = exams.size
                 }
+
+                editingExamId = exam.id
+                editingExam = exam
+
+                binding.etExamName.setText(exam.examName)
+                binding.etExamDate.setText(exam.examDate)
+                binding.actvClassSelect.setText(exam.targetClass, false)
+
+                configuredSubjects.clear()
+                configuredSubjects.addAll(loadedSubjects)
+                subjectAdapter.notifyDataSetChanged()
+
+                binding.btnSaveExamConfig.text = "Update Exam"
+
+                Toast.makeText(
+                    this@SetExamsActivity,
+                    "Edit the exam details and press Update Exam",
+                    Toast.LENGTH_LONG
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@SetExamsActivity,
+                    "Could not load exam: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
     class SubjectConfigAdapter(private val list: MutableList<SubjectConfigItem>) :
         RecyclerView.Adapter<SubjectConfigAdapter.ViewHolder>() {
+
+        private fun updateSharedComponent(
+            oldName: String,
+            newName: String,
+            maxMarks: Int,
+            delete: Boolean = false,
+            currentPosition: Int = RecyclerView.NO_POSITION
+        ) {
+            list.forEachIndexed { index, subject ->
+                val matches = subject.customComponents.filter {
+                    it.name.trim().equals(oldName.trim(), ignoreCase = true)
+                }
+
+                if (delete) {
+                    subject.customComponents.removeAll(matches.toSet())
+                } else {
+                    matches.forEach {
+                        it.name = newName
+                        it.maxMarks = maxMarks
+                    }
+                }
+
+                subject.fullMarks =
+                    (if (subject.hasWritten) subject.maxWritten else 0) +
+                    (if (subject.hasOral) subject.maxOral else 0) +
+                    (if (subject.hasPractical) subject.maxPractical else 0) +
+                    subject.customComponents.sumOf { it.maxMarks }
+
+                if (index != currentPosition) {
+                    notifyItemChanged(index)
+                }
+            }
+        }
 
         class ViewHolder(val b: ItemExamSubjectConfigBinding) :
             RecyclerView.ViewHolder(b.root) {
@@ -415,10 +585,21 @@ class SetExamsActivity : AppCompatActivity() {
                     setPadding(0, 0, 0, 0)
                 }
 
+                var previousName = component.name
+
                 nameField.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        component.name = s?.toString().orEmpty()
+                        val newName = s?.toString().orEmpty()
+                        if (newName.isNotBlank()) {
+                            updateSharedComponent(
+                                previousName,
+                                newName,
+                                component.maxMarks,
+                                currentPosition = holder.adapterPosition
+                            )
+                            previousName = newName
+                        }
                     }
                     override fun afterTextChanged(s: Editable?) {}
                 })
@@ -426,7 +607,14 @@ class SetExamsActivity : AppCompatActivity() {
                 marksField.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                        component.maxMarks = s?.toString()?.toIntOrNull() ?: 0
+                        val newMarks = s?.toString()?.toIntOrNull() ?: 0
+                        component.maxMarks = newMarks
+                        updateSharedComponent(
+                            component.name,
+                            component.name,
+                            newMarks,
+                            currentPosition = holder.adapterPosition
+                        )
                         recalculateFullMarks()
                     }
                     override fun afterTextChanged(s: Editable?) {}
@@ -435,9 +623,14 @@ class SetExamsActivity : AppCompatActivity() {
                 deleteButton.setOnClickListener {
                     val currentPosition = holder.adapterPosition
                     if (currentPosition != RecyclerView.NO_POSITION) {
-                        val currentItem = list[currentPosition]
-                        currentItem.customComponents.remove(component)
-                        notifyItemChanged(currentPosition)
+                        updateSharedComponent(
+                            component.name,
+                            component.name,
+                            component.maxMarks,
+                            delete = true,
+                            currentPosition = currentPosition
+                        )
+                        notifyDataSetChanged()
                     }
                 }
 
@@ -450,10 +643,31 @@ class SetExamsActivity : AppCompatActivity() {
             b.btnAddCustomComponent.setOnClickListener {
                 val currentPosition = holder.adapterPosition
                 if (currentPosition != RecyclerView.NO_POSITION) {
-                    list[currentPosition].customComponents.add(
-                        CustomComponentConfig("New Component", 10)
-                    )
-                    notifyItemChanged(currentPosition)
+                    val baseName = "New Component"
+                    var componentName = baseName
+                    var suffix = 2
+
+                    while (list.any { subject ->
+                        subject.customComponents.any {
+                            it.name.equals(componentName, ignoreCase = true)
+                        }
+                    }) {
+                        componentName = "$baseName $suffix"
+                        suffix++
+                    }
+
+                    list.forEach { subject ->
+                        subject.customComponents.add(
+                            CustomComponentConfig(componentName, 10)
+                        )
+                        subject.fullMarks =
+                            (if (subject.hasWritten) subject.maxWritten else 0) +
+                            (if (subject.hasOral) subject.maxOral else 0) +
+                            (if (subject.hasPractical) subject.maxPractical else 0) +
+                            subject.customComponents.sumOf { it.maxMarks }
+                    }
+
+                    notifyDataSetChanged()
                 }
             }
 

@@ -89,6 +89,22 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginHorizontal="4dp"
+                android:hint="Oral">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etOralMarks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="0" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:hint="Practical">
 
@@ -101,5 +117,12 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+
+        <LinearLayout
+            android:id="@+id/llCustomMarks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="6dp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.pdf.PdfDocument
 import com.vidyamandir.schoolmanager.data.ExamResult
+import com.vidyamandir.schoolmanager.data.ExamResultComponent
 import com.vidyamandir.schoolmanager.data.Student
 import java.io.File
 import java.io.FileOutputStream
@@ -17,7 +18,8 @@ class ResultPdfGenerator(private val context: Context) {
         student: Student,
         examName: String,
         results: List<ExamResult>,
-        outputFile: File
+        outputFile: File,
+        componentsByResult: Map<Long, List<ExamResultComponent>> = emptyMap()
     ) {
         val document = PdfDocument()
 
@@ -28,7 +30,7 @@ class ResultPdfGenerator(private val context: Context) {
 
         val pageInfo2 = PdfDocument.PageInfo.Builder(a4Width, a4Height, 2).create()
         val page2 = document.startPage(pageInfo2)
-        drawPageTwo(page2.canvas, student, results)
+        drawPageTwo(page2.canvas, student, results, componentsByResult)
         document.finishPage(page2)
 
         FileOutputStream(outputFile).use { out ->
@@ -42,7 +44,8 @@ class ResultPdfGenerator(private val context: Context) {
         students: List<Student>,
         examName: String,
         resultsByStudent: Map<Long, List<ExamResult>>,
-        outputFile: File
+        outputFile: File,
+        componentsByStudent: Map<Long, Map<Long, List<ExamResultComponent>>> = emptyMap()
     ) {
         val document = PdfDocument()
         var pageNumber = 1
@@ -63,7 +66,10 @@ class ResultPdfGenerator(private val context: Context) {
                     a4Width, a4Height, pageNumber++
                 ).create()
                 val page2 = document.startPage(pageInfo2)
-                drawPageTwo(page2.canvas, student, results)
+                drawPageTwo(
+                    page2.canvas, student, results,
+                    componentsByStudent[student.id].orEmpty()
+                )
                 document.finishPage(page2)
             }
 
@@ -191,12 +197,13 @@ class ResultPdfGenerator(private val context: Context) {
         p.isFakeBoldText = true
         canvas.drawText("FOLD HERE", center, 416f, p)
 
-        // BOTTOM PANEL: rotate the complete guide 90 degrees clockwise.
+        // BOTTOM PANEL: rotate 180 degrees from its previous orientation.
+        // Total rotation is 270 degrees so the landscape panel still fits.
         canvas.save()
         canvas.translate(center, 619.5f)
-        canvas.rotate(90f)
+        canvas.rotate(270f)
         canvas.translate(-198.5f, -297.5f)
-        drawGradingGuide(canvas, portrait, navy, gold, pale)
+        drawGradingGuide(canvas, navy, gold, pale)
         canvas.restore()
 
         portrait?.recycle()
@@ -231,7 +238,6 @@ class ResultPdfGenerator(private val context: Context) {
 
     private fun drawGradingGuide(
         canvas: Canvas,
-        portrait: Bitmap?,
         navy: Int,
         gold: Int,
         pale: Int
@@ -253,10 +259,6 @@ class ResultPdfGenerator(private val context: Context) {
         p.isFakeBoldText = true
         p.color = navy
         canvas.drawText("GRADING & RESULT GUIDE", cx, 34f, p)
-
-        if (portrait != null) {
-            drawCircularPortrait(canvas, portrait, cx, 91f, 39f, gold)
-        }
 
         p.textSize = 11f
         p.color = gold
@@ -333,12 +335,14 @@ class ResultPdfGenerator(private val context: Context) {
         canvas.drawText("Please check all details and marks carefully.", cx, 541f, p)
         canvas.drawText("Contact the school for any correction or query.", cx, 556f, p)
 
-        if (portrait != null) {
-            drawCircularPortrait(canvas, portrait, cx, 570f, 17f, gold)
-        }
     }
 
-    private fun drawPageTwo(canvas: Canvas, student: Student, results: List<ExamResult>) {
+    private fun drawPageTwo(
+        canvas: Canvas,
+        student: Student,
+        results: List<ExamResult>,
+        componentsByResult: Map<Long, List<ExamResultComponent>> = emptyMap()
+    ) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
         paint.color = Color.parseColor("#0F3D6E")
@@ -384,22 +388,47 @@ class ResultPdfGenerator(private val context: Context) {
 
         y += 24f
         for (res in results) {
+            val components = componentsByResult[res.id].orEmpty()
+            val customObtained = components.sumOf { it.obtainedMarks }
+            val totalObtained = res.obtainedMarks + customObtained
+
             grandFull += res.fullMarks
-            grandObtained += res.obtainedMarks
-            if (res.obtainedMarks < (res.fullMarks * 0.35)) isPassed = false
+            grandObtained += totalObtained
+            if (totalObtained < (res.fullMarks * 0.35)) isPassed = false
 
             canvas.drawText(res.subjectName, 50f, y, paint)
             canvas.drawText(res.fullMarks.toString(), 220f, y, paint)
             canvas.drawText(res.writtenMarks.toString(), 270f, y, paint)
             canvas.drawText(res.oralMarks.toString(), 330f, y, paint)
             canvas.drawText(res.practicalMarks.toString(), 380f, y, paint)
-            canvas.drawText(res.obtainedMarks.toString(), 450f, y, paint)
+            canvas.drawText(totalObtained.toString(), 450f, y, paint)
             canvas.drawText(res.grade, 520f, y, paint)
 
+            var rowHeight = 24f
+
+            if (components.isNotEmpty()) {
+                val detailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.DKGRAY
+                    textSize = 7f
+                }
+
+                val details = components
+                    .sortedBy { it.position }
+                    .joinToString("  |  ") {
+                        "${it.componentName}: ${it.obtainedMarks}/${it.maxMarks}"
+                    }
+
+                canvas.drawText("Components: $details", 50f, y + 12f, detailPaint)
+                rowHeight = 38f
+            }
+
             paint.color = Color.parseColor("#E2E8F0")
-            canvas.drawLine(40f, y + 5f, (a4Width - 40).toFloat(), y + 5f, paint)
+            canvas.drawLine(
+                40f, y + rowHeight - 5f,
+                (a4Width - 40).toFloat(), y + rowHeight - 5f, paint
+            )
             paint.color = Color.BLACK
-            y += 24f
+            y += rowHeight
         }
 
         y += 20f

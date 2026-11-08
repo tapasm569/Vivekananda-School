@@ -1010,6 +1010,10 @@ class MainActivity : AppCompatActivity() {
 
                     val resultsByStudent =
                         mutableMapOf<Long, List<com.vidyamandir.schoolmanager.data.ExamResult>>()
+                    val componentsByStudent =
+                        mutableMapOf<Long, Map<Long, List<com.vidyamandir.schoolmanager.data.ExamResultComponent>>>()
+
+                    val dao = db.schoolDao()
 
                     for (student in classStudents) {
                         val approved = db.schoolDao()
@@ -1024,6 +1028,9 @@ class MainActivity : AppCompatActivity() {
 
                         if (approved.isNotEmpty()) {
                             resultsByStudent[student.id] = approved
+                            componentsByStudent[student.id] = approved.associate { result ->
+                                result.id to dao.getExamResultComponents(result.id)
+                            }
                         }
                     }
 
@@ -1037,7 +1044,8 @@ class MainActivity : AppCompatActivity() {
                             classStudents,
                             exam.examName,
                             resultsByStudent,
-                            file
+                            file,
+                            componentsByStudent
                         )
 
                     file

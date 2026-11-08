@@ -96,6 +96,22 @@ interface SchoolDao {
     @Delete
     suspend fun deleteExam(exam: ExamDefinition)
 
+    @Update
+    suspend fun updateExam(exam: ExamDefinition)
+
+    @Query("DELETE FROM exam_subjects WHERE examId = :examId")
+    suspend fun deleteExamSubjects(examId: Long)
+
+    @Query("""
+        SELECT COUNT(*) FROM exam_results
+        WHERE examName = :examName
+        AND academicYear = :academicYear
+    """)
+    suspend fun countExamResults(
+        examName: String,
+        academicYear: Int
+    ): Int
+
     // Exam Results
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertResults(results: List<ExamResult>)
@@ -197,6 +213,9 @@ interface SchoolDao {
 
     @Query("SELECT * FROM exam_subject_components WHERE examSubjectId = :subjectId ORDER BY position ASC")
     suspend fun getExamSubjectComponents(subjectId: Long): List<ExamSubjectComponent>
+
+    @Query("DELETE FROM exam_result_components WHERE examResultId = :resultId")
+    suspend fun deleteExamResultComponents(resultId: Long)
 
     // Student component marks
     @Insert(onConflict = OnConflictStrategy.REPLACE)
