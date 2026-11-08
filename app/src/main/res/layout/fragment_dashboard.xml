@@ -111,8 +111,8 @@
                         android:textStyle="bold"
                         app:backgroundTint="#FFFFFF"
                         app:cornerRadius="11dp"
-                        app:insetTop="0dp"
-                        app:insetBottom="0dp"/>
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"/>
                 </LinearLayout>
 
                 <ImageView
@@ -660,8 +660,8 @@
                     android:textStyle="bold"
                     app:backgroundTint="#FFFFFF"
                     app:cornerRadius="10dp"
-                    app:insetTop="0dp"
-                    app:insetBottom="0dp"/>
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
