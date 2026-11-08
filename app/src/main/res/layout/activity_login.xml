@@ -23,14 +23,13 @@
             app:strokeWidth="2dp"
             app:strokeColor="#D97706">
 
-            <TextView
+            <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="VV"
-                android:textColor="#0F3D6E"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+                android:padding="5dp"
+                android:src="@mipmap/ic_launcher_round"
+                android:scaleType="fitCenter"
+                android:contentDescription="Vivekananda Vidyamandir Logo" />
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
