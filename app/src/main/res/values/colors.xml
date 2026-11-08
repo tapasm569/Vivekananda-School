@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Canvas & Surfaces -->
+    <color name="bg_app_canvas">#F4F6FB</color>
+    <color name="bg_card_white">#FFFFFF</color>
+    <color name="card_stroke_subtle">#E2E8F0</color>
+
+    <!-- Brand Palette -->
+    <color name="brand_navy_primary">#0F3D6E</color>
+    <color name="brand_navy_dark">#0A2540</color>
+
+    <!-- Pastel Module Tints -->
+    <color name="card_tint_blue">#F0F7FF</color>
+    <color name="card_stroke_blue">#DBEAFE</color>
+    <color name="card_text_blue">#1D4ED8</color>
+
+    <color name="card_tint_purple">#FAF5FF</color>
+    <color name="card_stroke_purple">#F3E8FF</color>
+    <color name="card_text_purple">#7C3AED</color>
+
+    <color name="card_tint_teal">#F0FDFA</color>
+    <color name="card_stroke_teal">#CCFBF1</color>
+    <color name="card_text_teal">#0F766E</color>
+
+    <color name="card_tint_green">#F0FDF4</color>
+    <color name="card_stroke_green">#DCFCE7</color>
+    <color name="card_text_green">#15803D</color>
+
+    <color name="card_tint_amber">#FFFBEB</color>
+    <color name="card_stroke_amber">#FEF3C7</color>
+    <color name="card_text_amber">#B45309</color>
+
+    <color name="card_tint_rose">#FFF1F2</color>
+    <color name="card_stroke_rose">#FECDD3</color>
+    <color name="card_text_rose">#BE123C</color>
+</resources>

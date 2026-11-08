@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F3F6FA"
+    android:background="#F4F6FB"
     android:fillViewport="true"
     android:clipToPadding="false">
 
@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="3dp"
-            android:paddingTop="3dp"
+            android:paddingStart="4dp"
+            android:paddingTop="4dp"
             android:paddingBottom="14dp">
 
             <TextView
@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:text="WELCOME BACK"
                 android:textColor="#0D9488"
-                android:textSize="10sp"
+                android:textSize="10.5sp"
                 android:letterSpacing="0.12"
                 android:textStyle="bold"/>
 
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:text="Admin Dashboard"
-                android:textColor="#102A43"
+                android:textColor="#0F3D6E"
                 android:textSize="23sp"
                 android:textStyle="bold"/>
 
@@ -55,10 +55,10 @@
             android:id="@+id/cardCollectFee"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="13dp"
-            app:cardBackgroundColor="#103B67"
-            app:cardCornerRadius="19dp"
-            app:cardElevation="4dp"
+            android:layout_marginBottom="14dp"
+            app:cardBackgroundColor="#0F3D6E"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="3dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="17dp">
+                android:padding="18dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -106,8 +106,8 @@
                         android:layout_height="39dp"
                         android:layout_marginTop="12dp"
                         android:text="Open Collection  →"
-                        android:textColor="#103B67"
-                        android:textSize="11sp"
+                        android:textColor="#0F3D6E"
+                        android:textSize="11.5sp"
                         android:textStyle="bold"
                         app:backgroundTint="#FFFFFF"
                         app:cornerRadius="11dp"
@@ -130,8 +130,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:text="SCHOOL OVERVIEW"
-            android:textColor="#334155"
-            android:textSize="12sp"
+            android:textColor="#475569"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.06"/>
 
@@ -147,10 +147,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="5dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
+                app:cardBackgroundColor="#F0F7FF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#DBEAFE"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -158,11 +158,11 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
                         android:src="@drawable/ic_dash_students"
                         android:contentDescription="Students"/>
 
@@ -172,7 +172,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
                         android:text="0"
-                        android:textColor="#103B67"
+                        android:textColor="#1D4ED8"
                         android:textSize="21sp"
                         android:textStyle="bold"/>
 
@@ -181,7 +181,8 @@
                         android:layout_height="wrap_content"
                         android:text="Students"
                         android:textColor="#64748B"
-                        android:textSize="10sp"/>
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -191,10 +192,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginHorizontal="3dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
+                app:cardBackgroundColor="#FAF5FF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#F3E8FF"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -202,60 +203,16 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
                         android:src="@drawable/ic_dash_class"
                         android:contentDescription="Classes"/>
 
                     <TextView
                         android:id="@+id/tvClassCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="0"
-                        android:textColor="#0D9488"
-                        android:textSize="21sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Classes"
-                        android:textColor="#64748B"
-                        android:textSize="10sp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardTeachers"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="5dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#E2E8F0"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:src="@drawable/ic_dash_teacher"
-                        android:contentDescription="Teachers"/>
-
-                    <TextView
-                        android:id="@+id/tvTeacherCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
@@ -267,9 +224,55 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Classes"
+                        android:textColor="#64748B"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTeachers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                app:cardBackgroundColor="#F0FDFA"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#CCFBF1"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:src="@drawable/ic_dash_teacher"
+                        android:contentDescription="Teachers"/>
+
+                    <TextView
+                        android:id="@+id/tvTeacherCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="0"
+                        android:textColor="#0F766E"
+                        android:textSize="21sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="Teachers"
                         android:textColor="#64748B"
-                        android:textSize="10sp"/>
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
@@ -278,11 +281,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="17dp"
+            android:layout_marginTop="18dp"
             android:layout_marginBottom="8dp"
             android:text="FEE STATUS"
-            android:textColor="#334155"
-            android:textSize="12sp"
+            android:textColor="#475569"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.06"/>
 
@@ -299,7 +302,7 @@
                 android:layout_marginEnd="6dp"
                 app:cardBackgroundColor="#FFF1F2"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
+                app:cardElevation="0dp"
                 app:strokeColor="#FECDD3"
                 app:strokeWidth="1dp">
 
@@ -308,7 +311,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="13dp">
+                    android:padding="14dp">
 
                     <ImageView
                         android:layout_width="29dp"
@@ -328,7 +331,7 @@
                             android:layout_height="wrap_content"
                             android:text="DUE"
                             android:textColor="#BE123C"
-                            android:textSize="10sp"
+                            android:textSize="10.5sp"
                             android:textStyle="bold"/>
 
                         <TextView
@@ -337,7 +340,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textColor="#9F1239"
-                            android:textSize="21sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -349,10 +352,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                app:cardBackgroundColor="#ECFDF5"
+                app:cardBackgroundColor="#F0FDF4"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                app:strokeColor="#A7F3D0"
+                app:cardElevation="0dp"
+                app:strokeColor="#BBF7D0"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -360,7 +363,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="13dp">
+                    android:padding="14dp">
 
                     <ImageView
                         android:layout_width="29dp"
@@ -380,7 +383,7 @@
                             android:layout_height="wrap_content"
                             android:text="PAID"
                             android:textColor="#047857"
-                            android:textSize="10sp"
+                            android:textSize="10.5sp"
                             android:textStyle="bold"/>
 
                         <TextView
@@ -389,7 +392,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textColor="#065F46"
-                            android:textSize="21sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -403,8 +406,8 @@
             android:layout_marginTop="18dp"
             android:layout_marginBottom="8dp"
             android:text="QUICK MANAGEMENT"
-            android:textColor="#334155"
-            android:textSize="12sp"
+            android:textColor="#475569"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.06"/>
 
@@ -421,7 +424,7 @@
                 android:layout_marginEnd="6dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="1dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp">
 
@@ -432,17 +435,17 @@
                     android:padding="14dp">
 
                     <ImageView
-                        android:layout_width="29dp"
-                        android:layout_height="29dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
                         android:src="@drawable/ic_dash_payment"
                         android:contentDescription="Track payment"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
+                        android:layout_marginTop="8dp"
                         android:text="Track Payment"
-                        android:textColor="#103B67"
+                        android:textColor="#0F3D6E"
                         android:textSize="14sp"
                         android:textStyle="bold"/>
 
@@ -450,10 +453,10 @@
                         android:id="@+id/tvDailyCollection"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="3dp"
                         android:text="Today's collection"
                         android:textColor="#0D9488"
-                        android:textSize="12sp"
+                        android:textSize="11.5sp"
                         android:maxLines="2"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -466,7 +469,7 @@
                 android:layout_marginStart="6dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="1dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp">
 
@@ -477,17 +480,17 @@
                     android:padding="14dp">
 
                     <ImageView
-                        android:layout_width="29dp"
-                        android:layout_height="29dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
                         android:src="@drawable/ic_dash_marksheet"
                         android:contentDescription="Approved marksheet"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
+                        android:layout_marginTop="8dp"
                         android:text="Approved Marksheet"
-                        android:textColor="#103B67"
+                        android:textColor="#0F3D6E"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:maxLines="2"/>
@@ -496,10 +499,10 @@
                         android:id="@+id/tvPendingMarksheetCount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="3dp"
                         android:text="Pending approval"
                         android:textColor="#D97706"
-                        android:textSize="12sp"
+                        android:textSize="11.5sp"
                         android:maxLines="2"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -520,7 +523,7 @@
                 android:layout_marginEnd="6dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="1dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp">
 
@@ -531,24 +534,24 @@
                     android:padding="14dp">
 
                     <ImageView
-                        android:layout_width="29dp"
-                        android:layout_height="29dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
                         android:src="@drawable/ic_dash_exam"
                         android:contentDescription="Set exams"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
+                        android:layout_marginTop="8dp"
                         android:text="Set Exams"
-                        android:textColor="#103B67"
+                        android:textColor="#0F3D6E"
                         android:textSize="14sp"
                         android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="3dp"
                         android:text="Configure examination"
                         android:textColor="#64748B"
                         android:textSize="11sp"/>
@@ -563,7 +566,7 @@
                 android:layout_marginStart="6dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="1dp"
                 app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp">
 
@@ -574,24 +577,24 @@
                     android:padding="14dp">
 
                     <ImageView
-                        android:layout_width="29dp"
-                        android:layout_height="29dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
                         android:src="@drawable/ic_dash_result"
                         android:contentDescription="Publish results"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="9dp"
+                        android:layout_marginTop="8dp"
                         android:text="Publish Result"
-                        android:textColor="#103B67"
+                        android:textColor="#0F3D6E"
                         android:textSize="14sp"
                         android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="3dp"
                         android:text="Generate PDF marksheets"
                         android:textColor="#64748B"
                         android:textSize="11sp"/>
@@ -604,11 +607,11 @@
             android:id="@+id/cardMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="13dp"
-            android:layout_marginBottom="18dp"
-            app:cardBackgroundColor="#103B67"
-            app:cardCornerRadius="17dp"
-            app:cardElevation="3dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="#0F3D6E"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
@@ -619,9 +622,9 @@
                 android:padding="15dp">
 
                 <ImageView
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:layout_marginEnd="11dp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="12dp"
                     android:src="@drawable/ic_dash_message"
                     android:contentDescription="WhatsApp messaging"/>
 
@@ -643,20 +646,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="3dp"
-                        android:text="Message students and parents"
+                        android:text="Broadcast alerts to parents"
                         android:textColor="#C5D9EA"
-                        android:textSize="10sp"/>
+                        android:textSize="10.5sp"/>
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnOpenMessage"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="39dp"
+                    android:layout_height="38dp"
                     android:layout_marginStart="5dp"
                     android:text="Open"
-                    android:textColor="#103B67"
-                    android:textSize="11sp"
+                    android:textColor="#0F3D6E"
+                    android:textSize="11.5sp"
                     android:textStyle="bold"
                     app:backgroundTint="#FFFFFF"
                     app:cornerRadius="10dp"
