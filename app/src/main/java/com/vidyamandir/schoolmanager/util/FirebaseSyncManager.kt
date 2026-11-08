@@ -13,17 +13,16 @@ import kotlinx.coroutines.withContext
 
 object FirebaseSyncManager {
     private const val TAG = "FirebaseSyncManager"
-    const val DATABASE_URL = "https://vidyamandir-a3340-default-rtdb.firebaseio.com"
+    const val DATABASE_URL = "https://vidyamandir-a3340-default-rtdb.asia-southeast1.firebasedatabase.app"
 
+    private var rtdbInstance: FirebaseDatabase? = null
     private var initialized = false
-    private var isListening = false
 
     fun getDatabase(): FirebaseDatabase {
-        return try {
-            FirebaseDatabase.getInstance(DATABASE_URL)
-        } catch (_: Exception) {
-            FirebaseDatabase.getInstance()
-        }
+        rtdbInstance?.let { return it }
+        val db = FirebaseDatabase.getInstance(DATABASE_URL)
+        rtdbInstance = db
+        return db
     }
 
     fun init(context: Context) {
@@ -35,9 +34,7 @@ object FirebaseSyncManager {
             val db = getDatabase()
             try {
                 db.setPersistenceEnabled(true)
-            } catch (e: Exception) {
-                Log.d(TAG, "Persistence already enabled: ${e.message}")
-            }
+            } catch (_: Exception) {}
 
             listOf(
                 "classes", "teachers", "students", "exams", "exam_subjects",
@@ -49,15 +46,13 @@ object FirebaseSyncManager {
 
             initialized = true
             startRealtimeListener(context)
+            Log.d(TAG, "Connected to Firebase RTDB: $DATABASE_URL")
         } catch (e: Exception) {
             Log.e(TAG, "Firebase initialization error: ${e.message}", e)
         }
     }
 
     fun startRealtimeListener(context: Context) {
-        if (isListening) return
-        isListening = true
-
         val db = getDatabase()
         val appContext = context.applicationContext
         val scope = CoroutineScope(Dispatchers.IO)
@@ -76,11 +71,7 @@ object FirebaseSyncManager {
                     }
                     if (list.isNotEmpty()) {
                         scope.launch {
-                            try {
-                                onData(list)
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Error saving synced $path: ${e.message}")
-                            }
+                            try { onData(list) } catch (_: Exception) {}
                         }
                     }
                 }
@@ -147,7 +138,7 @@ object FirebaseSyncManager {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Listener cancelled for school_profile: ${error.message}")
+                Log.w(TAG, "Listener error for school_profile: ${error.message}")
             }
         })
     }
@@ -163,37 +154,48 @@ object FirebaseSyncManager {
                 val dao = db.schoolDao()
                 val rtdb = getDatabase()
 
+                var lastError: String? = null
+
+                fun write(ref: DatabaseReference, value: Any?) {
+                    ref.setValue(value) { error, _ ->
+                        if (error != null) {
+                            lastError = error.message
+                            Log.e(TAG, "Firebase write error: ${error.message}")
+                        }
+                    }
+                }
+
                 val classes = dao.getAllClasses().first()
-                classes.forEach { rtdb.getReference("classes").child(it.id.toString()).setValue(it) }
+                classes.forEach { write(rtdb.getReference("classes").child(it.id.toString()), it) }
 
                 val teachers = dao.getAllTeachers().first()
-                teachers.forEach { rtdb.getReference("teachers").child(it.id.toString()).setValue(it) }
+                teachers.forEach { write(rtdb.getReference("teachers").child(it.id.toString()), it) }
 
                 val students = dao.getAllActiveStudents().first()
-                students.forEach { rtdb.getReference("students").child(it.id.toString()).setValue(it) }
+                students.forEach { write(rtdb.getReference("students").child(it.id.toString()), it) }
 
                 val exams = dao.getAllExams().first()
                 exams.forEach { exam ->
-                    rtdb.getReference("exams").child(exam.id.toString()).setValue(exam)
+                    write(rtdb.getReference("exams").child(exam.id.toString()), exam)
                 }
 
                 val subjects = dao.getAllExamSubjects()
-                subjects.forEach { rtdb.getReference("exam_subjects").child(it.id.toString()).setValue(it) }
+                subjects.forEach { write(rtdb.getReference("exam_subjects").child(it.id.toString()), it) }
 
                 val subjectComponents = dao.getAllExamSubjectComponents()
-                subjectComponents.forEach { rtdb.getReference("exam_subject_components").child(it.id.toString()).setValue(it) }
+                subjectComponents.forEach { write(rtdb.getReference("exam_subject_components").child(it.id.toString()), it) }
 
                 val results = dao.getAllExamResults()
-                results.forEach { rtdb.getReference("exam_results").child(it.id.toString()).setValue(it) }
+                results.forEach { write(rtdb.getReference("exam_results").child(it.id.toString()), it) }
 
                 val resultComponents = dao.getAllExamResultComponents()
-                resultComponents.forEach { rtdb.getReference("exam_result_components").child(it.id.toString()).setValue(it) }
+                resultComponents.forEach { write(rtdb.getReference("exam_result_components").child(it.id.toString()), it) }
 
                 val payments = dao.getAllPayments().first()
-                payments.forEach { rtdb.getReference("fee_payments").child(it.id.toString()).setValue(it) }
+                payments.forEach { write(rtdb.getReference("fee_payments").child(it.id.toString()), it) }
 
                 val rules = dao.getAllLateFeeRules()
-                rules.forEach { rtdb.getReference("late_fee_rules").child(it.id.toString()).setValue(it) }
+                rules.forEach { write(rtdb.getReference("late_fee_rules").child(it.id.toString()), it) }
 
                 val profilePrefs = context.getSharedPreferences("vv_school_profile", Context.MODE_PRIVATE)
                 val profileMap = mapOf(
@@ -206,7 +208,11 @@ object FirebaseSyncManager {
                 rtdb.getReference("school_profile").updateChildren(profileMap)
 
                 withContext(Dispatchers.Main) {
-                    onComplete?.invoke(true, "All school records backed up to Firebase Realtime Database!")
+                    if (lastError != null) {
+                        onComplete?.invoke(false, "Firebase Error: $lastError")
+                    } else {
+                        onComplete?.invoke(true, "All school records backed up to Firebase Realtime Database!")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Sync to cloud failed: ${e.message}", e)
@@ -294,7 +300,10 @@ object FirebaseSyncManager {
 
     fun syncStudent(student: Student) {
         try {
-            getDatabase().getReference("students").child(student.id.toString()).setValue(student)
+            getDatabase().getReference("students").child(student.id.toString()).setValue(student) { error, _ ->
+                if (error != null) Log.e(TAG, "Failed to upload student: ${error.message}")
+                else Log.d(TAG, "Student synced to Firebase successfully")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to upload student: ${e.message}")
         }
@@ -303,24 +312,18 @@ object FirebaseSyncManager {
     fun syncPayment(payment: FeePayment) {
         try {
             getDatabase().getReference("fee_payments").child(payment.id.toString()).setValue(payment)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to upload payment: ${e.message}")
-        }
+        } catch (_: Exception) {}
     }
 
     fun syncClass(cls: SchoolClass) {
         try {
             getDatabase().getReference("classes").child(cls.id.toString()).setValue(cls)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to upload class: ${e.message}")
-        }
+        } catch (_: Exception) {}
     }
 
     fun syncTeacher(teacher: Teacher) {
         try {
             getDatabase().getReference("teachers").child(teacher.id.toString()).setValue(teacher)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to upload teacher: ${e.message}")
-        }
+        } catch (_: Exception) {}
     }
 }
