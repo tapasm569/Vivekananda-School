@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F1F5F9">
+    android:background="#F3F6FA"
+    android:fillViewport="true"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,21 +14,59 @@
         android:orientation="vertical"
         android:padding="14dp">
 
-        <!-- COLLECT FEE (SINGLE CARD ROW) -->
+        <!-- WELCOME -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="3dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WELCOME BACK"
+                android:textColor="#0D9488"
+                android:textSize="10sp"
+                android:letterSpacing="0.12"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Admin Dashboard"
+                android:textColor="#102A43"
+                android:textSize="23sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Manage your school at a glance"
+                android:textColor="#64748B"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <!-- COLLECT FEE -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCollectFee"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="3dp"
-            app:cardBackgroundColor="#0F3D6E">
+            android:layout_marginBottom="13dp"
+            app:cardBackgroundColor="#103B67"
+            app:cardCornerRadius="19dp"
+            app:cardElevation="4dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="17dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -34,126 +74,114 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_collect" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="COLLECT FEE"
-                        android:textColor="@android:color/white"
-                        android:textSize="17sp"
-                        android:letterSpacing="0.04"
-                        android:textStyle="bold" />
+                        android:text="FEE MANAGEMENT"
+                        android:textColor="#9DDDD7"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.1"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="12-month advance &amp; due payment counter"
-                        android:textColor="#93C5FD"
-                        android:textSize="12sp" />
+                        android:layout_marginTop="5dp"
+                        android:text="Collect Fee"
+                        android:textColor="#FFFFFF"
+                        android:textSize="21sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="Record student fee payments"
+                        android:textColor="#C5D9EA"
+                        android:textSize="11sp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnQuickCollect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="39dp"
+                        android:layout_marginTop="12dp"
+                        android:text="Open Collection  →"
+                        android:textColor="#103B67"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="#FFFFFF"
+                        app:cornerRadius="11dp"
+                        app:insetTop="0dp"
+                        app:insetBottom="0dp"/>
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnQuickCollect"
-                    android:layout_width="wrap_content"
-                    android:layout_height="42dp"
-                    android:text="Open Counter →"
-                    android:textColor="#0F3D6E"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#FEF3C7"
-                    app:cornerRadius="10dp" />
+                <ImageView
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_dash_collect"
+                    android:contentDescription="Collect fee"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- STUDENT / CLASS / TEACHER STATISTICS -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardDueList"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:minHeight="104dp"
-                android:layout_weight="1" android:layout_marginEnd="6dp"
-                app:cardCornerRadius="14dp" app:cardBackgroundColor="#FFF1F2">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
-                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_due" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="DUE LIST" android:textColor="#991B1B" android:textStyle="bold" android:textSize="12sp" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:id="@+id/tvDashboardDueCount" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0 Students" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPaidList"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:minHeight="104dp"
-                android:layout_weight="1" android:layout_marginStart="6dp"
-                app:cardCornerRadius="14dp" app:cardBackgroundColor="#ECFDF5">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="12dp">
-                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_paid" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="PAID LIST" android:textColor="#166534" android:textStyle="bold" android:textSize="12sp" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center" android:id="@+id/tvDashboardPaidCount" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0 Students" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
+            android:layout_marginBottom="8dp"
+            android:text="SCHOOL OVERVIEW"
+            android:textColor="#334155"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"/>
 
-        <!-- ROW 1: STUDENTS, CLASS, TEACHER -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardStudents"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="118dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginEnd="5dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="15dp"
                 app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#CBD5E1"
-                app:cardBackgroundColor="@android:color/white">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="10dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_students" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="STUDENTS"
-                        android:textColor="#0F3D6E"
-                        android:textSize="11sp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="9sp"
-                        android:autoSizeMaxTextSize="11sp"
-                        android:autoSizeStepGranularity="1sp"
-                        android:letterSpacing="0.035"
-                        android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/ic_dash_students"
+                        android:contentDescription="Students"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:id="@+id/tvStudentCount"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="5dp"
                         android:text="0"
-                        android:textColor="#0F3D6E"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textColor="#103B67"
+                        android:textSize="21sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Enrolled"
+                        android:text="Students"
                         android:textColor="#64748B"
-                        android:textSize="10sp" />
+                        android:textSize="10sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -161,52 +189,43 @@
                 android:id="@+id/cardClasses"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="118dp"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="4dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginHorizontal="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="15dp"
                 app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#CBD5E1"
-                app:cardBackgroundColor="@android:color/white">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="10dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_class" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="CLASS"
-                        android:textColor="#0F3D6E"
-                        android:textSize="11sp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="9sp"
-                        android:autoSizeMaxTextSize="11sp"
-                        android:autoSizeStepGranularity="1sp"
-                        android:letterSpacing="0.035"
-                        android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/ic_dash_class"
+                        android:contentDescription="Classes"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:id="@+id/tvClassCount"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="5dp"
                         android:text="0"
-                        android:textColor="#0F3D6E"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textColor="#0D9488"
+                        android:textSize="21sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Classes"
                         android:textColor="#64748B"
-                        android:textSize="10sp" />
+                        android:textSize="10sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -214,109 +233,228 @@
                 android:id="@+id/cardTeachers"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="118dp"
                 android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginStart="5dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="15dp"
                 app:cardElevation="2dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#CBD5E1"
-                app:cardBackgroundColor="@android:color/white">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="10dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_teacher" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="TEACHER"
-                        android:textColor="#0F3D6E"
-                        android:textSize="11sp"
-                        android:autoSizeTextType="uniform"
-                        android:autoSizeMinTextSize="9sp"
-                        android:autoSizeMaxTextSize="11sp"
-                        android:autoSizeStepGranularity="1sp"
-                        android:letterSpacing="0.035"
-                        android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/ic_dash_teacher"
+                        android:contentDescription="Teachers"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:id="@+id/tvTeacherCount"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="5dp"
                         android:text="0"
-                        android:textColor="#0F3D6E"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textColor="#7C3AED"
+                        android:textSize="21sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Faculty"
+                        android:text="Teachers"
                         android:textColor="#64748B"
-                        android:textSize="10sp" />
+                        android:textSize="10sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- ROW 2: TRACK PAYMENT & APPROVED MARKSHEET -->
+        <!-- DUE AND PAID -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="17dp"
+            android:layout_marginBottom="8dp"
+            android:text="FEE STATUS"
+            android:textColor="#334155"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardDueList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="#FFF1F2"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp"
+                app:strokeColor="#FECDD3"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="13dp">
+
+                    <ImageView
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
+                        android:src="@drawable/ic_dash_due"
+                        android:contentDescription="Due fees"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="9dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DUE"
+                            android:textColor="#BE123C"
+                            android:textSize="10sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvDashboardDueCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#9F1239"
+                            android:textSize="21sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPaidList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                app:cardBackgroundColor="#ECFDF5"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp"
+                app:strokeColor="#A7F3D0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="13dp">
+
+                    <ImageView
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
+                        android:src="@drawable/ic_dash_paid"
+                        android:contentDescription="Paid fees"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="9dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PAID"
+                            android:textColor="#047857"
+                            android:textSize="10sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvDashboardPaidCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#065F46"
+                            android:textSize="21sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- MANAGEMENT -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="8dp"
+            android:text="QUICK MANAGEMENT"
+            android:textColor="#334155"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTrackPayment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="168dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#EFF6FF"
-                app:strokeWidth="1dp"
-                app:strokeColor="#BFDBFE">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_payment" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <ImageView
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
+                        android:src="@drawable/ic_dash_payment"
+                        android:contentDescription="Track payment"/>
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="TRACK PAYMENT"
-                        android:textColor="#1E40AF"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="9dp"
+                        android:text="Track Payment"
+                        android:textColor="#103B67"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:id="@+id/tvDailyCollection"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="₹0.00"
-                        android:textColor="#2563EB"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Today's receipts →"
-                        android:textColor="#1D4ED8"
-                        android:textSize="11sp" />
+                        android:text="Today's collection"
+                        android:textColor="#0D9488"
+                        android:textSize="12sp"
+                        android:maxLines="2"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -324,53 +462,50 @@
                 android:id="@+id/cardApprovedMarksheet"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="168dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFBEB"
-                app:strokeWidth="1dp"
-                app:strokeColor="#FDE68A">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_marksheet" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <ImageView
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
+                        android:src="@drawable/ic_dash_marksheet"
+                        android:contentDescription="Approved marksheet"/>
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="APPROVED MARKSHEET"
-                        android:textColor="#92400E"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="9dp"
+                        android:text="Approved Marksheet"
+                        android:textColor="#103B67"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:maxLines="2"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:id="@+id/tvPendingMarksheetCount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="0 Pending"
+                        android:text="Pending approval"
                         android:textColor="#D97706"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Review &amp; Approve →"
-                        android:textColor="#B45309"
-                        android:textSize="11sp" />
+                        android:textSize="12sp"
+                        android:maxLines="2"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- ROW 3: SET EXAMS & PUBLISH RESULT -->
+        <!-- EXAMS AND RESULTS -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -381,47 +516,42 @@
                 android:id="@+id/cardSetExams"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="168dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#FAF5FF"
-                app:strokeWidth="1dp"
-                app:strokeColor="#E9D5FF">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_exam" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <ImageView
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
+                        android:src="@drawable/ic_dash_exam"
+                        android:contentDescription="Set exams"/>
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="SET EXAMS"
-                        android:textColor="#6B21A8"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="9dp"
+                        android:text="Set Exams"
+                        android:textColor="#103B67"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Schedule"
-                        android:textColor="#9333EA"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Input &amp; configure tests →"
-                        android:textColor="#7E22CE"
-                        android:textSize="11sp" />
+                        android:text="Configure examination"
+                        android:textColor="#64748B"
+                        android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -429,68 +559,71 @@
                 android:id="@+id/cardPublishResult"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:minHeight="168dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#F0FDFA"
-                app:strokeWidth="1dp"
-                app:strokeColor="#99F6E4">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_result" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <ImageView
+                        android:layout_width="29dp"
+                        android:layout_height="29dp"
+                        android:src="@drawable/ic_dash_result"
+                        android:contentDescription="Publish results"/>
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="PUBLISH RESULT"
-                        android:textColor="#115E59"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="9dp"
+                        android:text="Publish Result"
+                        android:textColor="#103B67"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Print 2-Page"
-                        android:textColor="#0D9488"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Generate PDF marksheets →"
-                        android:textColor="#0F766E"
-                        android:textSize="11sp" />
+                        android:text="Generate PDF marksheets"
+                        android:textColor="#64748B"
+                        android:textSize="11sp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- ROW 4: MESSAGE (WHATSAPP BROADCAST) -->
+        <!-- WHATSAPP MESSAGE -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="18dp"
+            android:layout_marginTop="13dp"
+            android:layout_marginBottom="18dp"
+            app:cardBackgroundColor="#103B67"
+            app:cardCornerRadius="17dp"
             app:cardElevation="3dp"
-            app:cardBackgroundColor="#0F3D6E">
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="15dp">
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginEnd="11dp"
+                    android:src="@drawable/ic_dash_message"
+                    android:contentDescription="WhatsApp messaging"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -498,37 +631,37 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <ImageView android:layout_width="26dp" android:layout_height="26dp" android:layout_marginBottom="4dp" android:src="@drawable/ic_dash_message" android:contentDescription="" />
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="MESSAGE"
-                        android:textColor="@android:color/white"
-                        android:textSize="15sp"
-                        android:letterSpacing="0.04"
-                        android:textStyle="bold" />
+                        android:text="WhatsApp Message"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
 
-                    <TextView android:includeFontPadding="true" android:maxLines="2" android:gravity="center"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Direct WhatsApp messaging to students &amp; parents"
-                        android:textColor="#93C5FD"
-                        android:textSize="11sp" />
+                        android:layout_marginTop="3dp"
+                        android:text="Message students and parents"
+                        android:textColor="#C5D9EA"
+                        android:textSize="10sp"/>
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnOpenMessage"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:text="Send WhatsApp"
-                    android:textColor="#0F3D6E"
+                    android:layout_height="39dp"
+                    android:layout_marginStart="5dp"
+                    android:text="Open"
+                    android:textColor="#103B67"
                     android:textSize="11sp"
                     android:textStyle="bold"
-                    app:backgroundTint="#FEF3C7"
-                    app:cornerRadius="10dp" />
-
+                    app:backgroundTint="#FFFFFF"
+                    app:cornerRadius="10dp"
+                    app:insetTop="0dp"
+                    app:insetBottom="0dp"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

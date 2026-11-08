@@ -3,7 +3,7 @@
     <item
         android:id="@+id/nav_due"
         android:icon="@drawable/ic_nav_due"
-        android:title="Due" />
+        android:title="Dues" />
     <item
         android:id="@+id/nav_paid"
         android:icon="@drawable/ic_nav_paid"
@@ -15,5 +15,5 @@
     <item
         android:id="@+id/nav_dashboard"
         android:icon="@drawable/ic_nav_dashboard"
-        android:title="Dashboard" />
+        android:title="Home" />
 </menu>

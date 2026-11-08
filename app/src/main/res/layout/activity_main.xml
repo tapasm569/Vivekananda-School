@@ -40,13 +40,16 @@
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="72dp"
             android:background="@android:color/white"
-            app:elevation="8dp"
-            app:labelVisibilityMode="unlabeled"
+            app:elevation="10dp"
+            app:labelVisibilityMode="labeled"
+            app:itemIconSize="23dp"
+            app:itemHorizontalTranslationEnabled="false"
             
 app:menu="@menu/bottom_nav_menu"
-            app:itemIconTint="@color/nav_icon_color" />
+            app:itemIconTint="@color/nav_icon_color"
+    app:itemTextColor="@color/nav_icon_color" />
 
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
