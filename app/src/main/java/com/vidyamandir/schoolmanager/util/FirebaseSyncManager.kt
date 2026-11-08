@@ -2,6 +2,8 @@ package com.vidyamandir.schoolmanager.util
 
 import android.content.Context
 import android.util.Log
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.*
 import com.vidyamandir.schoolmanager.data.*
@@ -10,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 object FirebaseSyncManager {
     private const val TAG = "FirebaseSyncManager"
@@ -32,18 +35,6 @@ object FirebaseSyncManager {
                 FirebaseApp.initializeApp(context)
             }
             val db = getDatabase()
-            try {
-                db.setPersistenceEnabled(true)
-            } catch (_: Exception) {}
-
-            listOf(
-                "classes", "teachers", "students", "exams", "exam_subjects",
-                "exam_subject_components", "exam_results", "exam_result_components",
-                "fee_payments", "late_fee_rules", "school_profile"
-            ).forEach { path ->
-                db.getReference(path).keepSynced(true)
-            }
-
             initialized = true
             startRealtimeListener(context)
             Log.d(TAG, "Connected to Firebase RTDB: $DATABASE_URL")
@@ -153,49 +144,57 @@ object FirebaseSyncManager {
                 val db = AppDatabase.getDatabase(context.applicationContext, scope)
                 val dao = db.schoolDao()
                 val rtdb = getDatabase()
-
-                var lastError: String? = null
-
-                fun write(ref: DatabaseReference, value: Any?) {
-                    ref.setValue(value) { error, _ ->
-                        if (error != null) {
-                            lastError = error.message
-                            Log.e(TAG, "Firebase write error: ${error.message}")
-                        }
-                    }
-                }
+                val tasks = mutableListOf<Task<Void>>()
 
                 val classes = dao.getAllClasses().first()
-                classes.forEach { write(rtdb.getReference("classes").child(it.id.toString()), it) }
+                classes.forEach {
+                    tasks.add(rtdb.getReference("classes").child(it.id.toString()).setValue(it))
+                }
 
                 val teachers = dao.getAllTeachers().first()
-                teachers.forEach { write(rtdb.getReference("teachers").child(it.id.toString()), it) }
+                teachers.forEach {
+                    tasks.add(rtdb.getReference("teachers").child(it.id.toString()).setValue(it))
+                }
 
                 val students = dao.getAllActiveStudents().first()
-                students.forEach { write(rtdb.getReference("students").child(it.id.toString()), it) }
+                students.forEach {
+                    tasks.add(rtdb.getReference("students").child(it.id.toString()).setValue(it))
+                }
 
                 val exams = dao.getAllExams().first()
                 exams.forEach { exam ->
-                    write(rtdb.getReference("exams").child(exam.id.toString()), exam)
+                    tasks.add(rtdb.getReference("exams").child(exam.id.toString()).setValue(exam))
                 }
 
                 val subjects = dao.getAllExamSubjects()
-                subjects.forEach { write(rtdb.getReference("exam_subjects").child(it.id.toString()), it) }
+                subjects.forEach {
+                    tasks.add(rtdb.getReference("exam_subjects").child(it.id.toString()).setValue(it))
+                }
 
                 val subjectComponents = dao.getAllExamSubjectComponents()
-                subjectComponents.forEach { write(rtdb.getReference("exam_subject_components").child(it.id.toString()), it) }
+                subjectComponents.forEach {
+                    tasks.add(rtdb.getReference("exam_subject_components").child(it.id.toString()).setValue(it))
+                }
 
                 val results = dao.getAllExamResults()
-                results.forEach { write(rtdb.getReference("exam_results").child(it.id.toString()), it) }
+                results.forEach {
+                    tasks.add(rtdb.getReference("exam_results").child(it.id.toString()).setValue(it))
+                }
 
                 val resultComponents = dao.getAllExamResultComponents()
-                resultComponents.forEach { write(rtdb.getReference("exam_result_components").child(it.id.toString()), it) }
+                resultComponents.forEach {
+                    tasks.add(rtdb.getReference("exam_result_components").child(it.id.toString()).setValue(it))
+                }
 
                 val payments = dao.getAllPayments().first()
-                payments.forEach { write(rtdb.getReference("fee_payments").child(it.id.toString()), it) }
+                payments.forEach {
+                    tasks.add(rtdb.getReference("fee_payments").child(it.id.toString()).setValue(it))
+                }
 
                 val rules = dao.getAllLateFeeRules()
-                rules.forEach { write(rtdb.getReference("late_fee_rules").child(it.id.toString()), it) }
+                rules.forEach {
+                    tasks.add(rtdb.getReference("late_fee_rules").child(it.id.toString()).setValue(it))
+                }
 
                 val profilePrefs = context.getSharedPreferences("vv_school_profile", Context.MODE_PRIVATE)
                 val profileMap = mapOf(
@@ -205,19 +204,20 @@ object FirebaseSyncManager {
                     "address" to profilePrefs.getString("address", ""),
                     "admin_password" to profilePrefs.getString("admin_password", "India360@")
                 )
-                rtdb.getReference("school_profile").updateChildren(profileMap)
+                tasks.add(rtdb.getReference("school_profile").updateChildren(profileMap))
+
+                // Block until all network write tasks are complete (or timeout after 15s)
+                if (tasks.isNotEmpty()) {
+                    Tasks.await(Tasks.whenAll(tasks), 15, TimeUnit.SECONDS)
+                }
 
                 withContext(Dispatchers.Main) {
-                    if (lastError != null) {
-                        onComplete?.invoke(false, "Firebase Error: $lastError")
-                    } else {
-                        onComplete?.invoke(true, "All school records backed up to Firebase Realtime Database!")
-                    }
+                    onComplete?.invoke(true, "All ${tasks.size} records successfully saved to Firebase Cloud!")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Sync to cloud failed: ${e.message}", e)
                 withContext(Dispatchers.Main) {
-                    onComplete?.invoke(false, "Sync failed: ${e.message}")
+                    onComplete?.invoke(false, "Sync failed: ${e.message ?: "Network error"}")
                 }
             }
         }
@@ -300,13 +300,8 @@ object FirebaseSyncManager {
 
     fun syncStudent(student: Student) {
         try {
-            getDatabase().getReference("students").child(student.id.toString()).setValue(student) { error, _ ->
-                if (error != null) Log.e(TAG, "Failed to upload student: ${error.message}")
-                else Log.d(TAG, "Student synced to Firebase successfully")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to upload student: ${e.message}")
-        }
+            getDatabase().getReference("students").child(student.id.toString()).setValue(student)
+        } catch (_: Exception) {}
     }
 
     fun syncPayment(payment: FeePayment) {

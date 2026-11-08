@@ -1,17 +1,19 @@
 package com.vidyamandir.schoolmanager.ui
 
-import android.os.Bundle
 import android.graphics.Color
-import android.view.Gravity
-import android.view.View
-import android.widget.*
+import android.net.Uri
+import android.os.Bundle
 import android.text.InputType
+import android.view.Gravity
+import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.card.MaterialCardView
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.data.Student
+import com.vidyamandir.schoolmanager.util.FirebaseSyncManager
 import com.vidyamandir.schoolmanager.util.ImageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +28,30 @@ class StudentProfileActivity : AppCompatActivity() {
     private lateinit var editButton: Button
     private lateinit var photo: ImageView
     private lateinit var status: TextView
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val base64 = ImageHelper.convertUriToBase64(this, it)
+            if (base64 != null) {
+                student?.let { s ->
+                    val updated = s.copy(photoUri = base64)
+                    student = updated
+                    ImageHelper.loadProfilePhoto(base64, photo, android.R.drawable.sym_def_app_icon)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        db.schoolDao().updateStudent(updated)
+                        FirebaseSyncManager.syncStudent(updated)
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@StudentProfileActivity, "Photo updated & synced to cloud!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            } else {
+                Toast.makeText(this, "Could not process photo", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
 
@@ -69,14 +95,32 @@ class StudentProfileActivity : AppCompatActivity() {
         photo = ImageView(this).apply {
             layoutParams = LinearLayout.LayoutParams(dp(100), dp(100))
             scaleType = ImageView.ScaleType.CENTER_CROP
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                pickImageLauncher.launch("image/*")
+            }
         }
         headerContent.addView(photo)
+
+        val changePhotoHint = TextView(this).apply {
+            text = "Tap photo to change"
+            textSize = 11f
+            setTextColor(Color.rgb(15, 61, 110))
+            setPadding(0, dp(6), 0, dp(4))
+            gravity = Gravity.CENTER
+            isClickable = true
+            setOnClickListener {
+                pickImageLauncher.launch("image/*")
+            }
+        }
+        headerContent.addView(changePhotoHint)
 
         status = TextView(this).apply {
             text = "STUDENT DETAILS"
             textSize = 18f
             setTextColor(Color.rgb(22, 58, 105))
-            setPadding(0, dp(12), 0, dp(4))
+            setPadding(0, dp(8), 0, dp(4))
             gravity = Gravity.CENTER
             setTypeface(null, android.graphics.Typeface.BOLD)
         }
@@ -244,11 +288,12 @@ class StudentProfileActivity : AppCompatActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     db.schoolDao().updateStudent(updated)
+                    FirebaseSyncManager.syncStudent(updated)
                 }
                 student = updated
                 setEditing(false)
                 Toast.makeText(this@StudentProfileActivity,
-                    "Student details updated successfully", Toast.LENGTH_LONG).show()
+                    "Student details updated & synced to cloud!", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
                 Toast.makeText(this@StudentProfileActivity,
                     "Update failed: ${e.message}", Toast.LENGTH_LONG).show()

@@ -42,8 +42,9 @@ class AddStudentActivity : AppCompatActivity() {
             if (base64 != null) {
                 base64PhotoData = base64
                 ImageHelper.loadProfilePhoto(base64, binding.ivStudentPhoto, android.R.drawable.ic_menu_camera)
+                Toast.makeText(this, "Profile photo ready", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Could not process image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Could not process photo", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -57,6 +58,10 @@ class AddStudentActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         loadClasses()
+
+        binding.ivStudentPhoto.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
 
         binding.btnUploadPhoto.setOnClickListener {
             pickImageLauncher.launch("image/*")
@@ -134,7 +139,7 @@ class AddStudentActivity : AppCompatActivity() {
             val insertedId = db.schoolDao().insertStudent(student)
             val savedStudent = student.copy(id = insertedId)
 
-            // Sync to Firebase Realtime Database
+            // Direct sync to Firebase Realtime Database
             FirebaseSyncManager.syncStudent(savedStudent)
 
             withContext(Dispatchers.Main) {

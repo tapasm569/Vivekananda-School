@@ -12,42 +12,51 @@ import java.io.File
 object ImageHelper {
 
     /**
-     * Reads the selected image Uri, scales it to compact avatar dimensions (default 180px),
-     * compresses it as JPEG (70% quality), and returns a Base64 string (~10-20 KB).
+     * Downsamples high-resolution camera photos to avoid OutOfMemoryError.
+     * Compresses the output to a compact Base64 JPEG string (~10-15 KB).
      */
     fun convertUriToBase64(context: Context, uri: Uri, maxSize: Int = 180): String? {
         return try {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                val originalBitmap = BitmapFactory.decodeStream(inputStream) ?: return null
-
-                val ratio = originalBitmap.width.toFloat() / originalBitmap.height.toFloat()
-                val width: Int
-                val height: Int
-                if (ratio > 1) {
-                    width = maxSize
-                    height = (maxSize / ratio).toInt()
-                } else {
-                    height = maxSize
-                    width = (maxSize * ratio).toInt()
-                }
-
-                val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
-                val outputStream = ByteArrayOutputStream()
-                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
-                val byteArray = outputStream.toByteArray()
-
-                Base64.encodeToString(byteArray, Base64.NO_WRAP)
+            // First pass: query dimensions without allocating memory
+            val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, options)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+
+            if (options.outWidth <= 0 || options.outHeight <= 0) return null
+
+            var sampleSize = 1
+            while (options.outWidth / sampleSize > maxSize * 2 ||
+                   options.outHeight / sampleSize > maxSize * 2) {
+                sampleSize *= 2
+            }
+
+            // Second pass: decode with sample size and 16-bit RGB_565 configuration
+            val decodeOptions = BitmapFactory.Options().apply {
+                inSampleSize = sampleSize
+                inPreferredConfig = Bitmap.Config.RGB_565
+            }
+
+            val sampledBitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, decodeOptions)
+            } ?: return null
+
+            val ratio = sampledBitmap.width.toFloat() / sampledBitmap.height.toFloat()
+            val finalWidth = if (ratio > 1f) maxSize else maxOf(1, (maxSize * ratio).toInt())
+            val finalHeight = if (ratio > 1f) maxOf(1, (maxSize / ratio).toInt()) else maxSize
+
+            val finalBitmap = Bitmap.createScaledBitmap(sampledBitmap, finalWidth, finalHeight, true)
+            val outputStream = ByteArrayOutputStream()
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream)
+            val byteArray = outputStream.toByteArray()
+
+            Base64.encodeToString(byteArray, Base64.NO_WRAP)
+        } catch (t: Throwable) {
+            t.printStackTrace()
             null
         }
     }
 
-    /**
-     * Loads a profile photo into an ImageView.
-     * Supports Base64 strings from Firebase RTDB and local file paths.
-     */
     fun loadProfilePhoto(photoData: String?, imageView: ImageView, defaultResId: Int) {
         if (photoData.isNullOrBlank()) {
             imageView.setImageResource(defaultResId)
@@ -55,7 +64,7 @@ object ImageHelper {
         }
 
         try {
-            // Check if it is a Base64 image string from Firebase
+            // If it's a Base64 string from Firebase
             if (photoData.length > 200 && !photoData.startsWith("/")) {
                 val decodedBytes = Base64.decode(photoData, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
@@ -65,7 +74,7 @@ object ImageHelper {
                 }
             }
 
-            // Fallback for legacy local file path
+            // Legacy local file path fallback
             val file = File(photoData)
             if (file.exists()) {
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
@@ -74,9 +83,7 @@ object ImageHelper {
                     return
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (_: Throwable) {}
 
         imageView.setImageResource(defaultResId)
     }
