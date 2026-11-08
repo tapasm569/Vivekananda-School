@@ -77,23 +77,32 @@ class FeeCollectionActivity : AppCompatActivity() {
 
         binding.actvStudentSelect.threshold = 1
 
+        // Safe item click without adapter collision
         binding.actvStudentSelect.setOnItemClickListener { parent, _, position, _ ->
-            val label = parent.getItemAtPosition(position).toString()
+            val label = parent.getItemAtPosition(position)?.toString().orEmpty()
             val student = visibleStudents.firstOrNull { studentLabel(it) == label }
-            if (student != null) selectStudent(student)
+                ?: studentsList.firstOrNull { studentLabel(it) == label }
+
+            if (student != null) {
+                selectStudent(student)
+            }
         }
 
+        // Filters student search as user types without resetting mid-click
         binding.actvStudentSelect.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!isSettingStudentText && selectedStudent != null) {
-                    resetStudentSelection()
+                if (!isSettingStudentText) {
+                    val query = s?.toString()?.trim().orEmpty()
+                    if (query.isEmpty() && selectedStudent != null) {
+                        resetStudentSelection()
+                    }
+                    filterVisibleStudents(query)
                 }
             }
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // 1-Tap Waive Fine button
         binding.btnWaiveFine.setOnClickListener {
             isUpdatingInputs = true
             binding.etCustomFine.setText("0.00")
@@ -102,7 +111,6 @@ class FeeCollectionActivity : AppCompatActivity() {
             recomputePayableAndAllocation()
         }
 
-        // 1-Tap Full Pay button
         binding.btnFullPay.setOnClickListener {
             val totalBillable = calculatedBaseSum + userFineCharged
             isUpdatingInputs = true
@@ -112,7 +120,6 @@ class FeeCollectionActivity : AppCompatActivity() {
             recomputePayableAndAllocation()
         }
 
-        // Custom Fine listener
         binding.etCustomFine.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -129,7 +136,6 @@ class FeeCollectionActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Cash Received listener
         binding.etCashReceived.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -172,7 +178,7 @@ class FeeCollectionActivity : AppCompatActivity() {
                 if (requestedStudent != null) {
                     selectedClassFilter = requestedStudent.displayClass
                     binding.actvClassSelect.setText(selectedClassFilter, false)
-                    updateStudentOptions(studentLabel(requestedStudent))
+                    updateStudentOptions("")
                     selectStudent(requestedStudent)
                 } else {
                     binding.actvClassSelect.setText("All Classes", false)
@@ -188,7 +194,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         return "${student.fullName} (${student.displayClass}) - Roll ${student.rollNo}"
     }
 
-    private fun updateStudentOptions(query: String) {
+    private fun filterVisibleStudents(query: String) {
         visibleStudents = studentsList.filter { student ->
             val matchesClass = selectedClassFilter == "All Classes" ||
                 student.displayClass.equals(selectedClassFilter, ignoreCase = true)
@@ -196,15 +202,18 @@ class FeeCollectionActivity : AppCompatActivity() {
             matchesClass && (
                 query.isBlank() ||
                     student.fullName.contains(query, ignoreCase = true) ||
-                    student.admissionNo.contains(query, ignoreCase = true)
+                    student.admissionNo.contains(query, ignoreCase = true) ||
+                    studentLabel(student).contains(query, ignoreCase = true)
             )
         }
+    }
 
+    private fun updateStudentOptions(query: String) {
+        filterVisibleStudents(query)
         val names = visibleStudents.map { studentLabel(it) }
         binding.actvStudentSelect.setAdapter(
             ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, names)
         )
-        binding.actvStudentSelect.threshold = 1
     }
 
     private fun selectStudent(student: Student) {
@@ -225,10 +234,6 @@ class FeeCollectionActivity : AppCompatActivity() {
     private fun resetStudentSelection() {
         selectedStudent = null
         currentlySelectedMonths = emptyList()
-
-        isSettingStudentText = true
-        binding.actvStudentSelect.setText("", false)
-        isSettingStudentText = false
 
         binding.tvSelectedStudentName.text = "Student: Please select above"
         binding.tvSelectedStudentMeta.text = "Class and monthly fee will appear here"
@@ -298,7 +303,6 @@ class FeeCollectionActivity : AppCompatActivity() {
             return
         }
 
-        // Sequential FIFO Allocation
         val actualFinePaid = minOf(userFineCharged, userCashReceived)
         val cashForBase = maxOf(0.0, userCashReceived - actualFinePaid)
 
@@ -306,7 +310,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         val lines = mutableListOf<String>()
 
         if (userFineCharged > 0.0) {
-            lines.add("Fine Charged: ₹${String.format("%.2f", actualFinePaid)}")
+            lines.add("Fine: ₹${String.format("%.2f", actualFinePaid)}")
         } else if (waivedFine > 0.0) {
             lines.add("Fine: Waived ₹${String.format("%.2f", waivedFine)}")
         }
@@ -359,7 +363,6 @@ class FeeCollectionActivity : AppCompatActivity() {
         val cashForBase = maxOf(0.0, userCashReceived - actualFinePaid)
         val waivedFine = maxOf(0.0, calculatedLateFine - userFineCharged)
 
-        // Generate paid token string with allocated amounts
         var remainingCash = cashForBase
         val allocatedTokens = mutableListOf<String>()
 
@@ -405,6 +408,7 @@ class FeeCollectionActivity : AppCompatActivity() {
                 Toast.makeText(this@FeeCollectionActivity, "Payment saved. Receipt: $receipt", Toast.LENGTH_LONG).show()
                 showReceiptActions(pdfFile, receipt, student, payment)
 
+                // Refresh fee status for currently selected student
                 if (selectedStudent?.id == student.id) {
                     loadStudentFeeMonths(student)
                 }

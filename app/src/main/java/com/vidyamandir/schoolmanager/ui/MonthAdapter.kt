@@ -60,6 +60,8 @@ class MonthAdapter(
                 binding.cbSelectMonth.isEnabled = false
                 binding.tvFeeBreakdown.text = "Settled (₹${String.format("%.0f", item.paidAmount)})"
                 setPillBadge(binding.tvStatusBadge, "PAID", "#16A34A", "#DCFCE7")
+                binding.cardMonth.strokeColor = Color.parseColor("#E2E8F0")
+                binding.cardMonth.strokeWidth = (1 * binding.root.resources.displayMetrics.density).toInt()
                 binding.root.setOnClickListener(null)
                 binding.cbSelectMonth.setOnClickListener(null)
                 return
@@ -69,7 +71,6 @@ class MonthAdapter(
             val isChecked = selectedPeriodKeys.contains(item.periodKey)
             binding.cbSelectMonth.isChecked = isChecked
 
-            // Visual feedback on card border
             if (isChecked) {
                 binding.cardMonth.strokeColor = Color.parseColor("#0F3D6E")
                 binding.cardMonth.strokeWidth = (2 * binding.root.resources.displayMetrics.density).toInt()
@@ -92,12 +93,16 @@ class MonthAdapter(
             val toggleAction = {
                 if (selectedPeriodKeys.contains(item.periodKey)) {
                     selectedPeriodKeys.remove(item.periodKey)
+                    binding.cbSelectMonth.isChecked = false
+                    binding.cardMonth.strokeColor = Color.parseColor("#E2E8F0")
+                    binding.cardMonth.strokeWidth = (1 * binding.root.resources.displayMetrics.density).toInt()
                 } else {
                     selectedPeriodKeys.add(item.periodKey)
+                    binding.cbSelectMonth.isChecked = true
+                    binding.cardMonth.strokeColor = Color.parseColor("#0F3D6E")
+                    binding.cardMonth.strokeWidth = (2 * binding.root.resources.displayMetrics.density).toInt()
                 }
 
-                binding.cbSelectMonth.isChecked = selectedPeriodKeys.contains(item.periodKey)
-                notifyItemChanged(adapterPosition)
                 val selectedItems = items.filter { selectedPeriodKeys.contains(it.periodKey) }
                 onSelectionChanged(selectedItems)
             }

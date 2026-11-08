@@ -28,7 +28,6 @@ interface SchoolDao {
     """)
     fun getPendingMarksheetCount(): Flow<Int>
 
-    // Classes
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClass(schoolClass: SchoolClass): Long
 
@@ -41,7 +40,6 @@ interface SchoolDao {
     @Query("SELECT * FROM classes WHERE className = :name LIMIT 1")
     suspend fun getClassByName(name: String): SchoolClass?
 
-    // Teachers
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTeacher(teacher: Teacher): Long
 
@@ -51,7 +49,6 @@ interface SchoolDao {
     @Query("SELECT * FROM teachers WHERE password = :pass LIMIT 1")
     suspend fun getTeacherByPassword(pass: String): Teacher?
 
-    // Students
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStudent(student: Student): Long
 
@@ -64,7 +61,6 @@ interface SchoolDao {
     @Query("SELECT * FROM students WHERE id = :studentId LIMIT 1")
     suspend fun getStudentById(studentId: Long): Student?
 
-    // Exam Definitions
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExam(exam: ExamDefinition): Long
 
@@ -112,7 +108,6 @@ interface SchoolDao {
         academicYear: Int
     ): Int
 
-    // Exam Results
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertResults(results: List<ExamResult>)
 
@@ -205,11 +200,8 @@ interface SchoolDao {
     @Query("UPDATE exam_results SET approvalStatus = :status WHERE id = :id")
     suspend fun updateMarksheetStatus(id: Long, status: String)
 
-    // Exam component configuration
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExamSubjectComponents(
-        components: List<ExamSubjectComponent>
-    )
+    suspend fun insertExamSubjectComponents(components: List<ExamSubjectComponent>)
 
     @Query("SELECT * FROM exam_subject_components WHERE examSubjectId = :subjectId ORDER BY position ASC")
     suspend fun getExamSubjectComponents(subjectId: Long): List<ExamSubjectComponent>
@@ -217,19 +209,15 @@ interface SchoolDao {
     @Query("DELETE FROM exam_result_components WHERE examResultId = :resultId")
     suspend fun deleteExamResultComponents(resultId: Long)
 
-    // Student component marks
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExamResult(result: ExamResult): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExamResultComponents(
-        components: List<ExamResultComponent>
-    )
+    suspend fun insertExamResultComponents(components: List<ExamResultComponent>)
 
     @Query("SELECT * FROM exam_result_components WHERE examResultId = :resultId ORDER BY position ASC")
     suspend fun getExamResultComponents(resultId: Long): List<ExamResultComponent>
 
-    // Payments
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun recordPayment(payment: FeePayment): Long
 
@@ -245,7 +233,6 @@ interface SchoolDao {
     @Query("SELECT * FROM fee_payments WHERE studentId = :studentId AND academicYear = :year ORDER BY paymentDate DESC")
     fun getStudentPayments(studentId: Long, year: Int): Flow<List<FeePayment>>
 
-    // Late Fee Rules
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLateFeeRule(rule: LateFeeRule): Long
 
@@ -261,7 +248,6 @@ interface SchoolDao {
         rules.forEach { insertLateFeeRule(it) }
     }
 
-    // Bulk Sync Helpers
     @Query("SELECT * FROM exam_results")
     suspend fun getAllExamResults(): List<ExamResult>
 
