@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.data.Teacher
 import com.vidyamandir.schoolmanager.databinding.ActivityAddTeacherBinding
+import com.vidyamandir.schoolmanager.util.FirebaseSyncManager
 import com.vidyamandir.schoolmanager.util.ImageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,16 +19,18 @@ class AddTeacherActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTeacherBinding
     private lateinit var db: AppDatabase
-    private var internalPhotoPath: String? = null
+    private var base64PhotoData: String? = null
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val savedPath = ImageHelper.saveImageToInternalStorage(this, it, "teacher")
-            if (savedPath != null) {
-                internalPhotoPath = savedPath
-                ImageHelper.loadProfilePhoto(savedPath, binding.ivTeacherPhoto, android.R.drawable.ic_menu_camera)
+            val base64 = ImageHelper.convertUriToBase64(this, it)
+            if (base64 != null) {
+                base64PhotoData = base64
+                ImageHelper.loadProfilePhoto(base64, binding.ivTeacherPhoto, android.R.drawable.ic_menu_camera)
+            } else {
+                Toast.makeText(this, "Could not process image", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -64,12 +67,16 @@ class AddTeacherActivity : AppCompatActivity() {
                 name = name,
                 phone = phone,
                 password = password,
-                photoUri = internalPhotoPath
+                photoUri = base64PhotoData
             )
-            db.schoolDao().insertTeacher(teacher)
+            val insertedId = db.schoolDao().insertTeacher(teacher)
+            val savedTeacher = teacher.copy(id = insertedId)
+
+            // Sync to Firebase Realtime Database
+            FirebaseSyncManager.syncTeacher(savedTeacher)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@AddTeacherActivity, "Teacher registered successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@AddTeacherActivity, "Teacher registered and synced to cloud!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.vidyamandir.schoolmanager.data.AppDatabase
 import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.databinding.ActivityAddStudentBinding
+import com.vidyamandir.schoolmanager.util.FirebaseSyncManager
 import com.vidyamandir.schoolmanager.util.ImageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -30,17 +31,19 @@ class AddStudentActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddStudentBinding
     private lateinit var db: AppDatabase
-    private var internalPhotoPath: String? = null
+    private var base64PhotoData: String? = null
     private val classUnitOptions = mutableListOf<ClassUnitOption>()
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val savedPath = ImageHelper.saveImageToInternalStorage(this, it, "student")
-            if (savedPath != null) {
-                internalPhotoPath = savedPath
-                ImageHelper.loadProfilePhoto(savedPath, binding.ivStudentPhoto, android.R.drawable.ic_menu_camera)
+            val base64 = ImageHelper.convertUriToBase64(this, it)
+            if (base64 != null) {
+                base64PhotoData = base64
+                ImageHelper.loadProfilePhoto(base64, binding.ivStudentPhoto, android.R.drawable.ic_menu_camera)
+            } else {
+                Toast.makeText(this, "Could not process image", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -123,15 +126,19 @@ class AddStudentActivity : AppCompatActivity() {
                 motherName = mother,
                 parentPhone = phone,
                 address = address,
-                photoUri = internalPhotoPath,
+                photoUri = base64PhotoData,
                 admissionMonth = admissionMonth,
                 monthlyFee = matchedUnit.fee
             )
 
-            db.schoolDao().insertStudent(student)
+            val insertedId = db.schoolDao().insertStudent(student)
+            val savedStudent = student.copy(id = insertedId)
+
+            // Sync to Firebase Realtime Database
+            FirebaseSyncManager.syncStudent(savedStudent)
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@AddStudentActivity, "Student enrolled successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@AddStudentActivity, "Student enrolled and synced to cloud!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
