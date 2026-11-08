@@ -87,7 +87,7 @@ class DashboardFragment : Fragment() {
             val todayTotal = todayList.sumOf { it.totalAmount }
 
             withContext(Dispatchers.Main) {
-                _binding?.tvDailyCollection?.text = "₹${String.format("%.2f", todayTotal)}"
+                _binding?.tvDailyCollection?.text = "₹${String.format(java.util.Locale.US, "%.2f", todayTotal)}"
             }
         }
     }
@@ -95,18 +95,15 @@ class DashboardFragment : Fragment() {
     private fun observeFeeLists() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
-            val rules = FeeCalculator.effectiveRules(
-                db.schoolDao().getAllLateFeeRules()
-            )
+            val rules = FeeCalculator.effectiveRules(db.schoolDao().getAllLateFeeRules())
             var due = 0
             var paid = 0
 
             for (student in students) {
-                val payments = db.schoolDao()
-                    .getAllStudentPayments(student.id).first()
-                val paidKeys = FeeCalculator.parsePaidPeriodKeys(payments)
-                val outstanding = FeeCalculator.calculateDueMonths(
-                    student, paidKeys, rules
+                val payments = db.schoolDao().getAllStudentPayments(student.id).first()
+                val paidAmounts = FeeCalculator.parsePaidMonthAmounts(payments, student.monthlyFee)
+                val outstanding = FeeCalculator.calculateDueMonthsWithAmounts(
+                    student, paidAmounts, rules
                 ).any { it.isDue && !it.isPaid }
 
                 if (outstanding) due++ else paid++

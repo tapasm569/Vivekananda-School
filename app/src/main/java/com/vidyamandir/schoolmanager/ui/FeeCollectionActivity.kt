@@ -40,8 +40,8 @@ class FeeCollectionActivity : AppCompatActivity() {
     private var userCashReceived: Double = 0.0
 
     private var isUpdatingInputs = false
+    private var isSelectingFromDropdown = false
     private var selectedClassFilter = "All Classes"
-    private var isSettingStudentText = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,27 +77,28 @@ class FeeCollectionActivity : AppCompatActivity() {
 
         binding.actvStudentSelect.threshold = 1
 
-        // Safe item click without adapter collision
         binding.actvStudentSelect.setOnItemClickListener { parent, _, position, _ ->
-            val label = parent.getItemAtPosition(position)?.toString().orEmpty()
-            val student = visibleStudents.firstOrNull { studentLabel(it) == label }
-                ?: studentsList.firstOrNull { studentLabel(it) == label }
-
-            if (student != null) {
-                selectStudent(student)
+            try {
+                val selectedLabel = parent.getItemAtPosition(position)?.toString().orEmpty()
+                val student = studentsList.firstOrNull { studentLabel(it) == selectedLabel }
+                if (student != null) {
+                    isSelectingFromDropdown = true
+                    selectStudent(student)
+                    isSelectingFromDropdown = false
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
-        // Filters student search as user types without resetting mid-click
         binding.actvStudentSelect.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!isSettingStudentText) {
+                if (!isSelectingFromDropdown) {
                     val query = s?.toString()?.trim().orEmpty()
                     if (query.isEmpty() && selectedStudent != null) {
                         resetStudentSelection()
                     }
-                    filterVisibleStudents(query)
                 }
             }
             override fun afterTextChanged(s: Editable?) {}
@@ -114,7 +115,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         binding.btnFullPay.setOnClickListener {
             val totalBillable = calculatedBaseSum + userFineCharged
             isUpdatingInputs = true
-            binding.etCashReceived.setText(String.format("%.2f", totalBillable))
+            binding.etCashReceived.setText(String.format(java.util.Locale.US, "%.2f", totalBillable))
             userCashReceived = totalBillable
             isUpdatingInputs = false
             recomputePayableAndAllocation()
@@ -127,7 +128,7 @@ class FeeCollectionActivity : AppCompatActivity() {
                     userFineCharged = s?.toString()?.toDoubleOrNull() ?: 0.0
                     val totalBillable = calculatedBaseSum + userFineCharged
                     isUpdatingInputs = true
-                    binding.etCashReceived.setText(String.format("%.2f", totalBillable))
+                    binding.etCashReceived.setText(String.format(java.util.Locale.US, "%.2f", totalBillable))
                     userCashReceived = totalBillable
                     isUpdatingInputs = false
                     recomputePayableAndAllocation()
@@ -218,9 +219,9 @@ class FeeCollectionActivity : AppCompatActivity() {
 
     private fun selectStudent(student: Student) {
         selectedStudent = student
-        isSettingStudentText = true
+        isSelectingFromDropdown = true
         binding.actvStudentSelect.setText(studentLabel(student), false)
-        isSettingStudentText = false
+        isSelectingFromDropdown = false
 
         binding.btnSubmitPayment.isEnabled = false
         binding.btnViewPaymentHistory.isEnabled = true
@@ -281,9 +282,9 @@ class FeeCollectionActivity : AppCompatActivity() {
         userCashReceived = total
 
         isUpdatingInputs = true
-        binding.tvTotalBaseFee.text = "₹${String.format("%.2f", calculatedBaseSum)}"
-        binding.etCustomFine.setText(String.format("%.2f", userFineCharged))
-        binding.etCashReceived.setText(String.format("%.2f", userCashReceived))
+        binding.tvTotalBaseFee.text = "₹${String.format(java.util.Locale.US, "%.2f", calculatedBaseSum)}"
+        binding.etCustomFine.setText(String.format(java.util.Locale.US, "%.2f", userFineCharged))
+        binding.etCashReceived.setText(String.format(java.util.Locale.US, "%.2f", userCashReceived))
         isUpdatingInputs = false
 
         recomputePayableAndAllocation()
@@ -293,8 +294,8 @@ class FeeCollectionActivity : AppCompatActivity() {
         val waivedFine = maxOf(0.0, calculatedLateFine - userFineCharged)
         val totalBillable = calculatedBaseSum + userFineCharged
 
-        binding.tvTotalPayable.text = "₹${String.format("%.2f", totalBillable)}"
-        binding.tvWaivedNote.text = "Calculated Fine: ₹${String.format("%.2f", calculatedLateFine)} (Waived: ₹${String.format("%.2f", waivedFine)})"
+        binding.tvTotalPayable.text = "₹${String.format(java.util.Locale.US, "%.2f", totalBillable)}"
+        binding.tvWaivedNote.text = "Fine: ₹${String.format(java.util.Locale.US, "%.2f", userFineCharged)}"
 
         if (currentlySelectedMonths.isEmpty()) {
             binding.tvAllocationPreview.text = "Select due months to begin"
@@ -310,9 +311,9 @@ class FeeCollectionActivity : AppCompatActivity() {
         val lines = mutableListOf<String>()
 
         if (userFineCharged > 0.0) {
-            lines.add("Fine: ₹${String.format("%.2f", actualFinePaid)}")
+            lines.add("Fine: ₹${String.format(java.util.Locale.US, "%.2f", actualFinePaid)}")
         } else if (waivedFine > 0.0) {
-            lines.add("Fine: Waived ₹${String.format("%.2f", waivedFine)}")
+            lines.add("Fine: Waived ₹${String.format(java.util.Locale.US, "%.2f", waivedFine)}")
         }
 
         currentlySelectedMonths.forEach { m ->
@@ -321,11 +322,11 @@ class FeeCollectionActivity : AppCompatActivity() {
             val remAfter = needed - allocated
 
             if (remAfter <= 0.01) {
-                lines.add("${m.monthName}: ₹${String.format("%.0f", allocated)} (Fully Paid)")
+                lines.add("${m.monthName}: ₹${String.format(java.util.Locale.US, "%.0f", allocated)} (Fully Paid)")
             } else if (allocated > 0.0) {
-                lines.add("${m.monthName}: ₹${String.format("%.0f", allocated)} (Partial, ₹${String.format("%.0f", remAfter)} Due)")
+                lines.add("${m.monthName}: ₹${String.format(java.util.Locale.US, "%.0f", allocated)} (Partial, ₹${String.format(java.util.Locale.US, "%.0f", remAfter)} Due)")
             } else {
-                lines.add("${m.monthName}: ₹0 (Unpaid, ₹${String.format("%.0f", needed)} Due)")
+                lines.add("${m.monthName}: ₹0 (Unpaid, ₹${String.format(java.util.Locale.US, "%.0f", needed)} Due)")
             }
             remainingCash = maxOf(0.0, remainingCash - allocated)
         }
@@ -335,7 +336,7 @@ class FeeCollectionActivity : AppCompatActivity() {
         val canSubmit = userCashReceived > 0.0 && currentlySelectedMonths.isNotEmpty()
         binding.btnSubmitPayment.isEnabled = canSubmit
         binding.btnSubmitPayment.text = if (canSubmit) {
-            "Confirm Payment (₹${String.format("%.2f", userCashReceived)}) & Record"
+            "Confirm Payment (₹${String.format(java.util.Locale.US, "%.2f", userCashReceived)}) & Record"
         } else {
             "Confirm Payment & Record"
         }
@@ -408,7 +409,6 @@ class FeeCollectionActivity : AppCompatActivity() {
                 Toast.makeText(this@FeeCollectionActivity, "Payment saved. Receipt: $receipt", Toast.LENGTH_LONG).show()
                 showReceiptActions(pdfFile, receipt, student, payment)
 
-                // Refresh fee status for currently selected student
                 if (selectedStudent?.id == student.id) {
                     loadStudentFeeMonths(student)
                 }
@@ -436,7 +436,7 @@ class FeeCollectionActivity : AppCompatActivity() {
     ) {
         AlertDialog.Builder(this)
             .setTitle("Receipt saved successfully")
-            .setMessage("Receipt $receipt recorded. Total: ₹${String.format("%.2f", payment.totalAmount)}.")
+            .setMessage("Receipt $receipt recorded. Total: ₹${String.format(java.util.Locale.US, "%.2f", payment.totalAmount)}.")
             .setItems(
                 arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")
             ) { _, choice ->

@@ -72,7 +72,6 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // Drops the cascading foreign key and adds waivedFineAmount safely
         private val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(

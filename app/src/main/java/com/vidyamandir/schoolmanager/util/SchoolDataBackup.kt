@@ -23,18 +23,13 @@ object SchoolDataBackup {
 
         val db = AppDatabase.getDatabase(
             context,
-            kotlinx.coroutines.CoroutineScope(
-                kotlinx.coroutines.Dispatchers.IO
-            )
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
         )
 
-        db.openHelper.writableDatabase
-            .query("PRAGMA wal_checkpoint(FULL)").use { }
+        db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use { }
 
         val properties = Properties()
-        val prefs = context.getSharedPreferences(
-            "vv_school_profile", Context.MODE_PRIVATE
-        )
+        val prefs = context.getSharedPreferences("vv_school_profile", Context.MODE_PRIVATE)
 
         prefs.all.forEach { (key, value) ->
             when (value) {
@@ -57,7 +52,7 @@ object SchoolDataBackup {
                 zip.closeEntry()
 
                 zip.putNextEntry(ZipEntry("backup_info.txt"))
-                zip.write("Vivekananda Vidyamandir\nDatabase version: 4\n".toByteArray())
+                zip.write("Vivekananda Vidyamandir\nDatabase version: 7\n".toByteArray())
                 zip.closeEntry()
             }
         } ?: error("Cannot create backup file")
@@ -90,9 +85,7 @@ object SchoolDataBackup {
                                     val count = zip.read(buffer)
                                     if (count < 0) break
                                     totalBytes += count
-                                    require(totalBytes <= MAX_SIZE) {
-                                        "Backup file is too large"
-                                    }
+                                    require(totalBytes <= MAX_SIZE) { "Backup file is too large" }
                                     output.write(buffer, 0, count)
                                 }
                             }
@@ -102,9 +95,7 @@ object SchoolDataBackup {
                 }
             } ?: error("Cannot read selected backup")
 
-            require(stagedDb.exists() && stagedDb.length() > 0) {
-                "Database missing from backup"
-            }
+            require(stagedDb.exists() && stagedDb.length() > 0) { "Database missing from backup" }
 
             val header = ByteArray(16)
             FileInputStream(stagedDb).use {
@@ -124,26 +115,20 @@ object SchoolDataBackup {
                 }
 
                 sqlite.rawQuery("PRAGMA user_version", null).use { cursor ->
-                    require(cursor.moveToFirst() && cursor.getInt(0) == 4) {
+                    require(cursor.moveToFirst() && cursor.getInt(0) >= 4) {
                         "Incompatible database version"
                     }
                 }
 
-                val requiredTables = setOf(
-                    "classes", "teachers", "students", "exams",
-                    "exam_subjects", "exam_results", "fee_payments",
-                    "late_fee_rules"
-                )
+                val requiredTables = setOf("classes", "teachers", "students", "fee_payments")
                 val foundTables = mutableSetOf<String>()
 
-                sqlite.rawQuery(
-                    "SELECT name FROM sqlite_master WHERE type='table'", null
-                ).use { cursor ->
+                sqlite.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null).use { cursor ->
                     while (cursor.moveToNext()) foundTables.add(cursor.getString(0))
                 }
 
                 require(foundTables.containsAll(requiredTables)) {
-                    "Backup does not contain all school data tables"
+                    "Backup does not contain essential school data tables"
                 }
             }
 
@@ -154,19 +139,14 @@ object SchoolDataBackup {
 
             val currentDb = context.getDatabasePath(DB_NAME)
             val safetyFile = File(context.cacheDir, "school_database_before_restore.db")
-            val profilePrefs = context.getSharedPreferences(
-                "vv_school_profile", Context.MODE_PRIVATE
-            )
+            val profilePrefs = context.getSharedPreferences("vv_school_profile", Context.MODE_PRIVATE)
             val oldProfile = profilePrefs.all.toMap()
 
             val db = AppDatabase.getDatabase(
                 context,
-                kotlinx.coroutines.CoroutineScope(
-                    kotlinx.coroutines.Dispatchers.IO
-                )
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
             )
-            db.openHelper.writableDatabase
-                .query("PRAGMA wal_checkpoint(FULL)").use { }
+            db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").use { }
 
             AppDatabase.closeDatabase()
 
@@ -183,24 +163,16 @@ object SchoolDataBackup {
                 properties.stringPropertyNames().forEach { property ->
                     val value = properties.getProperty(property)
                     when {
-                        property.startsWith("s:") ->
-                            editor.putString(property.substring(2), value)
-                        property.startsWith("i:") ->
-                            editor.putInt(property.substring(2), value.toInt())
-                        property.startsWith("f:") ->
-                            editor.putFloat(property.substring(2), value.toFloat())
-                        property.startsWith("l:") ->
-                            editor.putLong(property.substring(2), value.toLong())
-                        property.startsWith("b:") ->
-                            editor.putBoolean(property.substring(2), value.toBoolean())
+                        property.startsWith("s:") -> editor.putString(property.substring(2), value)
+                        property.startsWith("i:") -> editor.putInt(property.substring(2), value.toInt())
+                        property.startsWith("f:") -> editor.putFloat(property.substring(2), value.toFloat())
+                        property.startsWith("l:") -> editor.putLong(property.substring(2), value.toLong())
+                        property.startsWith("b:") -> editor.putBoolean(property.substring(2), value.toBoolean())
                     }
                 }
 
                 check(editor.commit()) { "Could not restore school settings" }
-
-                context.getSharedPreferences(
-                    "vv_auth_session", Context.MODE_PRIVATE
-                ).edit().clear().commit()
+                context.getSharedPreferences("vv_auth_session", Context.MODE_PRIVATE).edit().clear().commit()
 
             } catch (error: Exception) {
                 if (safetyFile.exists()) {

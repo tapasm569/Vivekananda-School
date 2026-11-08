@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 
 data class StudentDueEntry(
     val student: Student,
@@ -50,30 +49,25 @@ class StudentDuesListActivity : AppCompatActivity() {
     private fun loadDuesData(mode: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             val students = db.schoolDao().getAllActiveStudents().first()
-            val rules = FeeCalculator.effectiveRules(
-                db.schoolDao().getAllLateFeeRules()
-            )
+            val rules = FeeCalculator.effectiveRules(db.schoolDao().getAllLateFeeRules())
             val displayList = mutableListOf<StudentDueEntry>()
 
             for (student in students) {
-                val payments = db.schoolDao()
-                    .getAllStudentPayments(student.id).first()
-                val paidKeys = FeeCalculator.parsePaidPeriodKeys(payments)
-                val statuses = FeeCalculator.calculateDueMonths(
-                    student, paidKeys, rules
+                val payments = db.schoolDao().getAllStudentPayments(student.id).first()
+                val paidAmounts = FeeCalculator.parsePaidMonthAmounts(payments, student.monthlyFee)
+                val statuses = FeeCalculator.calculateDueMonthsWithAmounts(
+                    student, paidAmounts, rules
                 ).filter { it.isDue }
                 val unpaid = statuses.filter { !it.isPaid }
 
                 if (mode == "DUE" && unpaid.isNotEmpty()) {
                     val dueAmt = unpaid.sumOf { it.baseFee + it.lateFee }
                     val text = "Unpaid: ${unpaid.size} month(s) • " +
-                        "Penalty: ₹${String.format("%.2f", unpaid.sumOf { it.lateFee })}"
+                        "Penalty: ₹${String.format(java.util.Locale.US, "%.2f", unpaid.sumOf { it.lateFee })}"
                     displayList.add(StudentDueEntry(student, dueAmt, text))
                 } else if (mode == "PAID" && unpaid.isEmpty()) {
                     displayList.add(
-                        StudentDueEntry(
-                            student, 0.0, "All dues cleared up to current month"
-                        )
+                        StudentDueEntry(student, 0.0, "All dues cleared up to current month")
                     )
                 }
             }

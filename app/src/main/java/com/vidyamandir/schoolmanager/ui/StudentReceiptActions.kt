@@ -10,9 +10,9 @@ import com.vidyamandir.schoolmanager.data.Student
 import com.vidyamandir.schoolmanager.util.PaymentReceiptPdf
 import com.vidyamandir.schoolmanager.util.ThermalReceiptPrinter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -28,7 +28,7 @@ object StudentReceiptActions {
     ) {
         scope.launch(Dispatchers.IO) {
             val payments = db.schoolDao()
-                .getStudentPayments(student.id, 2026)
+                .getAllStudentPayments(student.id)
                 .first()
                 .sortedByDescending { it.paymentDate }
 
@@ -44,11 +44,7 @@ object StudentReceiptActions {
                     return@withContext
                 }
 
-                val formatter = SimpleDateFormat(
-                    "dd MMM yyyy, hh:mm a",
-                    Locale.getDefault()
-                )
-
+                val formatter = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
                 val labels = payments.map {
                     "${it.receiptNo}  •  ₹${String.format(Locale.US, "%.2f", it.totalAmount)}  •  ${formatter.format(Date(it.paymentDate))}"
                 }.toTypedArray()
@@ -56,13 +52,7 @@ object StudentReceiptActions {
                 AlertDialog.Builder(context)
                     .setTitle("Payment Receipts — ${student.fullName}")
                     .setItems(labels) { _, index ->
-                        showReceiptOptions(
-                            context,
-                            activity,
-                            scope,
-                            student,
-                            payments[index]
-                        )
+                        showReceiptOptions(context, activity, scope, student, payments[index])
                     }
                     .setNegativeButton("Close", null)
                     .show()
@@ -86,35 +76,24 @@ object StudentReceiptActions {
                 if (activity.isFinishing || activity.isDestroyed) return@withContext
 
                 if (file == null) {
-                    Toast.makeText(
-                        context,
-                        "Could not prepare receipt PDF.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(context, "Could not prepare receipt PDF.", Toast.LENGTH_LONG).show()
                     return@withContext
                 }
 
                 AlertDialog.Builder(context)
                     .setTitle(payment.receiptNo)
-                    .setItems(
-                        arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")
-                    ) { _, choice ->
+                    .setItems(arrayOf("View PDF", "Print PDF", "Thermal Printer", "Share PDF")) { _, choice ->
                         runCatching {
                             when (choice) {
                                 0 -> PaymentReceiptPdf.view(context, file)
                                 1 -> PaymentReceiptPdf.print(context, file)
                                 2 -> ThermalReceiptPrinter.choosePrinterAndPrint(
-                                    activity,
-                                    PaymentReceiptPdf.thermalText(student, payment)
+                                    activity, PaymentReceiptPdf.thermalText(student, payment)
                                 )
                                 3 -> PaymentReceiptPdf.share(context, file)
                             }
                         }.onFailure {
-                            Toast.makeText(
-                                context,
-                                "Unable to open receipt: ${it.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Toast.makeText(context, "Unable to open receipt: ${it.message}", Toast.LENGTH_LONG).show()
                         }
                     }
                     .setNegativeButton("Cancel", null)
